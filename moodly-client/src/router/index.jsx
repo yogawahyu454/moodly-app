@@ -5,9 +5,9 @@ import { useAuth } from "../context/AuthContext";
 // Import semua halaman dari folder auth
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
-import ForgotPasswordPage from "../pages/auth/ForgotPassword"; // Dulu namanya ForgotPassword
-import ResetPasswordPage from "../pages/auth/ResetPassword"; // Dulu namanya ResetPassword
-// ... import halaman lain jika diperlukan
+import ForgotPasswordPage from "../pages/auth/ForgotPassword";
+import ResetPasswordPage from "../pages/auth/ResetPassword";
+import OnboardingPage from "../pages/auth/Onboarding"; // <-- 1. TAMBAHKAN IMPORT INI
 
 // Placeholder for Dashboard
 const Dashboard = () => {
@@ -39,6 +39,7 @@ const AppRouter = () => {
     return (
         <Routes>
             {/* == RUTE PUBLIK UNTUK AUTENTIKASI == */}
+            <Route path="/" element={<OnboardingPage />} /> {/* <-- 2. TAMBAHKAN RUTE INI */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -55,8 +56,8 @@ const AppRouter = () => {
                 }
             />
 
-            {/* Rute default, arahkan ke dashboard jika sudah login, atau ke login jika belum */}
-            <Route path="*" element={<Navigate to="/dashboard" />} />
+            {/* Rute default, arahkan ke halaman utama (onboarding) jika URL tidak ditemukan */}
+            <Route path="*" element={<Navigate to="/" />} /> {/* <-- 3. UBAH RUTE INI */}
         </Routes>
     );
 };
