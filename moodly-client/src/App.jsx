@@ -1,10 +1,17 @@
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import AppRouter from "./router";
+
 function App() {
+    // App.jsx sekarang menjadi "pusat" di mana kita menyusun semua provider.
+    // BrowserRouter membungkus semuanya, menyediakan konteks routing.
+    // AuthProvider membungkus AppRouter, menyediakan konteks autentikasi.
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-100">
-            <h1 className="text-3xl font-bold text-blue-600">
-                Project Curhat Moodly
-            </h1>
-        </div>
+        <BrowserRouter>
+            <AuthProvider>
+                <AppRouter />
+            </AuthProvider>
+        </BrowserRouter>
     );
 }
 
