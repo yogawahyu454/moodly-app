@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-// --- Icon Components (Tampilan tidak diubah) ---
+// --- Icon Components (Tidak diubah) ---
 function UserIcon() {
     return (
         <svg
@@ -20,7 +20,6 @@ function UserIcon() {
         </svg>
     );
 }
-
 function PhoneIcon() {
     return (
         <svg
@@ -38,7 +37,6 @@ function PhoneIcon() {
         </svg>
     );
 }
-
 function MailIcon() {
     return (
         <svg
@@ -57,7 +55,6 @@ function MailIcon() {
         </svg>
     );
 }
-
 function AddressIcon() {
     return (
         <svg
@@ -86,7 +83,6 @@ export default function RegisterPage() {
     const [address, setAddress] = useState("");
     const [errors, setErrors] = useState(null);
 
-    // LOGIKA YANG DIPERBAIKI: Fungsi ini hanya akan menavigasi, bukan mengirim data ke API
     const onSubmit = (e) => {
         e.preventDefault();
 
@@ -95,137 +91,123 @@ export default function RegisterPage() {
             return;
         }
 
-        // Hapus logika axios. Cukup arahkan ke halaman berikutnya
-        // dan bawa semua data yang sudah diisi.
         navigate("/address", {
             state: {
                 name,
                 phone,
                 email,
-                address, // Bawa juga alamat singkat yang sudah diisi
+                address,
             },
         });
     };
 
-    const contentWidth = "max-w-md";
-
-    // Tampilan JSX di bawah ini tidak diubah sama sekali
     return (
-        <div className="flex min-h-screen bg-white">
-            <div className="flex-1 hidden md:block"></div>
-            <div
-                className={`w-full ${contentWidth} min-h-screen bg-white shadow-2xl flex flex-col justify-center`}
-            >
-                <header className="relative h-64 flex-shrink-0">
-                    <div className="absolute inset-x-0 top-0 w-full h-full">
-                        <svg
-                            viewBox="0 0 375 240"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-full h-full"
-                            preserveAspectRatio="none"
-                        >
-                            <path
-                                d="M0 0H375V150C375 150 281.25 240 187.5 240C93.75 240 0 150 0 150V0Z"
-                                fill="#00A9E0"
-                            />
-                        </svg>
-                    </div>
-                    <div className="relative z-10 flex justify-center items-start h-full pt-6">
-                        <img
-                            src="/images/3.png"
-                            alt="Ilustrasi"
-                            className="w-32 h-auto object-contain"
+        // Kode layout luar sudah dihapus. Hanya menyisakan konten.
+        <>
+            <header className="relative h-64 flex-shrink-0">
+                <div className="absolute inset-x-0 top-0 w-full h-full">
+                    <svg
+                        viewBox="0 0 375 240"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-full h-full"
+                        preserveAspectRatio="none"
+                    >
+                        <path
+                            d="M0 0H375V150C375 150 281.25 240 187.5 240C93.75 240 0 150 0 150V0Z"
+                            fill="#00A9E0"
                         />
-                    </div>
-                </header>
-                <main className="flex-grow flex flex-col justify-center p-8">
-                    <div className="w-full">
-                        <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">
-                            Daftar
-                        </h1>
-                        <form
-                            className="space-y-4"
-                            onSubmit={onSubmit}
-                            noValidate
-                        >
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                    <UserIcon />
-                                </span>
-                                <input
-                                    type="text"
-                                    placeholder="Nama lengkap"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    required
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
-                                />
-                            </div>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                    <PhoneIcon />
-                                </span>
-                                <input
-                                    type="tel"
-                                    placeholder="No. Telepon"
-                                    value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    required
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
-                                />
-                            </div>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                    <MailIcon />
-                                </span>
-                                <input
-                                    type="email"
-                                    placeholder="Email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
-                                />
-                            </div>
-                            <div className="relative">
-                                <span className="absolute left-3 top-3 text-gray-400">
-                                    <AddressIcon />
-                                </span>
-                                <textarea
-                                    rows="3"
-                                    placeholder="Alamat"
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                    required
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none resize-none"
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                className="w-full py-3 !mt-6 bg-black text-white rounded-full font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
-                            >
-                                Daftar
-                            </button>
-                        </form>
-                        {errors && (
-                            <div className="text-red-600 text-xs mt-2 text-center">
-                                {errors.message}
-                            </div>
-                        )}
-                        <div className="text-center text-sm text-gray-600 mt-4">
-                            Sudah punya akun?{" "}
-                            <Link
-                                to="/login"
-                                className="text-sky-500 font-semibold hover:underline"
-                            >
-                                Masuk
-                            </Link>
+                    </svg>
+                </div>
+                <div className="relative z-10 flex justify-center items-start h-full pt-6">
+                    <img
+                        src="images/3.png"
+                        alt="Ilustrasi"
+                        className="w-32 h-auto object-contain"
+                    />
+                </div>
+            </header>
+            <main className="flex-grow flex flex-col justify-center p-8">
+                <div className="w-full">
+                    <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">
+                        Daftar
+                    </h1>
+                    <form className="space-y-4" onSubmit={onSubmit} noValidate>
+                        <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <UserIcon />
+                            </span>
+                            <input
+                                type="text"
+                                placeholder="Nama lengkap"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                            />
                         </div>
+                        <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <PhoneIcon />
+                            </span>
+                            <input
+                                type="tel"
+                                placeholder="No. Telepon"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                required
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                            />
+                        </div>
+                        <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <MailIcon />
+                            </span>
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                            />
+                        </div>
+                        <div className="relative">
+                            <span className="absolute left-3 top-3 text-gray-400">
+                                <AddressIcon />
+                            </span>
+                            <textarea
+                                rows="3"
+                                placeholder="Alamat"
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                required
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none resize-none"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full py-3 !mt-6 bg-black text-white rounded-full font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+                        >
+                            Daftar
+                        </button>
+                    </form>
+                    {errors && (
+                        <div className="text-red-600 text-xs mt-2 text-center">
+                            {errors.message}
+                        </div>
+                    )}
+                    <div className="text-center text-sm text-gray-600 mt-4">
+                        Sudah punya akun?{" "}
+                        <Link
+                            to="/login"
+                            className="text-sky-500 font-semibold hover:underline"
+                        >
+                            Masuk
+                        </Link>
                     </div>
-                </main>
-            </div>
-            <div className="flex-1 hidden md:block"></div>
-        </div>
+                </div>
+            </main>
+        </>
     );
 }

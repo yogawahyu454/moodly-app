@@ -1,199 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "../../context/AuthContext"; // <-- 1. Import useAuth
 
-export default function LoginPage() {
-    const [email, setEmail] = useState("");
-    const [pwd, setPwd] = useState("");
-    const [showPwd, setShowPwd] = useState(false);
-    const [errors, setErrors] = useState("");
-
-    const onSubmit = (e) => {
-        e.preventDefault();
-
-        if (!email || !pwd) {
-            // Menggunakan state untuk error, bukan alert
-            setErrors({ message: "Harap isi semua kolom." });
-            return;
-        }
-
-        const data = {
-            email,
-            password: pwd,
-        };
-
-        axios
-            .post("http://127.0.0.1:8000/api/login", data)
-            .then((response) => {
-                console.log(response.data);
-                alert("Login berhasil!"); // Sementara menggunakan alert untuk notifikasi sukses
-                setErrors(""); // Hapus error jika sukses
-                setEmail("");
-                setPwd("");
-            })
-            .catch((error) => {
-                if (error.response && error.response.data) {
-                    setErrors(
-                        error.response.data.errors || {
-                            message: error.response.data.message,
-                        }
-                    );
-                    console.log(error.response.data);
-                } else {
-                    setErrors({
-                        message: "Terjadi kesalahan, silakan coba lagi.",
-                    });
-                }
-            });
-    };
-
-    const contentWidth = "max-w-md"; // Lebar disamakan dengan halaman lain
-
-    return (
-        <div className="flex min-h-screen bg-white">
-            {/* Panel Putih Kiri (Hanya muncul di desktop) */}
-            <div className="flex-1 hidden md:block"></div>
-
-            {/* Konten Utama di Tengah, SEKARANG menjadi card full-height */}
-            <div
-                className={`w-full ${contentWidth} min-h-screen bg-white shadow-2xl flex flex-col`}
-            >
-                {/* Header dengan Kurva Biru dan Ilustrasi */}
-                <header className="relative h-80 flex-shrink-0">
-                    <div className="absolute inset-x-0 top-0 w-full h-full">
-                        <svg
-                            viewBox="0 0 375 240"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-full h-full"
-                            preserveAspectRatio="none"
-                        >
-                            <path
-                                d="M0 0H375V150C375 150 281.25 240 187.5 240C93.75 240 0 150 0 150V0Z"
-                                fill="#00A9E0"
-                            />
-                        </svg>
-                    </div>
-                    <div className="relative z-10 flex justify-center items-start h-full pt-12">
-                        <img
-                            src="/images/3.png"
-                            alt="Ilustrasi"
-                            className="w-44 h-auto object-contain"
-                        />
-                    </div>
-                </header>
-
-                {/* Formulir Login, sekarang terpusat secara vertikal */}
-                <main className="flex-grow flex flex-col justify-center p-8">
-                    <div className="w-full">
-                        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
-                            Masuk
-                        </h1>
-
-                        <form
-                            className="space-y-4"
-                            onSubmit={onSubmit}
-                            noValidate
-                        >
-                            {/* Email */}
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                    <UserIcon />
-                                </span>
-                                <input
-                                    type="email"
-                                    placeholder="Email atau No. Telepon"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
-                                />
-                            </div>
-
-                            {/* Kata Sandi */}
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                    <LockIcon />
-                                </span>
-                                <input
-                                    type={showPwd ? "text" : "password"}
-                                    placeholder="Kata sandi"
-                                    value={pwd}
-                                    onChange={(e) => setPwd(e.target.value)}
-                                    required
-                                    className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
-                                />
-                                <button
-                                    type="button"
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                                    onClick={() => setShowPwd((s) => !s)}
-                                    aria-label={
-                                        showPwd
-                                            ? "Sembunyikan kata sandi"
-                                            : "Tampilkan kata sandi"
-                                    }
-                                >
-                                    {showPwd ? <EyeOffIcon /> : <EyeIcon />}
-                                </button>
-                            </div>
-
-                            <div className="text-right">
-                                <Link
-                                    to="/forgot-password"
-                                    className="text-sm text-gray-500 hover:underline"
-                                >
-                                    Lupa Kata sandi?
-                                </Link>
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="w-full py-3 bg-black text-white rounded-full font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
-                            >
-                                Masuk
-                            </button>
-                        </form>
-
-                        {/* Pesan kesalahan */}
-                        {errors && (
-                            <div className="text-red-600 text-xs mt-3 text-center">
-                                {errors.email ||
-                                    errors.password ||
-                                    errors.message}
-                            </div>
-                        )}
-
-                        <div className="text-center text-sm text-gray-600 mt-6">
-                            Belum punya akun?{" "}
-                            <Link
-                                to="/register"
-                                className="text-sky-500 font-semibold hover:underline"
-                            >
-                                Daftar
-                            </Link>
-                        </div>
-
-                        <button
-                            type="button"
-                            className="w-full py-3 mt-4 flex items-center justify-center bg-white border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                        >
-                            <GoogleIcon className="w-5 h-5 mr-2" />
-                            <span className="font-medium">
-                                Masuk dengan Google
-                            </span>
-                        </button>
-                    </div>
-                </main>
-            </div>
-
-            {/* Panel Putih Kanan (Hanya muncul di desktop) */}
-            <div className="flex-1 hidden md:block"></div>
-        </div>
-    );
-}
-
-// --- Komponen Ikon ---
-
+// --- Komponen Ikon (Tidak diubah) ---
 function UserIcon() {
     return (
         <svg
@@ -292,5 +101,156 @@ function GoogleIcon({ className }) {
                 d="M272.1 106.2c39.7-.6 78 14.7 106.3 42.5l79.4-79.4C404.3 14.5 339.7-4.8 272.1 0 166.3 0 75.7 60 31.4 148.2l91.8 68.8c21-62.7 79.7-110.8 148.9-110.8z"
             />
         </svg>
+    );
+}
+// --- End of Icon Components ---
+
+export default function LoginPage() {
+    const { login } = useAuth(); // <-- 2. Panggil fungsi login dari context
+    const [email, setEmail] = useState("");
+    const [pwd, setPwd] = useState("");
+    const [showPwd, setShowPwd] = useState(false);
+    const [errors, setErrors] = useState(null); // Ubah state error jadi null
+
+    const onSubmit = async (e) => {
+        // <-- 3. Jadikan fungsi ini async
+        e.preventDefault();
+        setErrors(null); // Reset error setiap kali submit
+
+        if (!email || !pwd) {
+            setErrors({ message: "Harap isi semua kolom." });
+            return;
+        }
+
+        // 4. Gunakan fungsi login dari context
+        try {
+            await login({ email, password: pwd });
+            // Navigasi ke dashboard akan ditangani oleh AuthContext jika berhasil
+        } catch (error) {
+            // Tangkap dan tampilkan error dari backend
+            setErrors(error);
+        }
+    };
+
+    // 5. Hapus semua div layout, sisakan header dan main
+    return (
+        <>
+            <header className="relative h-80 flex-shrink-0">
+                <div className="absolute inset-x-0 top-0 w-full h-full">
+                    <svg
+                        viewBox="0 0 375 240"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-full h-full"
+                        preserveAspectRatio="none"
+                    >
+                        <path
+                            d="M0 0H375V150C375 150 281.25 240 187.5 240C93.75 240 0 150 0 150V0Z"
+                            fill="#00A9E0"
+                        />
+                    </svg>
+                </div>
+                <div className="relative z-10 flex justify-center items-start h-full pt-12">
+                    <img
+                        src="/images/3.png" // Pastikan path gambar ini benar
+                        alt="Ilustrasi"
+                        className="w-44 h-auto object-contain"
+                    />
+                </div>
+            </header>
+
+            <main className="flex-grow flex flex-col justify-center p-8">
+                <div className="w-full">
+                    <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
+                        Masuk
+                    </h1>
+
+                    <form className="space-y-4" onSubmit={onSubmit} noValidate>
+                        {/* Email */}
+                        <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <UserIcon />
+                            </span>
+                            <input
+                                type="email"
+                                placeholder="Email atau No. Telepon"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                            />
+                        </div>
+
+                        {/* Kata Sandi */}
+                        <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <LockIcon />
+                            </span>
+                            <input
+                                type={showPwd ? "text" : "password"}
+                                placeholder="Kata sandi"
+                                value={pwd}
+                                onChange={(e) => setPwd(e.target.value)}
+                                required
+                                className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                            />
+                            <button
+                                type="button"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                                onClick={() => setShowPwd((s) => !s)}
+                                aria-label={
+                                    showPwd
+                                        ? "Sembunyikan kata sandi"
+                                        : "Tampilkan kata sandi"
+                                }
+                            >
+                                {showPwd ? <EyeOffIcon /> : <EyeIcon />}
+                            </button>
+                        </div>
+
+                        <div className="text-right">
+                            <Link
+                                to="/forgot-password"
+                                className="text-sm text-gray-500 hover:underline"
+                            >
+                                Lupa Kata sandi?
+                            </Link>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full py-3 bg-black text-white rounded-full font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+                        >
+                            Masuk
+                        </button>
+                    </form>
+
+                    {/* Pesan kesalahan */}
+                    {errors && (
+                        <div className="text-red-600 text-xs mt-3 text-center">
+                            {errors.email || errors.password || errors.message}
+                        </div>
+                    )}
+
+                    <div className="text-center text-sm text-gray-600 mt-6">
+                        Belum punya akun?{" "}
+                        <Link
+                            to="/register"
+                            className="text-sky-500 font-semibold hover:underline"
+                        >
+                            Daftar
+                        </Link>
+                    </div>
+
+                    <button
+                        type="button"
+                        className="w-full py-3 mt-4 flex items-center justify-center bg-white border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    >
+                        <GoogleIcon className="w-5 h-5 mr-2" />
+                        <span className="font-medium">Masuk dengan Google</span>
+                    </button>
+                </div>
+            </main>
+        </>
     );
 }

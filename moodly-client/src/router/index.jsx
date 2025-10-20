@@ -2,12 +2,18 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+// Layout
+import MobileLayout from "../layouts/MobileLayout";
+
 // Import semua halaman dari folder auth
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import ForgotPasswordPage from "../pages/auth/ForgotPassword";
 import ResetPasswordPage from "../pages/auth/ResetPassword";
-import OnboardingPage from "../pages/auth/Onboarding"; // <-- 1. TAMBAHKAN IMPORT INI
+import OnboardingPage from "../pages/auth/Onboarding";
+import AddressPage from "../pages/auth/AddressPage";
+import CreatePasswordPage from "../pages/auth/CreatePasswordPage";
+import VerifyCodePage from "../pages/auth/VerifyCode";
 
 // Placeholder for Dashboard
 const Dashboard = () => {
@@ -38,15 +44,26 @@ const ProtectedRoute = ({ children }) => {
 const AppRouter = () => {
     return (
         <Routes>
-            {/* == RUTE PUBLIK UNTUK AUTENTIKASI == */}
-            <Route path="/" element={<OnboardingPage />} /> {/* <-- 2. TAMBAHKAN RUTE INI */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            {/* Tambahkan rute lain dari folder auth di sini jika perlu */}
+            {/* == RUTE PUBLIK & AUTH DIBUNGKUS DALAM MOBILE LAYOUT == */}
+            <Route element={<MobileLayout />}>
+                <Route path="/" element={<OnboardingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route
+                    path="/forgot-password"
+                    element={<ForgotPasswordPage />}
+                />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/verify-code" element={<VerifyCodePage />} />
+                <Route
+                    path="/create-password"
+                    element={<CreatePasswordPage />}
+                />
+                {/* Rute di bawah ini mungkin seharusnya diproteksi, tapi untuk sekarang kita letakkan di sini */}
+                <Route path="/address" element={<AddressPage />} />
+            </Route>
 
-            {/* == RUTE YANG DIPROTEKSI == */}
+            {/* == RUTE YANG DIPROTEKSI (MUNGKIN AKAN PAKAI LAYOUT BERBEDA) == */}
             <Route
                 path="/dashboard"
                 element={
@@ -56,8 +73,8 @@ const AppRouter = () => {
                 }
             />
 
-            {/* Rute default, arahkan ke halaman utama (onboarding) jika URL tidak ditemukan */}
-            <Route path="*" element={<Navigate to="/" />} /> {/* <-- 3. UBAH RUTE INI */}
+            {/* Rute default, arahkan ke halaman utama */}
+            <Route path="*" element={<Navigate to="/" />} />
         </Routes>
     );
 };
