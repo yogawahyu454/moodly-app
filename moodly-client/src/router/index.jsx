@@ -6,7 +6,6 @@ import MobileLayout from "../layouts/MobileLayout";
 // --- Import Halaman Auth ---
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
-// PERBAIKAN: Sesuaikan nama file import
 import ForgotPasswordPage from "../pages/auth/ForgotPassword";
 import ResetPasswordPage from "../pages/auth/ResetPassword";
 import CreatePasswordPage from "../pages/auth/CreatePasswordPage";
@@ -17,6 +16,7 @@ import OnboardingPage from "../pages/auth/Onboarding";
 import KonselingPage from "../pages/customer/konseling";
 import RiwayatPage from "../pages/customer/riwayat";
 import NotifikasiPage from "../pages/customer/notifikasi";
+// PERBAIKAN: Perbaiki typo 'GantiJwalPage' menjadi 'GantiJadwalPage'
 import GantiJadwalPage from "../pages/customer/GantiJadwal";
 
 // Placeholder for Dashboard
@@ -36,11 +36,22 @@ const Dashboard = () => {
     );
 };
 
-// Component for protected routes
+// PENJAGA 1: Melindungi halaman private
 const ProtectedRoute = ({ children }) => {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
+    if (loading) return <div>Loading...</div>; // Tampilkan loading
     if (!user) {
         return <Navigate to="/login" />;
+    }
+    return children;
+};
+
+// PENJAGA 2: Melindungi halaman login/register dari user yang sudah login
+const GuestRoute = ({ children }) => {
+    const { user, loading } = useAuth();
+    if (loading) return <div>Loading...</div>; // Tampilkan loading
+    if (user) {
+        return <Navigate to="/dashboard" />; // Arahkan ke dashboard jika sudah login
     }
     return children;
 };
@@ -48,30 +59,95 @@ const ProtectedRoute = ({ children }) => {
 const AppRouter = () => {
     return (
         <Routes>
-            {/* == RUTE PUBLIK & AUTH DENGAN LAYOUT MOBILE == */}
+            {/* == RUTE UNTUK TAMU (Guest) == */}
             <Route element={<MobileLayout />}>
                 <Route path="/" element={<OnboardingPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/address" element={<AddressPage />} />
+                <Route
+                    path="/login"
+                    element={
+                        <GuestRoute>
+                            <LoginPage />
+                        </GuestRoute>
+                    }
+                />
+                <Route
+                    path="/register"
+                    element={
+                        <GuestRoute>
+                            <RegisterPage />
+                        </GuestRoute>
+                    }
+                />
+                <Route
+                    path="/address"
+                    element={
+                        <GuestRoute>
+                            <AddressPage />
+                        </GuestRoute>
+                    }
+                />
                 <Route
                     path="/create-password"
-                    element={<CreatePasswordPage />}
+                    element={
+                        <GuestRoute>
+                            <CreatePasswordPage />
+                        </GuestRoute>
+                    }
                 />
                 <Route
                     path="/forgot-password"
-                    element={<ForgotPasswordPage />}
+                    element={
+                        <GuestRoute>
+                            <ForgotPasswordPage />
+                        </GuestRoute>
+                    }
                 />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-
-                {/* Rute Customer yang baru ditambahkan */}
-                <Route path="/konseling" element={<KonselingPage />} />
-                <Route path="/riwayat" element={<RiwayatPage />} />
-                <Route path="/notifikasi" element={<NotifikasiPage />} />
-                <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />
+                <Route
+                    path="/reset-password"
+                    element={
+                        <GuestRoute>
+                            <ResetPasswordPage />
+                        </GuestRoute>
+                    }
+                />
             </Route>
 
-            {/* == RUTE YANG DIPROTEKSI (NANTI BISA PAKAI LAYOUT BERBEDA) == */}
+            {/* == RUTE UNTUK PENGGUNA TERAUTENTIKASI == */}
+            <Route element={<MobileLayout />}>
+                <Route
+                    path="/konseling"
+                    element={
+                        <ProtectedRoute>
+                            <KonselingPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/riwayat"
+                    element={
+                        <ProtectedRoute>
+                            <RiwayatPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/notifikasi"
+                    element={
+                        <ProtectedRoute>
+                            <NotifikasiPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/ganti-jadwal"
+                    element={
+                        <ProtectedRoute>
+                            <GantiJadwalPage />
+                        </ProtectedRoute>
+                    }
+                />
+            </Route>
+
             <Route
                 path="/dashboard"
                 element={
