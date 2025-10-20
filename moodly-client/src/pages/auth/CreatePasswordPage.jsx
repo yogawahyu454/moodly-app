@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-// PERUBAHAN DI SINI: Gunakan kurung kurawal untuk import
 import { useAuth } from "../../context/AuthContext";
 
-// --- Komponen Ikon (diambil dari file sebelumnya) ---
+// --- Komponen Ikon ---
 function ArrowLeftIcon() {
     return (
         <svg
@@ -17,9 +16,8 @@ function ArrowLeftIcon() {
             strokeLinecap="round"
             strokeLinejoin="round"
         >
-            {" "}
-            <line x1="19" y1="12" x2="5" y2="12"></line>{" "}
-            <polyline points="12 19 5 12 12 5"></polyline>{" "}
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
     );
 }
@@ -35,9 +33,8 @@ function EyeIcon() {
             strokeLinecap="round"
             strokeLinejoin="round"
         >
-            {" "}
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />{" "}
-            <circle cx="12" cy="12" r="3" />{" "}
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
         </svg>
     );
 }
@@ -53,11 +50,10 @@ function EyeOffIcon() {
             strokeLinecap="round"
             strokeLinejoin="round"
         >
-            {" "}
-            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>{" "}
-            <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 11 7 11 7a13.16 13.16 0 0 1-1.67 2.68"></path>{" "}
-            <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 11 7a9.74 9.74 0 0 0 5.39-1.61"></path>{" "}
-            <line x1="2" y1="22" x2="22" y2="2"></line>{" "}
+            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+            <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 11 7 11 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+            <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 11 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+            <line x1="2" y1="22" x2="22" y2="2"></line>
         </svg>
     );
 }
@@ -66,8 +62,6 @@ export default function CreatePasswordPage() {
     const navigate = useNavigate();
     const location = useLocation();
     const { register, errors: backendErrors } = useAuth();
-
-    // Menerima semua data dari halaman alamat
     const registrationData = location.state;
 
     const [password, setPassword] = useState("");
@@ -77,7 +71,6 @@ export default function CreatePasswordPage() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        // Jika tidak ada data, kembalikan ke awal alur
         if (!registrationData) {
             navigate("/register");
         }
@@ -96,7 +89,6 @@ export default function CreatePasswordPage() {
             return;
         }
 
-        // Gabungkan data dari state dengan password, lalu kirim ke backend
         const finalData = {
             ...registrationData,
             password,
@@ -105,7 +97,6 @@ export default function CreatePasswordPage() {
 
         try {
             await register(finalData);
-            // Navigasi ke dashboard akan diurus oleh AuthContext jika berhasil
         } catch (err) {
             setError(
                 "Gagal mendaftar. Periksa kembali data Anda atau email mungkin sudah terdaftar."
@@ -115,24 +106,28 @@ export default function CreatePasswordPage() {
     };
 
     return (
-        <>
-            <header className="relative h-60 flex-shrink-0 bg-gradient-to-b from-[#42A5F5] to-white text-black">
+        // Wrapper utama untuk memastikan seluruh halaman bisa di-scroll jika kontennya panjang
+        <div className="flex flex-col">
+            <header className="relative h-60 flex-shrink-0 bg-sky-400 text-white">
                 <div className="absolute inset-0 px-6 py-8 z-10">
                     <button
                         onClick={() => navigate(-1)}
-                        className="p-1 rounded-full text-black"
+                        className="p-1 rounded-full text-white"
                     >
-                        {" "}
-                        <ArrowLeftIcon />{" "}
+                        <ArrowLeftIcon />
                     </button>
-                    <h1 className="text-2xl font-bold mt-4">Buat Kata Sandi</h1>
-                    <p className="text-sm opacity-90 mt-1">
+                    <h1 className="text-3xl font-bold mt-4">Buat Kata Sandi</h1>
+                    <p className="text-base opacity-90 mt-1">
                         Buat kata sandi untuk keamanan akun Anda
                     </p>
                 </div>
             </header>
-            <main className="flex-grow w-full bg-white rounded-t-3xl shadow-lg p-6 -mt-20 z-20">
-                <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+            <main className="flex-grow w-full bg-white rounded-t-3xl shadow-lg p-6 -mt-10 z-20">
+                <form
+                    className="space-y-4 mt-4"
+                    onSubmit={handleSubmit}
+                    noValidate
+                >
                     <div>
                         <label className="block text-sm font-medium text-gray-800 mb-2">
                             Kata Sandi
@@ -150,17 +145,17 @@ export default function CreatePasswordPage() {
                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
                                 onClick={() => setShowPassword((p) => !p)}
                             >
-                                {" "}
-                                {showPassword ? (
-                                    <EyeOffIcon />
-                                ) : (
-                                    <EyeIcon />
-                                )}{" "}
+                                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                             </button>
                         </div>
-                        {backendErrors?.password && (
+                        {backendErrors?.password ? (
                             <small className="text-red-500 mt-1">
                                 {backendErrors.password[0]}
+                            </small>
+                        ) : (
+                            <small className="text-red-500 mt-1">
+                                Minimal 12 karakter, kombinasi huruf besar dan
+                                angka
                             </small>
                         )}
                     </div>
@@ -185,12 +180,11 @@ export default function CreatePasswordPage() {
                                     setShowConfirmPassword((p) => !p)
                                 }
                             >
-                                {" "}
                                 {showConfirmPassword ? (
                                     <EyeOffIcon />
                                 ) : (
                                     <EyeIcon />
-                                )}{" "}
+                                )}
                             </button>
                         </div>
                     </div>
@@ -204,12 +198,11 @@ export default function CreatePasswordPage() {
                             type="submit"
                             className="w-full py-3 bg-black text-white rounded-full font-semibold hover:bg-gray-800 active:bg-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                         >
-                            {" "}
-                            Simpan{" "}
+                            Simpan
                         </button>
                     </div>
                 </form>
             </main>
-        </>
+        </div>
     );
 }

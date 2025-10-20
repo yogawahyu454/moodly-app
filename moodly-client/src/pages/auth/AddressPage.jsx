@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
+// Komponen InputField (tidak diubah)
 function InputField({ label, placeholder, value, onChange, type = "text" }) {
     return (
         <div>
-            {" "}
             <label className="block text-sm font-medium text-gray-700 mb-1">
                 {label}
-            </label>{" "}
+            </label>
             <input
                 type={type}
                 placeholder={placeholder}
@@ -15,14 +15,16 @@ function InputField({ label, placeholder, value, onChange, type = "text" }) {
                 onChange={onChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
-            />{" "}
+            />
         </div>
     );
 }
+
+// Komponen Ikon (viewBox diperbaiki)
 function ArrowLeftIcon() {
     return (
         <svg
-            xmlns="http://www.w3.org/2000/svg"
+            xmlns="http://www.w.org/2000/svg"
             width="24"
             height="24"
             viewBox="0 0 24 24"
@@ -32,9 +34,8 @@ function ArrowLeftIcon() {
             strokeLinecap="round"
             strokeLinejoin="round"
         >
-            {" "}
-            <line x1="19" y1="12" x2="5" y2="12"></line>{" "}
-            <polyline points="12 19 5 12 12 5"></polyline>{" "}
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
     );
 }
@@ -44,12 +45,13 @@ export default function AddressPage() {
     const location = useLocation();
     const registrationData = location.state;
 
-    // State untuk form alamat detail
     const [province, setProvince] = useState("");
     const [city, setCity] = useState("");
     const [district, setDistrict] = useState("");
     const [postalCode, setPostalCode] = useState("");
-    const [streetAddress, setStreetAddress] = useState("");
+    const [streetAddress, setStreetAddress] = useState(
+        registrationData?.address || ""
+    );
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -58,24 +60,26 @@ export default function AddressPage() {
         }
     }, [registrationData, navigate]);
 
+    // FUNGSI INI DIPERBAIKI
     const handleSubmit = (e) => {
         e.preventDefault();
+        setError("");
+
         if (!province || !city || !district || !postalCode || !streetAddress) {
             setError("Harap isi semua detail alamat.");
             return;
         }
 
-        // Gabungkan data dari form sebelumnya dengan form ini
         const finalData = {
-            ...registrationData, // name, phone, email, address (singkat)
+            ...registrationData,
             province,
             city,
             district,
             postal_code: postalCode,
-            street_address: streetAddress, // Ini adalah alamat yang lebih detail
+            street_address: streetAddress,
         };
 
-        // Kirim data gabungan ke halaman pembuatan password
+        // Tidak lagi mengirim ke API, tapi meneruskan ke halaman selanjutnya
         navigate("/create-password", { state: finalData });
     };
 
@@ -86,8 +90,7 @@ export default function AddressPage() {
                     onClick={() => navigate(-1)}
                     className="p-2 mr-2 rounded-full hover:bg-gray-100"
                 >
-                    {" "}
-                    <ArrowLeftIcon />{" "}
+                    <ArrowLeftIcon />
                 </button>
                 <h1 className="text-lg font-bold text-gray-800">Alamat Baru</h1>
             </header>
@@ -101,7 +104,6 @@ export default function AddressPage() {
                         onSubmit={handleSubmit}
                         noValidate
                     >
-                        {/* Form input untuk alamat detail */}
                         <InputField
                             label="Provinsi"
                             placeholder="Masukkan provinsi"
@@ -143,8 +145,7 @@ export default function AddressPage() {
                                 type="submit"
                                 className="w-full py-3 bg-black text-white rounded-full font-semibold hover:bg-gray-800 transition-colors"
                             >
-                                {" "}
-                                Simpan{" "}
+                                Lanjutkan
                             </button>
                         </div>
                     </form>

@@ -6,8 +6,7 @@ const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [errors, setErrors] = useState(null);
-    const [loading, setLoading] = useState(true); // <-- TAMBAHKAN INI
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     const getUser = async () => {
@@ -15,26 +14,33 @@ export const AuthProvider = ({ children }) => {
             const { data } = await apiClient.get("/api/user");
             setUser(data);
         } catch (e) {
-            // Abaikan error 401
+            // Abaikan, berarti user belum login
         } finally {
-            setLoading(false); // <-- TAMBAHKAN INI
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        getUser();
+        if (!user) {
+            getUser();
+        }
     }, []);
 
     const login = async (data) => {
         await apiClient.get("/sanctum/csrf-cookie");
         await apiClient.post("/login", data);
-        await getUser(); // State akan update & router akan redirect otomatis
+        await getUser();
+        // Redirect akan diurus oleh GuestGuard di router
     };
 
     const register = async (data) => {
+        // Hapus 'address' singkat karena kita sudah punya detailnya
+        const { address, ...finalData } = data;
+
         await apiClient.get("/sanctum/csrf-cookie");
-        await apiClient.post("/register", data);
-        await getUser(); // State akan update & router akan redirect otomatis
+        await apiClient.post("/register", finalData);
+        await getUser(); // Ambil data user yang baru dibuat
+        // Redirect akan diurus oleh GuestGuard di router
     };
 
     const logout = async () => {
@@ -44,7 +50,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider
-            value={{ user, errors, loading, getUser, login, register, logout }}
+            value={{ user, loading, getUser, login, register, logout }}
         >
             {children}
         </AuthContext.Provider>
