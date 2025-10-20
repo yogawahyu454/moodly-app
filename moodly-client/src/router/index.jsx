@@ -15,6 +15,11 @@ import AddressPage from "../pages/auth/AddressPage";
 import CreatePasswordPage from "../pages/auth/CreatePasswordPage";
 import VerifyCodePage from "../pages/auth/VerifyCode";
 
+// Import halaman customer
+import Beranda from "../pages/customer/beranda";
+import Konseling from "../pages/customer/konseling";
+import Notifikasi from "../pages/customer/notifikasi";
+
 // Placeholder for Dashboard
 const Dashboard = () => {
     const { user, logout } = useAuth();
@@ -59,11 +64,23 @@ const AppRouter = () => {
                     path="/create-password"
                     element={<CreatePasswordPage />}
                 />
-                {/* Rute di bawah ini mungkin seharusnya diproteksi, tapi untuk sekarang kita letakkan di sini */}
                 <Route path="/address" element={<AddressPage />} />
             </Route>
 
-            {/* == RUTE YANG DIPROTEKSI (MUNGKIN AKAN PAKAI LAYOUT BERBEDA) == */}
+            {/* == RUTE CUSTOMER DIPROTEKSI & MENGGUNAKAN MOBILE LAYOUT == */}
+            <Route
+                element={
+                    <ProtectedRoute>
+                        <MobileLayout />
+                    </ProtectedRoute>
+                }
+            >
+                <Route path="/beranda" element={<Beranda />} />
+                <Route path="/notifikasi" element={<Notifikasi />} />
+                <Route path="/konseling" element={<Konseling />} />
+            </Route>
+
+            {/* == RUTE YANG DIPROTEKSI (LAINNYA) == */}
             <Route
                 path="/dashboard"
                 element={
@@ -73,7 +90,7 @@ const AppRouter = () => {
                 }
             />
 
-            {/* Rute default, arahkan ke halaman utama */}
+            {/* Rute default */}
             <Route path="*" element={<Navigate to="/" />} />
         </Routes>
     );
