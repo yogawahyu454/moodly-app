@@ -39,13 +39,13 @@ const AppRouter = () => {
     return (
         <Routes>
             {/* == RUTE PUBLIK UNTUK AUTENTIKASI == */}
-            <Route path="/" element={<OnboardingPage />} /> {/* <-- 2. TAMBAHKAN RUTE INI */}
+            <Route path="/" element={<OnboardingPage />} />{" "}
+            {/* <-- 2. TAMBAHKAN RUTE INI */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             {/* Tambahkan rute lain dari folder auth di sini jika perlu */}
-
             {/* == RUTE YANG DIPROTEKSI == */}
             <Route
                 path="/dashboard"
@@ -55,9 +55,9 @@ const AppRouter = () => {
                     </ProtectedRoute>
                 }
             />
-
             {/* Rute default, arahkan ke halaman utama (onboarding) jika URL tidak ditemukan */}
-            <Route path="*" element={<Navigate to="/" />} /> {/* <-- 3. UBAH RUTE INI */}
+            <Route path="*" element={<Navigate to="/" />} />{" "}
+            {/* <-- 3. UBAH RUTE INI */}
         </Routes>
     );
 };
