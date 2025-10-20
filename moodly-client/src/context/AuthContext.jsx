@@ -1,66 +1,62 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import apiClient from "../api/axios";
 import { useNavigate } from "react-router-dom";
 
-// 1. Membuat Context
-const AuthContext = createContext();
+const AuthContext = createContext({});
 
-// 2. Membuat Provider (Komponen yang akan "membungkus" aplikasi kita)
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); // State untuk loading awal
+    const [errors, setErrors] = useState(null);
     const navigate = useNavigate();
 
-    // 3. Fungsi untuk mengambil data user dari backend
+    // ... (fungsi getUser, login, register, logout tetap sama) ...
     const getUser = async () => {
         try {
-            const response = await apiClient.get("/api/user");
-            setUser(response.data);
-        } catch (error) {
-            // Jika error (misal token tidak valid), set user ke null
-            setUser(null);
-        } finally {
-            setLoading(false); // Selesai loading
+            const { data } = await apiClient.get("/api/user");
+            setUser(data);
+        } catch (e) {
+            // Abaikan error 401 karena berarti user belum login
         }
     };
 
-    // 4. Cek status login saat aplikasi pertama kali dimuat
     useEffect(() => {
-        getUser();
-    }, []);
-
-    // 5. Fungsi untuk handle login
-    const login = async (data) => {
-        try {
-            await apiClient.get("/sanctum/csrf-cookie");
-            await apiClient.post("/login", data);
-            await getUser(); // Setelah login, ambil data user
-            navigate("/dashboard"); // Redirect ke dashboard
-        } catch (error) {
-            // Melempar error agar bisa ditangani di halaman login
-            throw error;
+        if (!user) {
+            getUser();
         }
+    }, [user]);
+
+    const login = async (data) => {
+        setErrors(null);
+        await apiClient.get("/sanctum/csrf-cookie");
+        await apiClient.post("/login", data);
+        await getUser();
+        navigate("/dashboard");
     };
 
-    // 6. Fungsi untuk handle logout
+    const register = async (data) => {
+        setErrors(null);
+        await apiClient.get("/sanctum/csrf-cookie");
+        await apiClient.post("/register", data);
+        await getUser();
+        navigate("/dashboard");
+    };
+
     const logout = async () => {
-        try {
-            await apiClient.post("/logout");
-            setUser(null);
-            navigate("/login");
-        } catch (error) {
-            console.error("Logout failed:", error);
-        }
+        await apiClient.post("/logout");
+        setUser(null);
+        navigate("/login");
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider
+            value={{ user, errors, getUser, login, register, logout }}
+        >
             {children}
         </AuthContext.Provider>
     );
 };
 
-// 7. Custom hook untuk mempermudah penggunaan context
-export const useAuth = () => {
+// PERUBAHAN DI SINI: Ubah dari 'export default' menjadi 'export'
+export function useAuth() {
     return useContext(AuthContext);
-};
+}

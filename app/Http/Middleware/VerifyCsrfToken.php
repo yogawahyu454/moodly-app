@@ -12,7 +12,6 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        // Tambahkan baris ini untuk menonaktifkan CSRF pada endpoint register
-        'register',
+        '*', // Nonaktifkan untuk semua rute sementara
     ];
 }
