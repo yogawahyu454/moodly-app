@@ -1,19 +1,24 @@
+import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "../pages/auth/LoginPage";
 import { useAuth } from "../context/AuthContext";
 
-// Komponen untuk Halaman Dashboard (Placeholder)
-const DashboardPage = () => {
+// Import semua halaman dari folder auth
+import LoginPage from "../pages/auth/LoginPage";
+import RegisterPage from "../pages/auth/RegisterPage";
+import ForgotPasswordPage from "../pages/auth/ForgotPassword"; // Dulu namanya ForgotPassword
+import ResetPasswordPage from "../pages/auth/ResetPassword"; // Dulu namanya ResetPassword
+// ... import halaman lain jika diperlukan
+
+// Placeholder for Dashboard
+const Dashboard = () => {
     const { user, logout } = useAuth();
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold">
-                Selamat Datang, {user?.name}!
-            </h1>
+        <div className="p-8">
+            <h1 className="text-2xl">Selamat Datang, {user?.name}!</h1>
             <p>Email: {user?.email}</p>
             <button
                 onClick={logout}
-                className="mt-4 px-4 py-2 font-bold text-white bg-red-500 rounded hover:bg-red-700"
+                className="px-4 py-2 mt-4 font-bold text-white bg-red-500 rounded hover:bg-red-700"
             >
                 Logout
             </button>
@@ -21,35 +26,37 @@ const DashboardPage = () => {
     );
 };
 
-// Komponen untuk melindungi rute
+// Component for protected routes
 const ProtectedRoute = ({ children }) => {
-    const { user, loading } = useAuth();
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                Loading...
-            </div>
-        );
+    const { user } = useAuth();
+    if (!user) {
+        return <Navigate to="/login" />;
     }
-
-    return user ? children : <Navigate to="/login" replace />;
+    return children;
 };
 
-// Komponen Router utama yang menggunakan <Routes>
 const AppRouter = () => {
     return (
         <Routes>
+            {/* == RUTE PUBLIK UNTUK AUTENTIKASI == */}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            {/* Tambahkan rute lain dari folder auth di sini jika perlu */}
+
+            {/* == RUTE YANG DIPROTEKSI == */}
             <Route
                 path="/dashboard"
                 element={
                     <ProtectedRoute>
-                        <DashboardPage />
+                        <Dashboard />
                     </ProtectedRoute>
                 }
             />
-            <Route path="/" element={<div>Halaman Beranda (Public)</div>} />
+
+            {/* Rute default, arahkan ke dashboard jika sudah login, atau ke login jika belum */}
+            <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
     );
 };
