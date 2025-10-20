@@ -1,26 +1,23 @@
 import React from "react";
-import { Routes, Route, Navigate, Outlet } from "react-router-dom"; // Tambahkan Outlet
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-
-// Layout
 import MobileLayout from "../layouts/MobileLayout";
 
-// Import semua halaman dari folder auth
+// --- Import Halaman Auth ---
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
+// PERBAIKAN: Sesuaikan nama file import
 import ForgotPasswordPage from "../pages/auth/ForgotPassword";
 import ResetPasswordPage from "../pages/auth/ResetPassword";
-import OnboardingPage from "../pages/auth/Onboarding";
-import AddressPage from "../pages/auth/AddressPage";
 import CreatePasswordPage from "../pages/auth/CreatePasswordPage";
-import VerifyCodePage from "../pages/auth/VerifyCode"; // Sudah ada
+import AddressPage from "../pages/auth/AddressPage";
+import OnboardingPage from "../pages/auth/Onboarding";
 
-// Import halaman customer
-import Beranda from "../pages/customer/beranda";
-import Konseling from "../pages/customer/konseling";
-import Notifikasi from "../pages/customer/notifikasi";
-import riwayat from "../pages/customer/riwayat"; // Sudah ada
-import GantiJadwal from "../pages/customer/GantiJadwal"; // Sudah ada
+// --- Import Halaman Customer (dari temanmu) ---
+import KonselingPage from "../pages/customer/konseling";
+import RiwayatPage from "../pages/customer/riwayat";
+import NotifikasiPage from "../pages/customer/notifikasi";
+import GantiJadwalPage from "../pages/customer/GantiJadwal";
 
 // Placeholder for Dashboard
 const Dashboard = () => {
@@ -43,51 +40,38 @@ const Dashboard = () => {
 const ProtectedRoute = ({ children }) => {
     const { user } = useAuth();
     if (!user) {
-        // Jika tidak ada user, arahkan ke login
-        return <Navigate to="/login" replace />; // Gunakan replace agar tidak menambah history
+        return <Navigate to="/login" />;
     }
-    // Jika ada user, tampilkan children (Outlet atau komponen halaman)
-    return children ? children : <Outlet />; // Gunakan Outlet jika children tidak diberikan
+    return children;
 };
 
-// Wrapper Layout untuk Customer (Protected + MobileLayout)
-const CustomerLayout = () => (
-    <ProtectedRoute>
-        <MobileLayout>
-            <Outlet /> {/* Halaman customer akan dirender di sini */}
-        </MobileLayout>
-    </ProtectedRoute>
-);
-
-// Ini adalah router lengkap Anda yang sudah diperbaiki
 const AppRouter = () => {
     return (
         <Routes>
-            {/* == RUTE PUBLIK / AUTH (TANPA MobileLayout) == */}
-            <Route path="/" element={<OnboardingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/verify-code" element={<VerifyCodePage />} />
-            <Route path="/create-password" element={<CreatePasswordPage />} />
-            <Route path="/address" element={<AddressPage />} />
-            {/* HAPUS DUPLIKASI RUTE AUTH DARI SINI */}
+            {/* == RUTE PUBLIK & AUTH DENGAN LAYOUT MOBILE == */}
+            <Route element={<MobileLayout />}>
+                <Route path="/" element={<OnboardingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/address" element={<AddressPage />} />
+                <Route
+                    path="/create-password"
+                    element={<CreatePasswordPage />}
+                />
+                <Route
+                    path="/forgot-password"
+                    element={<ForgotPasswordPage />}
+                />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-
-            {/* == RUTE CUSTOMER (DIPROTEKSI & MENGGUNAKAN MobileLayout) == */}
-            {/* Kita gunakan wrapper CustomerLayout */}
-            <Route element={<CustomerLayout />}>
-                <Route path="/beranda" element={<Beranda />} />
-                <Route path="/notifikasi" element={<Notifikasi />} />
-                <Route path="/konseling" element={<Konseling />} />
-                <Route path="/ganti-jadwal" element={<Riwayat />} />
-                <Route path="/ganti-jadwal" element={<GantiJadwal />} />
-                {/* Tambahkan rute customer lain di sini */}
+                {/* Rute Customer yang baru ditambahkan */}
+                <Route path="/konseling" element={<KonselingPage />} />
+                <Route path="/riwayat" element={<RiwayatPage />} />
+                <Route path="/notifikasi" element={<NotifikasiPage />} />
+                <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />
             </Route>
 
-            {/* == RUTE YANG DIPROTEKSI (LAINNYA, contoh: Dashboard Admin) == */}
-            {/* Jika Dashboard tidak perlu MobileLayout, buat seperti ini */}
+            {/* == RUTE YANG DIPROTEKSI (NANTI BISA PAKAI LAYOUT BERBEDA) == */}
             <Route
                 path="/dashboard"
                 element={
@@ -97,8 +81,8 @@ const AppRouter = () => {
                 }
             />
 
-            {/* Rute default jika URL tidak ditemukan, arahkan ke onboarding */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Fallback route */}
+            <Route path="*" element={<Navigate to="/" />} />
         </Routes>
     );
 };
