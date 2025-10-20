@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import MobileLayout from "../layouts/MobileLayout";
+import AuthLayout from "../layouts/AuthLayout"; // <-- Impor layout baru
 
 // --- Import semua halaman dengan penamaan yang SUDAH STANDAR (PascalCasePage.jsx) ---
 import LoginPage from "../pages/auth/LoginPage";
@@ -44,9 +45,9 @@ const AppRouter = () => {
 
     return (
         <Routes>
-            {/* WILAYAH TAMU */}
+            {/* WILAYAH TAMU: Menggunakan AuthLayout */}
             <Route element={<GuestGuard />}>
-                <Route element={<MobileLayout />}>
+                <Route element={<AuthLayout />}>
                     <Route path="/" element={<OnboardingPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
@@ -67,7 +68,7 @@ const AppRouter = () => {
                 </Route>
             </Route>
 
-            {/* WILAYAH PENGGUNA */}
+            {/* WILAYAH PENGGUNA: Menggunakan MobileLayout */}
             <Route element={<ProtectedGuard />}>
                 <Route element={<MobileLayout />}>
                     <Route path="/beranda" element={<BerandaPage />} />
