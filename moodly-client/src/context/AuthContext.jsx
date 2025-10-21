@@ -7,11 +7,9 @@ const AuthContext = createContext({});
 // 2. Buat Provider
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true); // Mulai dengan loading = true
 
     // --- PERBAIKAN 1: getUser HANYA mengambil data ---
-    // Biarkan fungsi ini melempar error jika gagal.
-    // JANGAN taruh try...catch...finally di sini.
     const getUser = async () => {
         const { data } = await apiClient.get("/api/user");
         setUser(data);
@@ -22,11 +20,8 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const fetchInitialUser = async () => {
             try {
-                // Coba ambil data user yang mungkin sudah login
                 await getUser();
             } catch (e) {
-                // DI SINI kita boleh mengabaikan error,
-                // karena ini hanya load awal.
                 console.log("No user logged in on initial load.");
             } finally {
                 // setLoading(false) HANYA dipanggil SETELAH
@@ -38,7 +33,6 @@ export const AuthProvider = ({ children }) => {
     }, []); // <-- Dependensi kosong sudah benar
 
     // --- PERBAIKAN 3: Logika login/register/logout yang benar ---
-    // (Tanpa window.location.reload())
     const login = async (data) => {
         try {
             await apiClient.get("/sanctum/csrf-cookie");
@@ -52,13 +46,14 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // --- INI ADALAH PERBAIKAN TYPO ---
     const register = async (data) => {
         const { address, ...finalData } = data;
         try {
             await apiClient.get("/sanctum/csrf-cookie");
             await apiClient.post("/register", finalData);
             await getUser(); // Ambil user baru setelah register
-        } catch (e) {
+        } catch (e) { // <-- Kurung kurawal { } sudah ditambahkan
             if (e.response && e.response.status === 422) {
                 throw e.response.data.errors;
             }
@@ -73,10 +68,9 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider
-            // Pastikan 'getUser' juga di-export
             value={{ user, loading, getUser, login, register, logout }}
         >
-            {/* Router Anda (AppRouter) sudah punya pengecekan 'if (loading)',
+            {/* Di file AppRouter.jsx Anda sudah ada 'if (loading) return ...',
               jadi 'children' di sini bisa langsung dirender.
             */}
             {children}
