@@ -11,13 +11,12 @@ use Illuminate\Validation\Rules\Password;
 
 class AdminManagementController extends Controller
 {
-    // Mengambil semua user dengan role 'admin'
+    // ... (fungsi index, store, show, destroy jangan diubah) ...
     public function index()
     {
         return User::where('role', 'admin')->latest()->get();
     }
 
-    // Menyimpan admin baru
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -41,8 +40,6 @@ class AdminManagementController extends Controller
         return response()->json($admin, 201);
     }
 
-    // Menampilkan detail satu admin
-    // PERBAIKAN: Kembalikan nama variabel ke $user agar konsisten
     public function show(User $user)
     {
         if ($user->role !== 'admin') {
@@ -51,10 +48,6 @@ class AdminManagementController extends Controller
         return $user;
     }
 
-    // (Metode update tidak kita gunakan)
-
-    // Menghapus admin
-    // PERBAIKAN: Kembalikan nama variabel ke $user agar konsisten
     public function destroy(User $user)
     {
         if ($user->role !== 'admin') {
@@ -64,13 +57,15 @@ class AdminManagementController extends Controller
         return response()->json(null, 204);
     }
 
-    // --- METODE KHUSUS UNTUK STATUS (nama variabel $user sudah benar) ---
     public function block(User $user)
     {
+        // Kode debugging sudah dihapus. Sekarang kita aktifkan logika yang sebenarnya.
         if ($user->role !== 'admin') {
             abort(404);
         }
+
         $user->update(['status' => 'Banned']);
+
         return response()->json($user);
     }
 
