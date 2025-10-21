@@ -3,7 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SuperAdmin\JenisKonselingController;
-use App\Http\Controllers\SuperAdmin\DurasiKonselingController; // <-- 1. Impor controller baru
+use App\Http\Controllers\SuperAdmin\DurasiKonselingController;
+use App\Http\Controllers\SuperAdmin\TempatKonselingController;
+use App\Http\Controllers\SuperAdmin\AdminManagementController;
+use App\Http\Controllers\SuperAdmin\KonselorManagementController;
 use App\Http\Middleware\RoleMiddleware;
 
 /*
@@ -33,7 +36,17 @@ Route::group(['middleware' => [
         // Rute khusus Super Admin
         Route::middleware(RoleMiddleware::class . ':super-admin')->prefix('super-admin')->group(function () {
             Route::apiResource('jenis-konseling', JenisKonselingController::class);
-            Route::apiResource('durasi-konseling', DurasiKonselingController::class); // <-- 2. Tambahkan rute baru
+            Route::apiResource('durasi-konseling', DurasiKonselingController::class);
+            Route::apiResource('tempat-konseling', TempatKonselingController::class);
+
+            // Rute untuk manajemen admin
+            Route::post('admin-management/{user}/block', [AdminManagementController::class, 'block']);
+            Route::post('admin-management/{user}/unblock', [AdminManagementController::class, 'unblock']);
+            Route::apiResource('admin-management', AdminManagementController::class)->parameters(['admin-management' => 'user']);
+
+            Route::post('konselor-management/{user}/block', [KonselorManagementController::class, 'block']);
+            Route::post('konselor-management/{user}/unblock', [KonselorManagementController::class, 'unblock']);
+            Route::apiResource('konselor-management', KonselorManagementController::class)->parameters(['konselor-management' => 'user']);
         });
     });
 });
