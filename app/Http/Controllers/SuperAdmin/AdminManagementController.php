@@ -34,36 +34,37 @@ class AdminManagementController extends Controller
             'password' => Hash::make($validated['password']),
             'phone' => $validated['phone'],
             'city' => $validated['city'],
-            'role' => 'admin', // Otomatis set role sebagai admin
-            'status' => 'Offline', // Default status
+            'role' => 'admin',
+            'status' => 'Offline',
         ]);
 
         return response()->json($admin, 201);
     }
 
     // Menampilkan detail satu admin
-    public function show(User $user)
+    // PERBAIKAN: Mengubah nama variabel $user menjadi $admin_management agar cocok dengan nama rute
+    public function show(User $admin_management)
     {
-        // Pastikan hanya bisa melihat user dengan role admin
-        if ($user->role !== 'admin') {
+        if ($admin_management->role !== 'admin') {
             abort(404);
         }
-        return $user;
+        return $admin_management;
     }
 
-    // (Metode update tidak kita gunakan untuk status)
+    // (Metode update tidak kita gunakan)
 
     // Menghapus admin
-    public function destroy(User $user)
+    // PERBAIKAN: Mengubah nama variabel $user menjadi $admin_management
+    public function destroy(User $admin_management)
     {
-        if ($user->role !== 'admin') {
+        if ($admin_management->role !== 'admin') {
             abort(404);
         }
-        $user->delete();
+        $admin_management->delete();
         return response()->json(null, 204);
     }
 
-    // --- METODE KHUSUS UNTUK STATUS ---
+    // --- METODE KHUSUS UNTUK STATUS (nama variabel $user sudah benar karena rutenya beda) ---
     public function block(User $user)
     {
         if ($user->role !== 'admin') {
@@ -78,7 +79,6 @@ class AdminManagementController extends Controller
         if ($user->role !== 'admin') {
             abort(404);
         }
-        // Saat di-unblock, kembalikan ke status Offline, bukan Online
         $user->update(['status' => 'Offline']);
         return response()->json($user);
     }
