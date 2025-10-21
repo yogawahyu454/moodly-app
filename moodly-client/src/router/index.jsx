@@ -3,122 +3,153 @@ import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 // --- Layouts ---
-import AuthLayout from "../layouts/AuthLayout";
 import MobileLayout from "../layouts/MobileLayout";
+import AuthLayout from "../layouts/AuthLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import AuthAdminLayout from "../layouts/AuthAdminLayout";
 
-// --- Halaman Auth (Tamu) ---
+// --- Halaman Customer & Auth (Mobile) ---
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
-import OnboardingPage from "../pages/auth/OnboardingPage";
-// ... Halaman auth lainnya bisa diimpor di sini
-
-// --- Halaman Customer (Terproteksi) ---
 import BerandaPage from "../pages/customer/BerandaPage";
-import KonselingPage from "../pages/customer/KonselingPage";
-import RiwayatPage from "../pages/customer/RiwayatPage";
-// ... Halaman customer lainnya
+// ...impor halaman customer dan auth lainnya jika ada
 
-// --- Halaman Admin (Placeholder) ---
-const AdminDashboardPage = () => (
-    <div>
-        <h1 className="text-2xl font-bold">Halo, Super Admin!</h1>
-        <p>Ini adalah halaman dasbor utama Anda.</p>
-    </div>
-);
+// --- Halaman Admin & Super Admin (Website) ---
+// import AdminDashboardPage from "../pages/admin/AdminDashboardPage"; // Anda bisa buat file ini nanti
+import JenisKonselingPage from "../pages/super-admin/JenisKonselingPage";
 
-// --- PENJAGA (GUARDS) ---
+// ==================================================================
+// --- PENJAGA ZONA CUSTOMER / KONSELOR (TAMPILAN MOBILE) ---
+// ==================================================================
 
-// Untuk tamu mobile (customer/konselor)
 const GuestGuard = () => {
     const { user } = useAuth();
-    return user && !user.role?.includes("admin") ? (
-        <Navigate to="/beranda" />
-    ) : (
-        <Outlet />
-    );
+    if (user) {
+        // Jika sudah login, lempar ke beranda yang sesuai
+        return user.role?.includes("admin") ||
+            user.role?.includes("super-admin") ? (
+            <Navigate to="/admin/dashboard" />
+        ) : (
+            <Navigate to="/beranda" />
+        );
+    }
+    return <Outlet />; // Jika belum login, tampilkan halaman (login, register)
 };
 
-// Untuk pengguna mobile (customer/konselor)
 const ProtectedGuard = () => {
     const { user } = useAuth();
-    return user && !user.role?.includes("admin") ? (
-        <Outlet />
-    ) : (
-        <Navigate to="/login" />
-    );
+    // Admin & Super Admin tidak boleh mengakses zona mobile
+    if (
+        !user ||
+        user.role?.includes("admin") ||
+        user.role?.includes("super-admin")
+    ) {
+        return <Navigate to="/login" />;
+    }
+    return <Outlet />; // Jika user adalah customer/konselor, izinkan akses
 };
 
-// Untuk tamu admin
+// ==================================================================
+// --- PENJAGA ZONA ADMIN / SUPER ADMIN (TAMPILAN WEBSITE) ---
+// ==================================================================
+
 const AdminGuestGuard = () => {
     const { user } = useAuth();
-    return user && user.role?.includes("admin") ? (
+    // Jika sudah login sebagai admin, lempar ke dashboard
+    return user &&
+        (user.role?.includes("admin") || user.role?.includes("super-admin")) ? (
         <Navigate to="/admin/dashboard" />
     ) : (
         <Outlet />
     );
 };
 
-// Untuk admin yang sudah login
 const AdminProtectedGuard = () => {
     const { user } = useAuth();
-    return user && user.role?.includes("admin") ? (
+    // Hanya izinkan jika sudah login DAN rolenya admin atau super-admin
+    return user &&
+        (user.role?.includes("admin") || user.role?.includes("super-admin")) ? (
         <Outlet />
     ) : (
         <Navigate to="/admin/login" />
     );
 };
 
-// --- PETA APLIKASI (ROUTER UTAMA) ---
+// --- PETA APLIKASI UTAMA ---
 const AppRouter = () => {
     const { loading } = useAuth();
 
+    // Tampilkan loading screen saat status autentikasi sedang diperiksa
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen font-sans">
-                Memuat Sesi...
+            <div className="flex items-center justify-center min-h-screen">
+                Loading...
             </div>
         );
     }
 
-    // Perhatikan: <BrowserRouter> sudah DIHAPUS dari sini.
-    // File ini sekarang hanya mengembalikan <Routes>.
     return (
         <Routes>
-            {/* == ZONA CUSTOMER & KONSELOR (TAMPILAN MOBILE) == */}
+            {/* === ZONA CUSTOMER (MOBILE) === */}
             <Route element={<GuestGuard />}>
                 <Route element={<AuthLayout />}>
-                    <Route path="/" element={<OnboardingPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
+                    {/* ...tambahkan rute auth mobile lainnya di sini */}
                 </Route>
             </Route>
-
             <Route element={<ProtectedGuard />}>
                 <Route element={<MobileLayout />}>
                     <Route path="/beranda" element={<BerandaPage />} />
-                    <Route path="/konseling" element={<KonselingPage />} />
-                    <Route path="/riwayat" element={<RiwayatPage />} />
+                    {/* ...tambahkan rute customer/konselor lainnya di sini */}
                 </Route>
             </Route>
 
-            {/* == ZONA ADMIN & SUPER ADMIN (TAMPILAN WEBSITE) == */}
+            {/* === ZONA ADMIN (WEBSITE) === */}
             <Route element={<AdminGuestGuard />}>
-                <Route path="/admin/login" element={<AuthAdminLayout />}>
-                    <Route index element={<LoginPage />} />
+                <Route element={<AuthAdminLayout />}>
+                    {/* Rute login khusus untuk admin */}
+                    <Route path="/admin/login" element={<LoginPage />} />
                 </Route>
             </Route>
-
             <Route element={<AdminProtectedGuard />}>
-                <Route path="/admin" element={<AdminLayout />}>
-                    <Route path="dashboard" element={<AdminDashboardPage />} />
-                    <Route index element={<Navigate to="/admin/dashboard" />} />
+                <Route element={<AdminLayout />}>
+                    {/* Redirect dari /admin ke /admin/dashboard */}
+                    <Route
+                        path="/admin"
+                        element={<Navigate to="/admin/dashboard" />}
+                    />
+                    <Route
+                        path="/admin/dashboard"
+                        element={
+                            <div>
+                                <h1>Selamat Datang di Dasbor!</h1>
+                            </div>
+                        }
+                    />
+
+                    {/* Rute untuk Super Admin */}
+                    <Route
+                        path="/admin/jenis-konseling"
+                        element={<JenisKonselingPage />}
+                    />
+
+                    {/* ...tambahkan rute admin/super-admin lainnya di sini */}
                 </Route>
             </Route>
 
-            {/* Rute cadangan jika tidak ada yang cocok */}
-            <Route path="*" element={<Navigate to="/" />} />
+            {/* === RUTE FALLBACK === */}
+            {/* Rute default, akan diarahkan oleh GuestGuard */}
+            <Route path="/" element={<Navigate to="/login" />} />
+            {/* Rute jika halaman tidak ditemukan */}
+            <Route
+                path="*"
+                element={
+                    <div>
+                        <h1>404 - Halaman Tidak Ditemukan</h1>
+                    </div>
+                }
+            />
         </Routes>
     );
 };

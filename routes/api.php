@@ -2,32 +2,37 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SuperAdmin\JenisKonselingController;
+use App\Http\Middleware\RoleMiddleware; // <-- 1. Impor class middleware
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Di bawah ini kita tidak lagi bergantung pada grup middleware 'api' dari Kernel.
-| Kita secara manual menyuntikkan middleware yang dibutuhkan untuk sesi stateful.
-|
 */
 
-// --- INTERVENSI LANGSUNG ---
-// Kita memaksa Laravel untuk menjalankan middleware sesi dan cookie
-// sebelum memproses rute-rute di dalamnya.
+// --- GRUP UTAMA UNTUK SEMUA RUTE YANG MEMBUTUHKAN SESI ---
 Route::group(['middleware' => [
     \Illuminate\Cookie\Middleware\EncryptCookies::class,
     \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
     \Illuminate\Session\Middleware\StartSession::class,
 ]], function () {
 
-    // Rute untuk pengguna yang sudah login (terproteksi)
-    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-        return $request->user();
-    });
-
-    // Memuat semua rute autentikasi (login, register, logout, dll.)
-    // di dalam grup yang sudah kita paksa untuk memiliki sesi ini.
+    // 1. Rute Autentikasi
     require __DIR__ . '/auth.php';
+
+    // 2. Grup untuk SEMUA rute yang terproteksi
+    Route::middleware('auth:sanctum')->group(function () {
+
+        // Rute umum
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        });
+
+        // Rute khusus Super Admin
+        // 2. Panggil dengan nama class lengkap, bukan alias
+        Route::middleware(RoleMiddleware::class . ':super-admin')->prefix('super-admin')->group(function () {
+            Route::apiResource('jenis-konseling', JenisKonselingController::class);
+        });
+    });
 });
