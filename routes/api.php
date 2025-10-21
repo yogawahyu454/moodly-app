@@ -6,6 +6,7 @@ use App\Http\Controllers\SuperAdmin\JenisKonselingController;
 use App\Http\Controllers\SuperAdmin\DurasiKonselingController;
 use App\Http\Controllers\SuperAdmin\TempatKonselingController;
 use App\Http\Controllers\SuperAdmin\AdminManagementController;
+use App\Http\Controllers\SuperAdmin\KonselorManagementController;
 use App\Http\Middleware\RoleMiddleware;
 
 /*
@@ -41,9 +42,11 @@ Route::group(['middleware' => [
             // Rute untuk manajemen admin
             Route::post('admin-management/{user}/block', [AdminManagementController::class, 'block']);
             Route::post('admin-management/{user}/unblock', [AdminManagementController::class, 'unblock']);
-
-            // PERBAIKAN: Beritahu resource untuk menggunakan 'user' sebagai nama parameter
             Route::apiResource('admin-management', AdminManagementController::class)->parameters(['admin-management' => 'user']);
+
+            Route::post('konselor-management/{user}/block', [KonselorManagementController::class, 'block']);
+            Route::post('konselor-management/{user}/unblock', [KonselorManagementController::class, 'unblock']);
+            Route::apiResource('konselor-management', KonselorManagementController::class)->parameters(['konselor-management' => 'user']);
         });
     });
 });

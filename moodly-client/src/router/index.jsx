@@ -27,6 +27,8 @@ import DurasiKonselingPage from "../pages/super-admin/konseling/durasi/Index.jsx
 import TempatKonselingPage from "../pages/super-admin/konseling/tempat/Index.jsx";
 import AdminManagementPage from "../pages/super-admin/admin/Index.jsx";
 import AdminDetailPage from "../pages/super-admin/admin/Show.jsx";
+import KonselorManagementPage from "../pages/super-admin/konselor/Index.jsx";
+import KonselorDetailPage from "../pages/super-admin/konselor/Show.jsx";
 
 // ==================================================================
 // --- PENJAGA ZONA CUSTOMER / KONSELOR (TAMPILAN MOBILE) ---
@@ -172,6 +174,14 @@ const AppRouter = () => {
                     <Route
                         path="/admin/admin-management/:id"
                         element={<AdminDetailPage />}
+                    />
+                    <Route
+                        path="/admin/konselor-management"
+                        element={<KonselorManagementPage />}
+                    />
+                    <Route
+                        path="/admin/konselor-management/:id"
+                        element={<KonselorDetailPage />}
                     />
                 </Route>
             </Route>

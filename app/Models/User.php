@@ -29,6 +29,9 @@ class User extends Authenticatable
         'postal_code',
         'street_address',
         'password',
+        'surat_izin_praktik',
+        'spesialisasi',
+        'rating',
     ];
 
     /**
@@ -49,5 +52,6 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'spesialisasi' => 'array',
     ];
 }

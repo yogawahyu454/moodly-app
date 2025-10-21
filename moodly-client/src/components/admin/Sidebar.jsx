@@ -236,7 +236,11 @@ const SidebarMenu = ({ role }) => {
         { label: "Dashboard", path: "/admin/dashboard", icon: DashboardIcon },
         { label: "Pesanan", path: "/admin/pesanan", icon: PesananIcon },
         { label: "Customer", path: "/admin/customer", icon: CustomerIcon },
-        { label: "Konselor", path: "/admin/konselor", icon: KonselorIcon },
+        {
+            label: "Konselor",
+            path: "/admin/konselor-management",
+            icon: KonselorIcon,
+        },
         { label: "Admin", path: "/admin/admin-management", icon: AdminIcon },
         {
             label: "Konseling",
@@ -249,7 +253,6 @@ const SidebarMenu = ({ role }) => {
                     path: "/admin/tempat-konseling",
                     icon: MapPinIcon,
                 },
-                // { label: "Tempat Konseling", path: "/admin/tempat-konseling" },
             ],
         },
     ];
