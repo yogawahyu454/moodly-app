@@ -9,7 +9,6 @@ import AdminLayout from "../layouts/AdminLayout";
 import AuthAdminLayout from "../layouts/AuthAdminLayout";
 import PageLayout from "../layouts/PageLayout";
 
-
 // --- Halaman Customer & Auth (Mobile) ---
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
@@ -22,9 +21,6 @@ import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
 // import DetailPembatalanPage from "../pages/customer/DetailPembatalanPage"; // <-- Dihapus karena diganti CancellationPage
 import CancellationPage from "../pages/customer/CancellationPage"; // <-- PERBAIKAN PATH DI SINI (sebelumnya ../../)
 import PsikologPage from "../pages/customer/PsikologPage";
-// (Import OnboardingPage jika Anda punya)
-// import OnboardingPage from "../pages/auth/OnboardingPage"; 
-
 
 // --- Halaman Admin & Super Admin (Website) ---
 import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index";
@@ -32,7 +28,6 @@ import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index";
 // ==================================================================
 // --- PENJAGA ZONA CUSTOMER / KONSELOR (TAMPILAN MOBILE) ---
 // ==================================================================
-
 const GuestGuard = () => {
     const { user } = useAuth();
     if (user) {
@@ -63,7 +58,6 @@ const ProtectedGuard = () => {
 // ==================================================================
 // --- PENJAGA ZONA ADMIN / SUPER ADMIN (TAMPILAN WEBSITE) ---
 // ==================================================================
-
 const AdminGuestGuard = () => {
     const { user } = useAuth();
     // Jika sudah login sebagai admin, lempar ke dashboard
@@ -104,18 +98,13 @@ const AppRouter = () => {
             {/* === ZONA CUSTOMER (MOBILE) === */}
             <Route element={<GuestGuard />}>
                 <Route element={<AuthLayout />}>
-                    {/* <Route path="/" element={<OnboardingPage />} /> */}
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                 </Route>
             </Route>
 
-            {/* ====================================================== */}
-            {/* == PERBAIKAN DI SINI == */}
-            {/* ====================================================== */}
+            {/* === ZONA CUSTOMER (DENGAN PEMBATALAN DAN DETAIL PEMBATALAN) === */}
             <Route element={<ProtectedGuard />}>
-
-                {/* 1. Rute yang PAKAI Navigasi Bawah */}
                 <Route element={<MobileLayout />}>
                     <Route path="/beranda" element={<BerandaPage />} />
                     <Route path="/konseling" element={<KonselingPage />} />
@@ -123,32 +112,16 @@ const AppRouter = () => {
                     <Route path="/notifikasi" element={<NotifikasiPage />} />
                 </Route>
 
-                {/* 2. Rute Full-Screen (TANPA Navigasi Bawah) */}
+                {/* Rute Full-Screen (Tanpa Navigasi Bawah) */}
                 <Route element={<PageLayout />}>
                     <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />
                     <Route path="/psikolog" element={<PsikologPage />} />
-
-                    {/* RUTE YANG BENAR UNTUK DETAIL RIWAYAT */}
-                    <Route
-                        path="/riwayat/:id"
-                        element={<DetailRiwayatPage />}
-                    />
-                    
-                    {/* RUTE UNTUK PEMBATALAN (MENGGUNAKAN CancellationPage) */}
-                    <Route
-                        path="/pembatalan/:id"
-                        element={<CancellationPage />} // <-- PERBAIKAN RUTE: Diganti ke CancellationPage
-                    />
-                </Route> 
-                
-                {/* RUTE DUPLIKAT DIHAPUS DARI SINI */}
-                {/* <Route path="/pembatalan/:id" element={<CancellationPage />} /> */}
-
-            </Route> {/* <-- Tag penutup ProtectedGuard */}
-            {/* ====================================================== */}
-            {/* == AKHIR PERBAIKAN == */}
-            {/* ====================================================== */}
-
+                    <Route path="/riwayat/:id" element={<DetailRiwayatPage />} />
+                    {/* Rute Pembatalan */}
+                    <Route path="/detail-pembatalan/:id" element={<DetailPembatalanPage />} />
+                    <Route path="/pembatalan/:id" element={<CancellationPage />} />
+                </Route>
+            </Route>
 
             {/* === ZONA ADMIN (WEBSITE) === */}
             <Route element={<AdminGuestGuard />}>
@@ -158,36 +131,15 @@ const AppRouter = () => {
             </Route>
             <Route element={<AdminProtectedGuard />}>
                 <Route element={<AdminLayout />}>
-                    <Route
-                        path="/admin"
-                        element={<Navigate to="/admin/dashboard" />}
-                    />
-                    <Route
-                        path="/admin/dashboard"
-                        element={
-                            <div>
-                                <h1>Selamat Datang di Dasbor!</h1>
-                            </div>
-                        }
-                    />
-                    <Route
-                        path="/admin/jenis-konseling"
-                        element={<JenisKonselingPage />}
-                    />
+                    <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
+                    <Route path="/admin/dashboard" element={<h1>Selamat Datang di Dasbor!</h1>} />
+                    <Route path="/admin/jenis-konseling" element={<JenisKonselingPage />} />
                 </Route>
             </Route>
 
-            {/* === RUTE FALLBACK === */}
-            {/* Arahkan / ke /login jika tidak ada rute lain yang cocok di awal */}
+            {/* Fallback Route */}
             <Route path="/" element={<Navigate to="/login" />} />
-            <Route
-                path="*"
-                element={
-                    <div>
-                        <h1>404 - Halaman Tidak Ditemukan</h1>
-                    </div>
-                }
-            />
+            <Route path="*" element={<h1>404 - Halaman Tidak Ditemukan</h1>} />
         </Routes>
     );
 };
