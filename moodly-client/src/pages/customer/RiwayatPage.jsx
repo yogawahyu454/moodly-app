@@ -52,19 +52,15 @@ const TabButton = ({ title, isActive, onClick, isFirst = false, isLast = false }
     // Font text-xs font-semibold
     // DITAMBAHKAN: whitespace-nowrap
     className={`flex-1 py-1.5 px-2 text-xs font-semibold text-center transition-colors duration-200 focus:outline-none whitespace-nowrap
-      ${
-        isActive
-          ? "bg-sky-500 text-white" // Active state
-          : "bg-white text-gray-700 hover:bg-sky-50" // Inactive state
+      ${isActive
+        ? "bg-sky-500 text-white" // Active state
+        : "bg-white text-gray-700 hover:bg-sky-50" // Inactive state
       }
-      ${
-        !isLast ? "border-r border-sky-200" : "" // Border pemisah lebih terang
+      ${!isLast ? "border-r border-sky-200" : "" // Border pemisah lebih terang
       }
-      ${
-        isFirst ? "rounded-l-lg" : "" 
+      ${isFirst ? "rounded-l-lg" : ""
       }
-      ${
-        isLast ? "rounded-r-lg" : "" 
+      ${isLast ? "rounded-r-lg" : ""
       }
     `}
   >
@@ -189,19 +185,27 @@ const AppointmentCard = ({ item, status }) => {
             </button>
           </>
         )}
+
+        {/* ============================================== */}
+        {/* == PERBAIKAN DI SINI == */}
+        {/* ============================================== */}
         {status === "canceled" && (
           <>
             <span className="text-xs font-semibold text-red-500 mr-auto">
               Telah Dibatalkan
             </span>
             <Link
-              to={`/riwayat/${item.id}`}
+              to={`/pembatalan/${item.id}`}
               className="px-3 py-1.5 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 text-center"
             >
               Detail
             </Link>
           </>
         )}
+        {/* ============================================== */}
+        {/* == AKHIR PERBAIKAN == */}
+        {/* ============================================== */}
+
         {status === "unpaid" && (
           <>
             <span className="text-xs font-semibold text-orange-500 mr-auto">
@@ -327,7 +331,7 @@ export default function RiwayatPage() {
         />
         <TabButton
           title="Dibatalkan"
-          isActive={activeTab === "canceled"}
+          isActive={activeTab === "canceled"} // Perbaikan di sini
           onClick={() => setActiveTab("canceled")}
         />
         <TabButton
@@ -347,4 +351,4 @@ export default function RiwayatPage() {
       <div>{renderContent()}</div>
     </div>
   );
-}
+} 
