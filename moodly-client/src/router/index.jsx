@@ -12,22 +12,13 @@ import AuthAdminLayout from "../layouts/AuthAdminLayout";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import BerandaPage from "../pages/customer/BerandaPage";
-<<<<<<< HEAD
-// ...impor halaman customer dan auth lainnya jika ada
-=======
 import KonselingPage from "../pages/customer/KonselingPage";
 import RiwayatPage from "../pages/customer/RiwayatPage";
-<<<<<<< HEAD
 import NotifikasiPage from "../pages/customer/NotifikasiPage";
 import GantiJadwalPage from "../pages/customer/GantiJadwalPage";
 import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
-=======
-// ... Halaman customer lainnya
->>>>>>> a22ee6be91e1399a922ffba9dc187961d00792b0
->>>>>>> 9338599971fcb730a2bf09811465a18e2c6585ba
 
 // --- Halaman Admin & Super Admin (Website) ---
-// import AdminDashboardPage from "../pages/admin/AdminDashboardPage"; // Anda bisa buat file ini nanti
 import JenisKonselingPage from "../pages/super-admin/JenisKonselingPage";
 
 // ==================================================================
@@ -107,37 +98,30 @@ const AppRouter = () => {
                 <Route element={<AuthLayout />}>
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
-                    {/* ...tambahkan rute auth mobile lainnya di sini */}
                 </Route>
             </Route>
             <Route element={<ProtectedGuard />}>
                 <Route element={<MobileLayout />}>
                     <Route path="/beranda" element={<BerandaPage />} />
-<<<<<<< HEAD
-                    {/* ...tambahkan rute customer/konselor lainnya di sini */}
-=======
                     <Route path="/konseling" element={<KonselingPage />} />
                     <Route path="/riwayat" element={<RiwayatPage />} />
-<<<<<<< HEAD
                     <Route path="/notifikasi" element={<NotifikasiPage />} />
                     <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />
-                    <Route path="/detail-riwayat" element={<RiwayatPage />} />
-=======
->>>>>>> a22ee6be91e1399a922ffba9dc187961d00792b0
->>>>>>> 9338599971fcb730a2bf09811465a18e2c6585ba
+                    <Route
+                        path="/detail-riwayat"
+                        element={<DetailRiwayatPage />}
+                    />
                 </Route>
             </Route>
 
             {/* === ZONA ADMIN (WEBSITE) === */}
             <Route element={<AdminGuestGuard />}>
                 <Route element={<AuthAdminLayout />}>
-                    {/* Rute login khusus untuk admin */}
                     <Route path="/admin/login" element={<LoginPage />} />
                 </Route>
             </Route>
             <Route element={<AdminProtectedGuard />}>
                 <Route element={<AdminLayout />}>
-                    {/* Redirect dari /admin ke /admin/dashboard */}
                     <Route
                         path="/admin"
                         element={<Navigate to="/admin/dashboard" />}
@@ -150,21 +134,15 @@ const AppRouter = () => {
                             </div>
                         }
                     />
-
-                    {/* Rute untuk Super Admin */}
                     <Route
                         path="/admin/jenis-konseling"
                         element={<JenisKonselingPage />}
                     />
-
-                    {/* ...tambahkan rute admin/super-admin lainnya di sini */}
                 </Route>
             </Route>
 
             {/* === RUTE FALLBACK === */}
-            {/* Rute default, akan diarahkan oleh GuestGuard */}
             <Route path="/" element={<Navigate to="/login" />} />
-            {/* Rute jika halaman tidak ditemukan */}
             <Route
                 path="*"
                 element={
