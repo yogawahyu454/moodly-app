@@ -1,8 +1,12 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-    baseURL: "http://127.0.0.1:8000", // Sesuaikan dengan URL backend Laravel
-    withCredentials: true, // WAJIB untuk Laravel Sanctum
+    baseURL: "http://localhost:8000",
+    withCredentials: true,
+
+    // TAMBAHAN PENTING:
+    // Header ini memberitahu Laravel bahwa kita HANYA mau menerima respons JSON.
+    // Ini akan mencegah Laravel melakukan 'redirect' saat terjadi error.
     headers: {
         Accept: "application/json",
     },

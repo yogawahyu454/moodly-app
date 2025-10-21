@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-// --- Komponen Ikon SVG (Hanya yang diperlukan untuk halaman ini) ---
+// --- Komponen Ikon SVG ---
 const ArrowLeftIcon = () => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -19,8 +19,6 @@ const ArrowLeftIcon = () => (
         <polyline points="12 19 5 12 12 5"></polyline>
     </svg>
 );
-
-// --- Komponen Halaman Notifikasi ---
 
 // Komponen untuk satu item notifikasi
 const NotificationItem = ({ title, date, message }) => (
@@ -43,7 +41,7 @@ const NotificationItem = ({ title, date, message }) => (
 );
 
 // Komponen utama halaman notifikasi
-export default function NotificationPage() {
+export default function NotifikasiPage() {
     const notifications = [
         {
             id: 1,
@@ -76,27 +74,24 @@ export default function NotificationPage() {
     ];
 
     return (
-        <div className="bg-gray-50 min-h-screen font-sans">
-            <div className="max-w-md mx-auto bg-white md:max-w-3xl lg:max-w-5xl min-h-screen">
-                <header className="p-4 flex items-center gap-4 sticky top-0 z-10 bg-white shadow-sm">
-                    <Link to="/beranda">
-                        <ArrowLeftIcon />
-                    </Link>
-                    <h1 className="text-xl font-bold text-gray-800">
-                        Notifikasi
-                    </h1>
-                </header>
-                <main>
-                    {notifications.map((notif) => (
-                        <NotificationItem
-                            key={notif.id}
-                            title={notif.title}
-                            date={notif.date}
-                            message={notif.message}
-                        />
-                    ))}
-                </main>
-            </div>
-        </div>
+        // Wrapper utama dihapus, hanya menyisakan konten spesifik halaman
+        <>
+            <header className="p-4 flex items-center gap-4 sticky top-0 z-10 bg-white shadow-sm">
+                <Link to="/beranda">
+                    <ArrowLeftIcon />
+                </Link>
+                <h1 className="text-xl font-bold text-gray-800">Notifikasi</h1>
+            </header>
+            <main>
+                {notifications.map((notif) => (
+                    <NotificationItem
+                        key={notif.id}
+                        title={notif.title}
+                        date={notif.date}
+                        message={notif.message}
+                    />
+                ))}
+            </main>
+        </>
     );
 }

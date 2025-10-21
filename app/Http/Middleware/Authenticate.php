@@ -12,6 +12,17 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
-        return $request->expectsJson() ? null : route('login');
+        // MODIFIKASI PENTING:
+        // Jika permintaan datang dari API (mengharapkan JSON), jangan redirect.
+        // Cukup kembalikan null, dan Laravel akan secara otomatis mengirim
+        // respons error 401 Unauthorized dalam format JSON.
+        // Ini akan mencegah redirect yang menyebabkan error CORS.
+        if ($request->expectsJson()) {
+            return null;
+        }
+
+        // Baris ini adalah perilaku default untuk aplikasi web biasa,
+        // kita biarkan saja untuk keamanan.
+        return route('login');
     }
 }
