@@ -17,6 +17,7 @@ import RiwayatPage from "../pages/customer/RiwayatPage";
 import NotifikasiPage from "../pages/customer/NotifikasiPage";
 import GantiJadwalPage from "../pages/customer/GantiJadwalPage";
 import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
+import PsikologPage from "../pages/customer/PsikologPage";
 
 // --- Halaman Admin & Super Admin (Website) ---
 import JenisKonselingPage from "../pages/super-admin/JenisKonselingPage";
@@ -107,6 +108,7 @@ const AppRouter = () => {
                     <Route path="/riwayat" element={<RiwayatPage />} />
                     <Route path="/notifikasi" element={<NotifikasiPage />} />
                     <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />
+                    <Route path="/psikolog" element={<PsikologPage />} />
                     <Route
                         path="/detail-riwayat"
                         element={<DetailRiwayatPage />}
