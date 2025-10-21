@@ -68,8 +68,7 @@ export default function DetailRiwayatPage() {
   const { id } = useParams(); // Untuk mengambil ID dari URL, misal: /riwayat/5
   const navigate = useNavigate();
 
-  // TODO: Nanti, Anda akan menggunakan 'id' di atas untuk fetch data
-  // dari API. Untuk saat ini, kita gunakan data dummy.
+  // Data dummy (menggunakan versi yang lebih kecil)
   const dummyData = {
     id: id,
     name: "Vina Amalia, M.Psi., Psikolog",
@@ -83,7 +82,7 @@ export default function DetailRiwayatPage() {
     bookingId: "gg44gs7-33yeijduus-8832j-ey7e7w",
     payment: {
       method: "Virtual Account BCA",
-      logo: "/images/bca-logo.png", // <-- Ganti dengan path logo BCA Anda
+      logo: "/images/bca-logo.png",
       vaNumber: "7684567465748394754654",
       total: "Rp 230.000",
     },
@@ -92,13 +91,13 @@ export default function DetailRiwayatPage() {
       minutes: "39",
       seconds: "04",
     },
-    avatar: "https://i.pravatar.cc/100?img=1", // Ganti dengan path avatar
+    avatar: "https://i.pravatar.cc/100?img=1",
   };
 
   return (
-    // Diberi padding bawah (pb-24) agar tombol sticky tidak menutupi konten
-    <div className="p-4 bg-gray-50 min-h-screen pb-24">
-      {/* Header Halaman */}
+    // DIUBAH: Padding bawah (pb-20) dihapus dari div utama
+    <div className="p-4 bg-gray-50 min-h-screen">
+      {/* Header Halaman (versi kecil) */}
       <div className="flex items-center mb-4">
         <button onClick={() => navigate(-1)} className="text-gray-800">
           <svg
@@ -116,77 +115,74 @@ export default function DetailRiwayatPage() {
             />
           </svg>
         </button>
-        <h1 className="text-xl font-bold text-center text-gray-800 flex-grow">
+        <h1 className="text-lg font-bold text-center text-gray-800 flex-grow">
           Detail Riwayat
         </h1>
-        <div className="w-6"></div> {/* Spacer agar judul tetap di tengah */}
+        <div className="w-6"></div> {/* Spacer */}
       </div>
 
-      {/* --- Konten Sesuai Desain --- */}
+      {/* --- Konten Sesuai Desain (versi kecil) --- */}
 
       {/* 1. Timer Pembayaran */}
-      <div className="flex flex-col items-center mb-4">
-        <p className="text-sm text-gray-700 mb-2">Sisa Waktu Pembayaran</p>
-        <div className="flex items-center space-x-2">
-          <span className="bg-blue-600 text-white font-bold text-lg p-2 rounded-md w-12 text-center">
+      <div className="flex flex-col items-center mb-3">
+        <p className="text-xs text-gray-700 mb-1">Sisa Waktu Pembayaran</p>
+        <div className="flex items-center space-x-1.5">
+          <span className="bg-blue-600 text-white font-bold text-base p-1.5 rounded-md w-10 text-center">
             {dummyData.countdown.hours}
           </span>
-          <span className="text-blue-600 font-bold text-lg">:</span>
-          <span className="bg-blue-600 text-white font-bold text-lg p-2 rounded-md w-12 text-center">
+          <span className="text-blue-600 font-bold text-base">:</span>
+          <span className="bg-blue-600 text-white font-bold text-base p-1.5 rounded-md w-10 text-center">
             {dummyData.countdown.minutes}
           </span>
-          <span className="text-blue-600 font-bold text-lg">:</span>
-          <span className="bg-blue-600 text-white font-bold text-lg p-2 rounded-md w-12 text-center">
+          <span className="text-blue-600 font-bold text-base">:</span>
+          <span className="bg-blue-600 text-white font-bold text-base p-1.5 rounded-md w-10 text-center">
             {dummyData.countdown.seconds}
           </span>
         </div>
       </div>
 
       {/* 2. Kartu Virtual Account */}
-      <div className="bg-white p-4 rounded-xl shadow-lg mb-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-base font-semibold text-gray-900">
+      <div className="bg-white p-3 rounded-xl shadow-lg mb-3">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-sm font-semibold text-gray-900">
             {dummyData.payment.method}
           </h2>
-          {/* Ganti dengan <img> jika path logo sudah benar */}
-          <span className="font-bold text-blue-700 text-lg">BCA</span>
-          {/* <img src={dummyData.payment.logo} alt="BCA" className="h-4" /> */}
+          <span className="font-bold text-blue-700 text-base">BCA</span>
         </div>
-
-        <div className="mb-3">
-          <label className="text-xs text-gray-500 block mb-1">
+        <div className="mb-2">
+          <label className="text-xs text-gray-500 block mb-0.5">
             Nomer Virtual Account
           </label>
           <div className="flex justify-between items-center">
-            <span className="text-base font-semibold text-gray-800">
+            <span className="text-sm font-semibold text-gray-800">
               {dummyData.payment.vaNumber}
             </span>
             <button className="text-blue-600 hover:text-blue-800">
-              <ClipboardIcon className="w-5 h-5" />
+              <ClipboardIcon className="w-4 h-4" />
             </button>
           </div>
         </div>
-
         <div>
-          <label className="text-xs text-gray-500 block mb-1">
+          <label className="text-xs text-gray-500 block mb-0.5">
             Total Pembayaran
           </label>
           <div className="flex justify-between items-center">
-            <span className="text-base font-bold text-blue-600">
+            <span className="text-sm font-bold text-blue-600">
               {dummyData.payment.total}
             </span>
             <button className="text-blue-600 hover:text-blue-800">
-              <ClipboardIcon className="w-5 h-5" />
+              <ClipboardIcon className="w-4 h-4" />
             </button>
           </div>
         </div>
       </div>
 
       {/* 3. Kartu Detail Sesi Konseling */}
-      <div className="bg-white rounded-xl shadow-lg mb-4">
-        <div className="px-4 pt-4 pb-3">
+      {/* DIUBAH: mb-3 dihapus dari kartu ini */}
+      <div className="bg-white rounded-xl shadow-lg">
+        <div className="p-3">
           <div className="flex justify-between items-center">
-            <h2 className="text-base font-semibold text-gray-900">
+            <h2 className="text-sm font-semibold text-gray-900">
               Vidio Call Konseling
             </h2>
             <span
@@ -195,51 +191,46 @@ export default function DetailRiwayatPage() {
               {dummyData.status}
             </span>
           </div>
-          <p className="text-sm text-gray-500">{dummyData.sessionInfo}</p>
+          <p className="text-xs text-gray-500 mt-1">{dummyData.sessionInfo}</p>
         </div>
-
-        <div className="flex items-center space-x-3 px-4 pb-4">
+        <div className="flex items-center space-x-3 px-3 pb-3">
           <img
             src={dummyData.avatar}
             alt={dummyData.name}
-            className="w-12 h-12 rounded-full object-cover"
+            className="w-10 h-10 rounded-full object-cover"
           />
           <div>
-            <h3 className="font-semibold text-gray-900 text-sm">
+            <h3 className="font-semibold text-gray-900 text-xs">
               {dummyData.name}
             </h3>
             <p className="text-xs text-gray-500">{dummyData.specialization}</p>
           </div>
         </div>
-
-        <hr className="mx-4" />
-
-        <div className="p-4 space-y-3">
-          <p className="text-sm font-medium text-gray-800">
+        <hr className="mx-3" />
+        <div className="p-3 space-y-2">
+          <p className="text-xs font-medium text-gray-800">
             {dummyData.date}
           </p>
           <div className="flex items-center space-x-2">
-            <VideoCameraIcon className="w-5 h-5 text-gray-500" />
-            <span className="text-sm text-gray-700">{dummyData.type}</span>
+            <VideoCameraIcon className="w-4 h-4 text-gray-500" />
+            <span className="text-xs text-gray-700">{dummyData.type}</span>
           </div>
           <div className="flex items-center space-x-2">
-            <ClockIcon className="w-5 h-5 text-gray-500" />
-            <span className="text-sm text-gray-700">{dummyData.time}</span>
+            <ClockIcon className="w-4 h-4 text-gray-500" />
+            <span className="text-xs text-gray-700">{dummyData.time}</span>
           </div>
         </div>
-
-        <hr className="mx-4" />
-
-        <div className="p-4">
+        <hr className="mx-3" />
+        <div className="p-3">
           <label className="text-xs text-gray-500 block mb-1">
             Konseling Booking ID
           </label>
           <div className="flex justify-between items-center">
-            <span className="text-sm font-semibold text-gray-800 break-all">
+            <span className="text-xs font-semibold text-gray-800 break-all">
               {dummyData.bookingId}
             </span>
             <button className="text-blue-600 hover:text-blue-800 ml-2 flex-shrink-0">
-              <ClipboardIcon className="w-5 h-5" />
+              <ClipboardIcon className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -249,19 +240,20 @@ export default function DetailRiwayatPage() {
       {/* == PERBAIKAN DI SINI == */}
       {/* ============================================== */}
       
-      {/* 4. Tombol Aksi di Bawah (Sticky) */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
-        {/* Wrapper tambahan untuk membatasi lebar dan menengahkan tombol */}
-        <div className="max-w-md mx-auto">
-          <button className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg shadow-lg hover:bg-blue-700 transition-colors">
-            Lihat Invoice Pembayaran
-          </button>
-        </div>
+      {/* 4. Tombol Aksi (Dipindahkan ke sini, tidak lagi sticky) */}
+      {/* Diberi margin atas 'mt-4' */}
+      <div className="mt-4">
+        <button className="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg shadow-lg hover:bg-blue-700 transition-colors text-sm">
+          Lihat Invoice Pembayaran
+        </button>
       </div>
       
       {/* ============================================== */}
       {/* == AKHIR PERBAIKAN == */}
       {/* ============================================== */}
+      
+      {/* Tombol sticky yang lama DIHAPUS */}
+      
     </div>
   );
 }
