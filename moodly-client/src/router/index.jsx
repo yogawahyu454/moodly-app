@@ -19,6 +19,7 @@ import KonselingPage from "../pages/customer/KonselingPage";
 import RiwayatPage from "../pages/customer/RiwayatPage";
 import NotifikasiPage from "../pages/customer/NotifikasiPage";
 import GantiJadwalPage from "../pages/customer/GantiJadwalPage";
+import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
 
 // --- PENJAGA (Guard) ---
 const GuestGuard = () => {
@@ -76,6 +77,7 @@ const AppRouter = () => {
                     <Route path="/riwayat" element={<RiwayatPage />} />
                     <Route path="/notifikasi" element={<NotifikasiPage />} />
                     <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />
+                    <Route path="/detail-riwayat" element={<RiwayatPage />} />
                 </Route>
             </Route>
 
