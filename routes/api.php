@@ -3,7 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SuperAdmin\JenisKonselingController;
-use App\Http\Middleware\RoleMiddleware; // <-- 1. Impor class middleware
+use App\Http\Controllers\SuperAdmin\DurasiKonselingController; // <-- 1. Impor controller baru
+use App\Http\Middleware\RoleMiddleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,9 +31,9 @@ Route::group(['middleware' => [
         });
 
         // Rute khusus Super Admin
-        // 2. Panggil dengan nama class lengkap, bukan alias
         Route::middleware(RoleMiddleware::class . ':super-admin')->prefix('super-admin')->group(function () {
             Route::apiResource('jenis-konseling', JenisKonselingController::class);
+            Route::apiResource('durasi-konseling', DurasiKonselingController::class); // <-- 2. Tambahkan rute baru
         });
     });
 });
