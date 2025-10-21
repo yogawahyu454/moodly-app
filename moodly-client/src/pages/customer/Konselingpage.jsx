@@ -41,27 +41,27 @@ export default function KonselingPage() {
     const counselingTypes = [
         {
             name: "Konseling Pernikahan",
-            icon: "https://placehold.co/80x80/E0F2FE/0EA5E9?text=💑",
+            icon: "images/konseling/pernikahan1.png",
         },
         {
             name: "Konseling Individu",
-            icon: "https://placehold.co/80x80/E0F2FE/0EA5E9?text=👤",
+            icon: "images/konseling/individu1.png",
         },
         {
             name: "Konseling Keluarga",
-            icon: "https://placehold.co/80x80/E0F2FE/0EA5E9?text=👨‍👩‍👧‍👦",
+            icon: "images/konseling/keluarga1.png",
         },
         {
             name: "Konseling Karir",
-            icon: "https://placehold.co/80x80/E0F2FE/0EA5E9?text=💼",
+            icon: "images/konseling/karir1.png",
         },
         {
             name: "Konseling Depresi",
-            icon: "https://placehold.co/80x80/E0F2FE/0EA5E9?text=😔",
+            icon: "images/konseling/depresi1.png",
         },
         {
             name: "Konseling Anak",
-            icon: "https://placehold.co/80x80/E0F2FE/0EA5E9?text=👧",
+            icon: "images/konseling/anak1.png",
         },
     ];
 
@@ -76,7 +76,7 @@ export default function KonselingPage() {
                         onClick={() => setActiveTab("Online")}
                         className={`w-full py-3 text-sm font-semibold ${
                             activeTab === "Online"
-                                ? "border-b-2 border-blue-500 text-blue-500"
+                                ? "border-b-2 border-cyan-500 text-cyan-500"
                                 : "text-gray-500"
                         }`}
                     >
@@ -86,7 +86,7 @@ export default function KonselingPage() {
                         onClick={() => setActiveTab("Tatap Muka")}
                         className={`w-full py-3 text-sm font-semibold ${
                             activeTab === "Tatap Muka"
-                                ? "border-b-2 border-blue-500 text-blue-500"
+                                ? "border-b-2 border-cyan-500 text-cyan-500"
                                 : "text-gray-500"
                         }`}
                     >
@@ -99,7 +99,7 @@ export default function KonselingPage() {
                     <input
                         type="text"
                         placeholder="Pilih jenis konseling yang kamu butuhkan."
-                        className="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500"
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                         <SearchIcon />
