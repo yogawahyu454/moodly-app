@@ -20,7 +20,8 @@ import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
 import PsikologPage from "../pages/customer/PsikologPage";
 
 // --- Halaman Admin & Super Admin (Website) ---
-import JenisKonselingPage from "../pages/super-admin/JenisKonselingPage";
+// PERBARUI PATH IMPORT INI
+import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
 
 // ==================================================================
 // --- PENJAGA ZONA CUSTOMER / KONSELOR (TAMPILAN MOBILE) ---
