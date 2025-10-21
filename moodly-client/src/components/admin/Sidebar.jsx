@@ -237,7 +237,7 @@ const SidebarMenu = ({ role }) => {
         { label: "Pesanan", path: "/admin/pesanan", icon: PesananIcon },
         { label: "Customer", path: "/admin/customer", icon: CustomerIcon },
         { label: "Konselor", path: "/admin/konselor", icon: KonselorIcon },
-        { label: "Admin", path: "/admin/admin", icon: AdminIcon },
+        { label: "Admin", path: "/admin/admin-management", icon: AdminIcon },
         {
             label: "Konseling",
             icon: CounselingIcon,
