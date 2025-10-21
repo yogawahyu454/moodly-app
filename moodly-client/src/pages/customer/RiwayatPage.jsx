@@ -44,18 +44,27 @@ function ClockIcon(props) {
 
 // --- Komponen-komponen Kecil ---
 
-// Tombol Tab (Sudah sesuai)
-const TabButton = ({ title, isActive, onClick, isLast = false }) => (
+// Tombol Tab (Versi paling kecil dengan padding py-1.5)
+const TabButton = ({ title, isActive, onClick, isFirst = false, isLast = false }) => (
   <button
     onClick={onClick}
-    className={`flex-1 py-2 px-2 text-xs font-medium text-center transition-colors duration-200
+    // Padding py-1.5 px-2 sudah cukup kecil
+    // Font text-xs font-semibold
+    // DITAMBAHKAN: whitespace-nowrap
+    className={`flex-1 py-1.5 px-2 text-xs font-semibold text-center transition-colors duration-200 focus:outline-none whitespace-nowrap
       ${
         isActive
           ? "bg-sky-500 text-white" // Active state
-          : "bg-white text-gray-800 hover:bg-gray-50" // Inactive state
+          : "bg-white text-gray-700 hover:bg-sky-50" // Inactive state
       }
       ${
-        !isLast ? "border-r border-sky-300" : "" // Border pemisah
+        !isLast ? "border-r border-sky-200" : "" // Border pemisah lebih terang
+      }
+      ${
+        isFirst ? "rounded-l-lg" : "" 
+      }
+      ${
+        isLast ? "rounded-r-lg" : "" 
       }
     `}
   >
@@ -63,7 +72,8 @@ const TabButton = ({ title, isActive, onClick, isLast = false }) => (
   </button>
 );
 
-// --- DATA CONTOH (Sama seperti sebelumnya) ---
+
+// --- DATA CONTOH ---
 const mockUpcoming = [
   {
     id: 1,
@@ -119,29 +129,33 @@ const mockCompleted = [
 ];
 // --- END OF DATA CONTOH ---
 
-// Kartu Appointment
+// Kartu Appointment (Versi lebih kecil)
 const AppointmentCard = ({ item, status }) => {
   return (
-    <div className="bg-white p-4 rounded-xl shadow-lg mb-4">
+    // Padding kartu p-4 -> p-3
+    <div className="bg-white p-3 rounded-xl shadow-lg mb-4">
       {/* Bagian Atas: Spesialisasi, Nama, Avatar */}
       <div className="flex justify-between items-start">
         <div className="flex-1">
           <p className="text-xs text-gray-500 mb-1">
             Spesialisasi: {item.specialization}
           </p>
-          <h3 className="font-semibold text-gray-900 text-sm">
+          {/* Font nama text-sm -> text-xs */}
+          <h3 className="font-semibold text-gray-900 text-xs">
             {item.name}
           </h3>
         </div>
+        {/* Ukuran Avatar w-12 h-12 -> w-10 h-10 */}
         <img
           src={item.avatar}
           alt={item.name}
-          className="w-12 h-12 rounded-full object-cover ml-3"
+          className="w-10 h-10 rounded-full object-cover ml-2" // ml-3 diubah ke ml-2
         />
       </div>
 
-      {/* Bagian Tengah: Tanggal, Waktu, Tipe (Sudah Sesuai) */}
-      <div className="flex items-center justify-between mt-4">
+      {/* Bagian Tengah: Tanggal, Waktu, Tipe (Margin dikurangi) */}
+      {/* Margin atas mt-4 -> mt-3 */}
+      <div className="flex items-center justify-between mt-3">
         <div className="flex items-center space-x-1.5">
           <CalendarIcon className="w-4 h-4 text-gray-400" />
           <span className="text-xs text-gray-600">{item.date}</span>
@@ -159,18 +173,18 @@ const AppointmentCard = ({ item, status }) => {
       </div>
 
       {/* Garis Pemisah */}
-      <hr className="my-4" />
+      {/* Margin my-4 -> my-3 */}
+      <hr className="my-3" />
 
-      {/* ========================================================== */}
-      {/* == PERBAIKAN DI SINI: Tombol diubah menjadi <Link> == */}
-      {/* ========================================================== */}
+      {/* Tombol Aksi (Padding diperkecil dan sudah menggunakan <Link>) */}
       <div className="flex justify-end items-center space-x-2">
         {status === "upcoming" && (
           <>
-            <button className="px-4 py-2 rounded-md border border-gray-300 bg-white text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+            {/* Padding tombol px-4 py-2 -> px-3 py-1.5 */}
+            <button className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
               Batalkan
             </button>
-            <button className="px-4 py-2 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
+            <button className="px-3 py-1.5 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
               Mulai
             </button>
           </>
@@ -180,10 +194,9 @@ const AppointmentCard = ({ item, status }) => {
             <span className="text-xs font-semibold text-red-500 mr-auto">
               Telah Dibatalkan
             </span>
-            {/* DIUBAH DARI <button> KE <Link> */}
             <Link
               to={`/riwayat/${item.id}`}
-              className="px-4 py-2 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 text-center"
+              className="px-3 py-1.5 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 text-center"
             >
               Detail
             </Link>
@@ -194,36 +207,31 @@ const AppointmentCard = ({ item, status }) => {
             <span className="text-xs font-semibold text-orange-500 mr-auto">
               Menunggu Pembayaran
             </span>
-            {/* DIUBAH DARI <button> KE <Link> */}
             <Link
               to={`/riwayat/${item.id}`}
-              className="px-4 py-2 rounded-md border border-blue-600 bg-white text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50 text-center"
+              className="px-3 py-1.5 rounded-md border border-blue-600 bg-white text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50 text-center"
             >
               Lihat Detail
             </Link>
-            <button className="px-4 py-2 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
+            <button className="px-3 py-1.5 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
               Bayar Sekarang
             </button>
           </>
         )}
         {status === "completed" && (
           <>
-            <button className="px-4 py-2 rounded-md border border-blue-600 bg-white text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50">
+            <button className="px-3 py-1.5 rounded-md border border-blue-600 bg-white text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50">
               Beri Nilai
             </button>
-            {/* DIUBAH DARI <button> KE <Link> */}
             <Link
               to={`/riwayat/${item.id}`}
-              className="px-4 py-2 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 text-center"
+              className="px-3 py-1.5 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 text-center"
             >
               Riwayat Chat
             </Link>
           </>
         )}
       </div>
-      {/* ========================================================== */}
-      {/* == AKHIR PERBAIKAN == */}
-      {/* =A======================================================== */}
     </div>
   );
 };
@@ -282,7 +290,7 @@ export default function RiwayatPage() {
 
   return (
     <div className="p-4 bg-gray-50 min-h-screen">
-      {/* Header (sesuai desain, Anda mungkin punya ini di layout) */}
+      {/* Header */}
       <div className="flex items-center mb-4">
         <button
           onClick={() => window.history.back()}
@@ -306,15 +314,16 @@ export default function RiwayatPage() {
         <h1 className="text-xl font-bold text-center text-gray-800 flex-grow">
           Riwayat
         </h1>
-        <div className="w-6"></div> {/* Spacer agar judul tetap di tengah */}
+        <div className="w-6"></div> {/* Spacer */}
       </div>
 
-      {/* Container Tab */}
-      <div className="flex w-full mb-4 rounded-lg border border-sky-300 overflow-hidden">
+      {/* Container Tab (Gaya Segmented Control) */}
+      <div className="flex w-full mb-4 rounded-lg border border-sky-300 overflow-hidden shadow-sm">
         <TabButton
           title="Akan Datang"
           isActive={activeTab === "upcoming"}
           onClick={() => setActiveTab("upcoming")}
+          isFirst={true} // Tandai tombol pertama
         />
         <TabButton
           title="Dibatalkan"
@@ -330,7 +339,7 @@ export default function RiwayatPage() {
           title="Selesai"
           isActive={activeTab === "completed"}
           onClick={() => setActiveTab("completed")}
-          isLast={true}
+          isLast={true} // Tandai tombol terakhir
         />
       </div>
 

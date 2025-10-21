@@ -7,6 +7,8 @@ import MobileLayout from "../layouts/MobileLayout";
 import AuthLayout from "../layouts/AuthLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import AuthAdminLayout from "../layouts/AuthAdminLayout";
+import PageLayout from "../layouts/PageLayout"; // <-- Ini penting
+
 
 // --- Halaman Customer & Auth (Mobile) ---
 import LoginPage from "../pages/auth/LoginPage";
@@ -18,6 +20,9 @@ import NotifikasiPage from "../pages/customer/NotifikasiPage";
 import GantiJadwalPage from "../pages/customer/GantiJadwalPage";
 import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
 import PsikologPage from "../pages/customer/PsikologPage";
+// (Import OnboardingPage jika Anda punya, jika tidak, hapus)
+// import OnboardingPage from "../pages/auth/OnboardingPage"; 
+
 
 // --- Halaman Admin & Super Admin (Website) ---
 import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
@@ -94,24 +99,41 @@ const AppRouter = () => {
             {/* === ZONA CUSTOMER (MOBILE) === */}
             <Route element={<GuestGuard />}>
                 <Route element={<AuthLayout />}>
+                    {/* <Route path="/" element={<OnboardingPage />} /> */}
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                 </Route>
             </Route>
+
+            {/* ====================================================== */}
+            {/* == PERBAIKAN DI SINI == */}
+            {/* ====================================================== */}
             <Route element={<ProtectedGuard />}>
+                
+                {/* 1. Rute yang PAKAI Navigasi Bawah */}
                 <Route element={<MobileLayout />}>
                     <Route path="/beranda" element={<BerandaPage />} />
                     <Route path="/konseling" element={<KonselingPage />} />
                     <Route path="/riwayat" element={<RiwayatPage />} />
                     <Route path="/notifikasi" element={<NotifikasiPage />} />
+                </Route>
+
+                {/* 2. Rute Full-Screen (TANPA Navigasi Bawah) */}
+                <Route element={<PageLayout />}>
                     <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />
                     <Route path="/psikolog" element={<PsikologPage />} />
+                    
+                    {/* RUTE YANG BENAR UNTUK DETAIL RIWAYAT (Memperbaiki 404) */}
                     <Route
-                        path="/detail-riwayat"
+                        path="/riwayat/:id"
                         element={<DetailRiwayatPage />}
                     />
                 </Route>
             </Route>
+            {/* ====================================================== */}
+            {/* == AKHIR PERBAIKAN == */}
+            {/* ====================================================== */}
+
 
             {/* === ZONA ADMIN (WEBSITE) === */}
             <Route element={<AdminGuestGuard />}>
@@ -145,6 +167,7 @@ const AppRouter = () => {
             </Route>
 
             {/* === RUTE FALLBACK === */}
+            {/* Arahkan / ke /login jika tidak ada rute lain yang cocok di awal */}
             <Route path="/" element={<Navigate to="/login" />} />
             <Route
                 path="*"
