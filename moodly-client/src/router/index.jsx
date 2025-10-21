@@ -25,8 +25,8 @@ import PsikologPage from "../pages/customer/PsikologPage";
 
 
 // --- Halaman Admin & Super Admin (Website) ---
-// PERBARUI PATH IMPORT INI
 import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
+import DurasiKonselingPage from "../pages/super-admin/konseling/durasi/Index.jsx";
 
 // ==================================================================
 // --- PENJAGA ZONA CUSTOMER / KONSELOR (TAMPILAN MOBILE) ---
@@ -35,7 +35,6 @@ import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
 const GuestGuard = () => {
     const { user } = useAuth();
     if (user) {
-        // Jika sudah login, lempar ke beranda yang sesuai
         return user.role?.includes("admin") ||
             user.role?.includes("super-admin") ? (
             <Navigate to="/admin/dashboard" />
@@ -43,12 +42,11 @@ const GuestGuard = () => {
             <Navigate to="/beranda" />
         );
     }
-    return <Outlet />; // Jika belum login, tampilkan halaman (login, register)
+    return <Outlet />;
 };
 
 const ProtectedGuard = () => {
     const { user } = useAuth();
-    // Admin & Super Admin tidak boleh mengakses zona mobile
     if (
         !user ||
         user.role?.includes("admin") ||
@@ -56,7 +54,7 @@ const ProtectedGuard = () => {
     ) {
         return <Navigate to="/login" />;
     }
-    return <Outlet />; // Jika user adalah customer/konselor, izinkan akses
+    return <Outlet />;
 };
 
 // ==================================================================
@@ -65,7 +63,6 @@ const ProtectedGuard = () => {
 
 const AdminGuestGuard = () => {
     const { user } = useAuth();
-    // Jika sudah login sebagai admin, lempar ke dashboard
     return user &&
         (user.role?.includes("admin") || user.role?.includes("super-admin")) ? (
         <Navigate to="/admin/dashboard" />
@@ -76,7 +73,6 @@ const AdminGuestGuard = () => {
 
 const AdminProtectedGuard = () => {
     const { user } = useAuth();
-    // Hanya izinkan jika sudah login DAN rolenya admin atau super-admin
     return user &&
         (user.role?.includes("admin") || user.role?.includes("super-admin")) ? (
         <Outlet />
@@ -89,11 +85,11 @@ const AdminProtectedGuard = () => {
 const AppRouter = () => {
     const { loading } = useAuth();
 
-    // Tampilkan loading screen saat status autentikasi sedang diperiksa
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                Loading...
+                {" "}
+                Loading...{" "}
             </div>
         );
     }
@@ -162,6 +158,10 @@ const AppRouter = () => {
                     <Route
                         path="/admin/jenis-konseling"
                         element={<JenisKonselingPage />}
+                    />
+                    <Route
+                        path="/admin/durasi-konseling"
+                        element={<DurasiKonselingPage />}
                     />
                 </Route>
             </Route>
