@@ -9,7 +9,6 @@ import AdminLayout from "../layouts/AdminLayout";
 import AuthAdminLayout from "../layouts/AuthAdminLayout";
 import PageLayout from "../layouts/PageLayout"; // <-- Ini penting
 
-
 // --- Halaman Customer & Auth (Mobile) ---
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
@@ -20,13 +19,12 @@ import NotifikasiPage from "../pages/customer/NotifikasiPage";
 import GantiJadwalPage from "../pages/customer/GantiJadwalPage";
 import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
 import PsikologPage from "../pages/customer/PsikologPage";
-// (Import OnboardingPage jika Anda punya, jika tidak, hapus)
-// import OnboardingPage from "../pages/auth/OnboardingPage"; 
-
+import OnboardingPage from "../pages/auth/OnboardingPage";
 
 // --- Halaman Admin & Super Admin (Website) ---
 import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
 import DurasiKonselingPage from "../pages/super-admin/konseling/durasi/Index.jsx";
+import TempatKonselingPage from "../pages/super-admin/konseling/tempat/Index.jsx";
 
 // ==================================================================
 // --- PENJAGA ZONA CUSTOMER / KONSELOR (TAMPILAN MOBILE) ---
@@ -109,7 +107,6 @@ const AppRouter = () => {
             {/* == PERBAIKAN DI SINI == */}
             {/* ====================================================== */}
             <Route element={<ProtectedGuard />}>
-                
                 {/* 1. Rute yang PAKAI Navigasi Bawah */}
                 <Route element={<MobileLayout />}>
                     <Route path="/beranda" element={<BerandaPage />} />
@@ -122,7 +119,7 @@ const AppRouter = () => {
                 <Route element={<PageLayout />}>
                     <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />
                     <Route path="/psikolog" element={<PsikologPage />} />
-                    
+
                     {/* RUTE YANG BENAR UNTUK DETAIL RIWAYAT (Memperbaiki 404) */}
                     <Route
                         path="/riwayat/:id"
@@ -133,7 +130,6 @@ const AppRouter = () => {
             {/* ====================================================== */}
             {/* == AKHIR PERBAIKAN == */}
             {/* ====================================================== */}
-
 
             {/* === ZONA ADMIN (WEBSITE) === */}
             <Route element={<AdminGuestGuard />}>
@@ -162,6 +158,10 @@ const AppRouter = () => {
                     <Route
                         path="/admin/durasi-konseling"
                         element={<DurasiKonselingPage />}
+                    />
+                    <Route
+                        path="/admin/tempat-konseling"
+                        element={<TempatKonselingPage />}
                     />
                 </Route>
             </Route>
