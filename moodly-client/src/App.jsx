@@ -1,17 +1,13 @@
-import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import AppRouter from "./router";
+import AppRouter from "./router"; // <-- Mengimpor router yang sudah bersih
 
 function App() {
-    // App.jsx sekarang menjadi "pusat" di mana kita menyusun semua provider.
-    // BrowserRouter membungkus semuanya, menyediakan konteks routing.
-    // AuthProvider membungkus AppRouter, menyediakan konteks autentikasi.
+    // AuthProvider membungkus AppRouter agar semua rute
+    // bisa mengakses data user.
     return (
-        <BrowserRouter>
-            <AuthProvider>
-                <AppRouter />
-            </AuthProvider>
-        </BrowserRouter>
+        <AuthProvider>
+            <AppRouter />
+        </AuthProvider>
     );
 }
 

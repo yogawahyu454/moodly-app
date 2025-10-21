@@ -2,7 +2,8 @@ import React from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-// --- Komponen Ikon ---
+// --- Komponen Ikon Baru (Disesuaikan dengan Desain Referensi) ---
+
 const BellIcon = () => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -20,6 +21,7 @@ const BellIcon = () => (
         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
     </svg>
 );
+
 const ChevronDownIcon = () => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -31,82 +33,93 @@ const ChevronDownIcon = () => (
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="text-gray-500"
+        className="text-gray-500 ml-1"
     >
         <polyline points="6 9 12 15 18 9"></polyline>
     </svg>
 );
+
 const HomeIcon = ({ active }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
         strokeWidth="2"
+        stroke="currentColor"
+        fill={active ? "currentColor" : "none"}
         strokeLinecap="round"
         strokeLinejoin="round"
         className={active ? "text-sky-500" : "text-gray-400"}
     >
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M5 12l-2 0l9 -9l9 9l-2 0"></path>
+        <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"></path>
+        <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"></path>
     </svg>
 );
+
 const CounselingIcon = ({ active }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
         strokeWidth="2"
+        stroke="currentColor"
+        fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
         className={active ? "text-sky-500" : "text-gray-400"}
     >
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-        <circle cx="9" cy="7" r="4"></circle>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M3 20l1.3 -3.9a9 8 0 1 1 3.4 2.9l-4.7 1"></path>
+        <path d="M8 12h8"></path>
+        <path d="M8 9h6"></path>
     </svg>
 );
+
 const HistoryIcon = ({ active }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
         strokeWidth="2"
+        stroke="currentColor"
+        fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
         className={active ? "text-sky-500" : "text-gray-400"}
     >
-        <path d="M1 4v6h6"></path>
-        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"></path>
+        <path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"></path>
+        <path d="M9 12l.01 0"></path>
+        <path d="M13 12l2 0"></path>
+        <path d="M9 16l.01 0"></path>
+        <path d="M13 16l2 0"></path>
     </svg>
 );
+
 const ProfileIcon = ({ active }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
         strokeWidth="2"
+        stroke="currentColor"
+        fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
         className={active ? "text-sky-500" : "text-gray-400"}
     >
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-        <circle cx="12" cy="7" r="4"></circle>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"></path>
+        <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
     </svg>
 );
-// --- Akhir dari Ikon ---
 
 // --- Komponen Navigasi Bawah ---
 const BottomNavItem = ({ to, icon, label, active }) => (
@@ -117,7 +130,7 @@ const BottomNavItem = ({ to, icon, label, active }) => (
         {icon}
         <span
             className={`text-xs ${
-                active ? "text-sky-500 font-bold" : "text-gray-400"
+                active ? "text-sky-500 font-bold" : "text-gray-500"
             }`}
         >
             {label}
@@ -132,7 +145,7 @@ export default function MobileLayout() {
     const currentPath = location.pathname;
 
     return (
-        <div className="bg-gray-50 min-h-screen font-sans">
+        <div className="bg-gray-100 min-h-screen font-sans">
             <div className="max-w-md mx-auto bg-white min-h-screen flex flex-col">
                 {/* Header */}
                 <header className="p-4 flex items-center justify-between sticky top-0 z-10 bg-white shadow-sm">
@@ -141,19 +154,23 @@ export default function MobileLayout() {
                             src={
                                 user?.avatar ||
                                 `https://ui-avatars.com/api/?name=${
-                                    user?.name || "P"
-                                }&background=E2E8F0&color=4A5568`
+                                    user?.name || "User"
+                                }&background=EBF4FF&color=3B82F6&bold=true`
                             }
                             alt="User Avatar"
-                            className="w-10 h-10 rounded-full"
+                            className="w-11 h-11 rounded-full"
                         />
                         <div>
-                            <p className="text-sm text-gray-800 font-semibold">
+                            <p className="text-base text-gray-800 font-bold">
                                 Hi, {user?.name || "Pengguna"}
                             </p>
-                            <div className="flex items-center">
+                            <div className="flex items-center cursor-pointer">
                                 <p className="text-xs text-gray-500">
-                                    Yogyakarta, Indonesia
+                                    {/* Mengambil data lokasi dari user jika ada, jika tidak, gunakan default */}
+                                    {user?.city || "Yogyakarta"},{" "}
+                                    {user?.province
+                                        ? user.province.split(" ").pop()
+                                        : "Indonesia"}
                                 </p>
                                 <ChevronDownIcon />
                             </div>
@@ -163,13 +180,13 @@ export default function MobileLayout() {
                 </header>
 
                 {/* Konten Halaman (Beranda, Riwayat, dll) akan dimuat di sini */}
-                <main className="flex-grow pb-20">
+                <main className="flex-grow p-4">
                     <Outlet />
                 </main>
             </div>
 
             {/* Navigasi Bawah */}
-            <footer className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200">
+            <footer className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 shadow-[0_-1px_4px_rgba(0,0,0,0.05)]">
                 <div className="flex justify-around items-center h-16">
                     <BottomNavItem
                         to="/beranda"
@@ -196,7 +213,7 @@ export default function MobileLayout() {
                         active={currentPath === "/riwayat"}
                     />
                     <BottomNavItem
-                        to="/profile" // Rute /profile perlu ditambahkan ke router
+                        to="/profile"
                         icon={
                             <ProfileIcon active={currentPath === "/profile"} />
                         }
