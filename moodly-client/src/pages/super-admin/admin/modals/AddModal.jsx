@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const AddModal = ({ isOpen, onClose, onSave }) => {
     const [formData, setFormData] = useState({
@@ -9,21 +9,37 @@ const AddModal = ({ isOpen, onClose, onSave }) => {
         password: "",
         password_confirmation: "",
     });
-    const [error, setError] = useState("");
+    // PERBAIKAN: State untuk menampung error validasi dari Laravel
+    const [errors, setErrors] = useState({});
+
+    // Reset form dan error setiap kali modal dibuka
+    useEffect(() => {
+        if (isOpen) {
+            setFormData({
+                name: "",
+                email: "",
+                phone: "",
+                city: "",
+                password: "",
+                password_confirmation: "",
+            });
+            setErrors({});
+        }
+    }, [isOpen]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+        // Hapus error untuk field yang sedang diubah
+        if (errors[name]) {
+            setErrors((prev) => ({ ...prev, [name]: null }));
+        }
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (formData.password !== formData.password_confirmation) {
-            setError("Konfirmasi password tidak cocok.");
-            return;
-        }
-        setError("");
-        onSave(formData);
+        // Kirimkan fungsi setErrors ke parent agar bisa diisi saat ada error
+        onSave(formData, setErrors);
     };
 
     if (!isOpen) return null;
@@ -33,9 +49,9 @@ const AddModal = ({ isOpen, onClose, onSave }) => {
             <div className="bg-white rounded-lg p-8 w-full max-w-lg">
                 <h2 className="text-2xl font-bold mb-6">Tambah Admin Baru</h2>
                 <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                            <label className="block text-gray-700 mb-1">
                                 Nama Lengkap
                             </label>
                             <input
@@ -45,9 +61,14 @@ const AddModal = ({ isOpen, onClose, onSave }) => {
                                 className="w-full px-4 py-2 border rounded-lg"
                                 required
                             />
+                            {errors.name && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.name[0]}
+                                </p>
+                            )}
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">
+                        <div>
+                            <label className="block text-gray-700 mb-1">
                                 Email
                             </label>
                             <input
@@ -57,9 +78,14 @@ const AddModal = ({ isOpen, onClose, onSave }) => {
                                 className="w-full px-4 py-2 border rounded-lg"
                                 required
                             />
+                            {errors.email && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.email[0]}
+                                </p>
+                            )}
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">
+                        <div>
+                            <label className="block text-gray-700 mb-1">
                                 No Telepon
                             </label>
                             <input
@@ -68,9 +94,14 @@ const AddModal = ({ isOpen, onClose, onSave }) => {
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 border rounded-lg"
                             />
+                            {errors.phone && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.phone[0]}
+                                </p>
+                            )}
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">
+                        <div>
+                            <label className="block text-gray-700 mb-1">
                                 Kota
                             </label>
                             <input
@@ -79,9 +110,14 @@ const AddModal = ({ isOpen, onClose, onSave }) => {
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 border rounded-lg"
                             />
+                            {errors.city && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.city[0]}
+                                </p>
+                            )}
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">
+                        <div>
+                            <label className="block text-gray-700 mb-1">
                                 Password
                             </label>
                             <input
@@ -91,9 +127,14 @@ const AddModal = ({ isOpen, onClose, onSave }) => {
                                 className="w-full px-4 py-2 border rounded-lg"
                                 required
                             />
+                            {errors.password && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.password[0]}
+                                </p>
+                            )}
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">
+                        <div>
+                            <label className="block text-gray-700 mb-1">
                                 Konfirmasi Password
                             </label>
                             <input
@@ -105,10 +146,6 @@ const AddModal = ({ isOpen, onClose, onSave }) => {
                             />
                         </div>
                     </div>
-
-                    {error && (
-                        <p className="text-red-500 text-sm mt-2">{error}</p>
-                    )}
 
                     <div className="flex justify-end gap-4 mt-8">
                         <button

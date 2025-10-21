@@ -38,9 +38,12 @@ Route::group(['middleware' => [
             Route::apiResource('durasi-konseling', DurasiKonselingController::class);
             Route::apiResource('tempat-konseling', TempatKonselingController::class);
 
+            // Rute untuk manajemen admin
             Route::post('admin-management/{user}/block', [AdminManagementController::class, 'block']);
             Route::post('admin-management/{user}/unblock', [AdminManagementController::class, 'unblock']);
-            Route::apiResource('admin-management', AdminManagementController::class);
+
+            // PERBAIKAN: Beritahu resource untuk menggunakan 'user' sebagai nama parameter
+            Route::apiResource('admin-management', AdminManagementController::class)->parameters(['admin-management' => 'user']);
         });
     });
 });

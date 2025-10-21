@@ -42,29 +42,29 @@ class AdminManagementController extends Controller
     }
 
     // Menampilkan detail satu admin
-    // PERBAIKAN: Mengubah nama variabel $user menjadi $admin_management agar cocok dengan nama rute
-    public function show(User $admin_management)
+    // PERBAIKAN: Kembalikan nama variabel ke $user agar konsisten
+    public function show(User $user)
     {
-        if ($admin_management->role !== 'admin') {
+        if ($user->role !== 'admin') {
             abort(404);
         }
-        return $admin_management;
+        return $user;
     }
 
     // (Metode update tidak kita gunakan)
 
     // Menghapus admin
-    // PERBAIKAN: Mengubah nama variabel $user menjadi $admin_management
-    public function destroy(User $admin_management)
+    // PERBAIKAN: Kembalikan nama variabel ke $user agar konsisten
+    public function destroy(User $user)
     {
-        if ($admin_management->role !== 'admin') {
+        if ($user->role !== 'admin') {
             abort(404);
         }
-        $admin_management->delete();
+        $user->delete();
         return response()->json(null, 204);
     }
 
-    // --- METODE KHUSUS UNTUK STATUS (nama variabel $user sudah benar karena rutenya beda) ---
+    // --- METODE KHUSUS UNTUK STATUS (nama variabel $user sudah benar) ---
     public function block(User $user)
     {
         if ($user->role !== 'admin') {
