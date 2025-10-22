@@ -119,8 +119,10 @@ const AppointmentCard = ({ item, status }) => {
       <div className="flex justify-end items-center space-x-2">
         {status === "upcoming" && (
           <>
+            {/* --- PERBAIKAN DI SINI --- */}
+            {/* Mengarah ke halaman untuk MELAKUKAN pembatalan */}
             <Link
-              to={`/pembatalan/${item.id}`}
+              to={`/batalkan/${item.id}`} 
               className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 text-center"
             >
               Batalkan
@@ -134,8 +136,10 @@ const AppointmentCard = ({ item, status }) => {
         {status === "canceled" && (
           <>
             <span className="text-xs font-semibold text-red-500 mr-auto">Telah Dibatalkan</span>
+            {/* --- PERBAIKAN DI SINI --- */}
+            {/* Mengarah ke halaman DETAIL pembatalan */}
             <Link
-              to={`/pembatalan/${item.id}`}
+              to={`/detail-pembatalan/${item.id}`}
               className="px-3 py-1.5 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 text-center"
             >
               Detail
