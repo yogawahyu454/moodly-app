@@ -9,29 +9,31 @@ import AdminLayout from "../layouts/AdminLayout";
 import AuthAdminLayout from "../layouts/AuthAdminLayout";
 import PageLayout from "../layouts/PageLayout";
 
-
 // --- Halaman Customer & Auth (Mobile) ---
 import LoginPage from "../pages/auth/LoginPage";
-import AddressPage from "../pages/auth/AddressPage"; // <-- Import sudah ada
+import AddressPage from "../pages/auth/AddressPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import BerandaPage from "../pages/customer/BerandaPage";
 import KonselingPage from "../pages/customer/KonselingPage";
 import RiwayatPage from "../pages/customer/RiwayatPage";
 import NotifikasiPage from "../pages/customer/NotifikasiPage";
-import GantiJadwalPage from "../pages/customer/GantiJadwalPage"; // <-- PERBAIKAN TYPO DI SINI
+import GantiJadwalPage from "../pages/customer/GantiJadwalPage";
 import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
-// --- KEDUA HALAMAN INI SEKARANG DIGUNAKAN ---
 import DetailPembatalanPage from "../pages/customer/DetailPembatalanPage";
 import CancellationPage from "../pages/customer/CancellationPage";
 import PsikologPage from "../pages/customer/PsikologPage";
 import OnboardingPage from "../pages/auth/OnboardingPage";
+<<<<<<< HEAD
 import RatingPage from "../pages/customer/RatingPage"; // <-- IMPORT UNTUK RATING
 import ChatPage from "../pages/customer/ChatPage"; // <-- IMPORT UNTUK CHAT
 import PaymentInstructionsPage from "../pages/customer/PaymentInstructionsPage"; // <-- IMPORT BARU
 
+=======
+import RatingPage from "../pages/customer/RatingPage";
+import ChatPage from "../pages/customer/ChatPage";
+>>>>>>> b759abba1b2378b5e9c6793237609bb5f3cce372
 
 // --- Halaman Admin & Super Admin (Website) ---
-// --- PERBAIKAN DI SINI: Hapus baris import yang duplikat ---
 import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
 import DurasiKonselingPage from "../pages/super-admin/konseling/durasi/Index.jsx";
 import TempatKonselingPage from "../pages/super-admin/konseling/tempat/Index.jsx";
@@ -41,9 +43,13 @@ import KonselorManagementPage from "../pages/super-admin/konselor/Index.jsx";
 import KonselorDetailPage from "../pages/super-admin/konselor/Show.jsx";
 import CustomerManagementPage from "../pages/super-admin/customer/Index.jsx";
 import CustomerDetailPage from "../pages/super-admin/customer/Show.jsx";
-// --- IMPORT BARU UNTUK BOOKING ---
 import BookingManagementPage from "../pages/super-admin/pesanan/Index.jsx";
 import BookingDetailPage from "../pages/super-admin/pesanan/Show.jsx";
+
+import JadwalKonsultasiPage from "../pages/admin/jadwal-konsultasi/Index.jsx";
+import JadwalDetailPage from "../pages/admin/jadwal-konsultasi/Show.jsx";
+import VerifikasiKonselorPage from "../pages/admin/verifikasi-konselor/Index.jsx";
+import VerifikasiDetailPage from "../pages/admin/verifikasi-konselor/Show.jsx";
 
 // ==================================================================
 // --- PENJAGA ZONA CUSTOMER / KONSELOR (TAMPILAN MOBILE) ---
@@ -125,12 +131,10 @@ const AppRouter = () => {
                     <Route path="/register" element={<RegisterPage />} />
                 </Route>
             </Route>
-
             {/* ====================================================== */}
             {/* == PERBAIKAN DI SINI == */}
             {/* ====================================================== */}
             <Route element={<ProtectedGuard />}>
-
                 {/* 1. Rute yang PAKAI Navigasi Bawah */}
                 <Route element={<MobileLayout />}>
                     <Route path="/beranda" element={<BerandaPage />} />
@@ -141,39 +145,31 @@ const AppRouter = () => {
 
                 {/* 2. Rute Full-Screen (TANPA Navigasi Bawah) */}
                 <Route element={<PageLayout />}>
-                    <Route path="/ganti-jadwal" element={<GantiJadwalPage />} /> {/* <-- Komponen yang benar sekarang */}
+                    <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />{" "}
+                    {/* <-- Komponen yang benar sekarang */}
                     <Route path="/psikolog" element={<PsikologPage />} />
-
                     {/* --- RUTE ADDRESS PAGE DITAMBAHKAN DI SINI --- */}
                     <Route path="/address" element={<AddressPage />} />
-
                     {/* RUTE UNTUK DETAIL RIWAYAT */}
                     <Route
                         path="/riwayat/:id"
                         element={<DetailRiwayatPage />}
                     />
-
                     {/* === PERBAIKAN RUTE PEMBATALAN === */}
-
                     {/* Rute untuk HALAMAN MELAKUKAN PEMBATALAN (Aksi) */}
                     <Route
                         path="/batalkan/:id"
                         element={<CancellationPage />}
                     />
-
                     {/* Rute untuk MELIHAT DETAIL PEMBATALAN (View) */}
                     <Route
                         path="/detail-pembatalan/:id"
                         element={<DetailPembatalanPage />}
                     />
-
                     {/* --- RUTE BARU UNTUK RATING PAGE --- */}
-                    <Route
-                        path="/beri-nilai/:id"
-                        element={<RatingPage />}
-                    />
-
+                    <Route path="/beri-nilai/:id" element={<RatingPage />} />
                     {/* --- RUTE BARU UNTUK CHAT PAGE --- */}
+<<<<<<< HEAD
                     <Route
                         path="/chat/:id"
                         element={<ChatPage />}
@@ -185,19 +181,19 @@ const AppRouter = () => {
                         element={<PaymentInstructionsPage />}
                     />
 
+=======
+                    <Route path="/chat/:id" element={<ChatPage />} />
+>>>>>>> b759abba1b2378b5e9c6793237609bb5f3cce372
                     {/* === AKHIR PERBAIKAN === */}
-
                 </Route>
 
                 {/* RUTE DUPLIKAT DIHAPUS DARI SINI */}
                 {/* <Route path="/cancel/:id" element={<CancellationPage />} /> */}
-
-            </Route> {/* <-- Tag penutup ProtectedGuard */}
+            </Route>{" "}
+            {/* <-- Tag penutup ProtectedGuard */}
             {/* ====================================================== */}
             {/* == AKHIR PERBAIKAN == */}
             {/* ====================================================== */}
-
-
             {/* === ZONA ADMIN (WEBSITE) === */}
             <Route element={<AdminGuestGuard />}>
                 <Route element={<AuthAdminLayout />}>
@@ -263,9 +259,24 @@ const AppRouter = () => {
                         path="/admin/booking-management/:id"
                         element={<BookingDetailPage />}
                     />
+                    <Route
+                        path="/admin/jadwal-konsultasi"
+                        element={<JadwalKonsultasiPage />}
+                    />
+                    <Route
+                        path="/admin/jadwal-konsultasi/:id"
+                        element={<JadwalDetailPage />}
+                    />
+                    <Route
+                        path="/admin/verifikasi-konselor"
+                        element={<VerifikasiKonselorPage />}
+                    />
+                    <Route
+                        path="/admin/verifikasi-konselor/:id"
+                        element={<VerifikasiDetailPage />}
+                    />
                 </Route>
             </Route>
-
             {/* === RUTE FALLBACK === */}
             {/* Arahkan / ke /login jika tidak ada rute lain yang cocok di awal */}
             <Route path="/" element={<Navigate to="/login" />} />
@@ -282,4 +293,3 @@ const AppRouter = () => {
 };
 
 export default AppRouter;
-
