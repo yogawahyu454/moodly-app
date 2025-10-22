@@ -27,6 +27,7 @@ import PsikologPage from "../pages/customer/PsikologPage";
 import OnboardingPage from "../pages/auth/OnboardingPage";
 import RatingPage from "../pages/customer/RatingPage"; // <-- IMPORT UNTUK RATING
 import ChatPage from "../pages/customer/ChatPage"; // <-- IMPORT UNTUK CHAT
+import PaymentInstructionsPage from "../pages/customer/PaymentInstructionsPage"; // <-- IMPORT BARU
 
 
 // --- Halaman Admin & Super Admin (Website) ---
@@ -176,6 +177,12 @@ const AppRouter = () => {
                     <Route
                         path="/chat/:id"
                         element={<ChatPage />}
+                    />
+
+                    {/* --- RUTE BARU UNTUK PAYMENT INSTRUCTIONS --- */}
+                    <Route
+                        path="/payment-instructions/:id"
+                        element={<PaymentInstructionsPage />}
                     />
 
                     {/* === AKHIR PERBAIKAN === */}
