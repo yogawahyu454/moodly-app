@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import apiClient from "../../../api/axios";
-import DeleteModal from "./modals/DeleteModal"; // Akan kita buat
+import DeleteModal from "./modals/DeleteModal";
 
 // Ikon
 const DetailIcon = () => (
@@ -60,29 +60,75 @@ const StatusBadge = ({ status }) => {
 };
 
 const BookingManagementPage = () => {
-    const [bookings, setBookings] = useState([]);
+    const [bookings, setBookings] = useState([]); // State untuk menyimpan data
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
 
+    // Fungsi Fetch Data (diperiksa ulang)
     const fetchData = async () => {
-        /* ... logika fetch ... */
+        try {
+            setLoading(true);
+            const response = await apiClient.get(
+                "/api/super-admin/booking-management"
+            );
+            setBookings(response.data); // Pastikan data disimpan ke state 'bookings'
+            setError(null);
+        } catch (err) {
+            setError("Gagal memuat data pesanan.");
+            console.error("Error fetching bookings:", err); // Log error lebih detail
+        } finally {
+            setLoading(false);
+        }
     };
+
+    // useEffect untuk memanggil fetchData saat komponen pertama kali dimuat
     useEffect(() => {
         fetchData();
-    }, []);
+    }, []); // Array dependensi kosong memastikan ini hanya berjalan sekali
 
+    // Fungsi Delete (diperiksa ulang)
     const handleDelete = async () => {
-        /* ... logika delete ... */
-    };
-    const openModal = (setter, booking = null) => {
-        /* ... logika open modal ... */
+        if (!selectedBooking) return; // Pastikan ada booking yang dipilih
+        try {
+            await apiClient.delete(
+                `/api/super-admin/booking-management/${selectedBooking.id}`
+            );
+            setDeleteModalOpen(false);
+            setSelectedBooking(null); // Reset booking yang dipilih
+            fetchData(); // Muat ulang data setelah hapus
+        } catch (err) {
+            console.error("Gagal menghapus pesanan:", err);
+            // TODO: Tampilkan notifikasi error ke pengguna
+        }
     };
 
-    const formatDate = (dateString) => {
-        /* ... fungsi format tanggal ... */
+    // Fungsi untuk membuka modal (diperiksa ulang)
+    const openModal = (setter, booking = null) => {
+        setSelectedBooking(booking); // Set booking yang dipilih
+        setter(true);
     };
+
+    // Fungsi format tanggal (diperiksa ulang)
+    const formatDate = (dateString) => {
+        if (!dateString) return "-";
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+            });
+        } catch (e) {
+            console.error("Error formatting date:", dateString, e);
+            return "Invalid Date";
+        }
+    };
+
+    // Tampilan Loading dan Error
+    if (loading) return <div className="p-6">Memuat data pesanan...</div>;
+    if (error) return <div className="p-6 text-red-500">{error}</div>;
 
     return (
         <div className="p-6">
@@ -101,45 +147,63 @@ const BookingManagementPage = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {bookings.map((booking, index) => (
-                            <tr key={booking.id} className="border-t">
-                                <td className="p-4">{index + 1}</td>
-                                <td className="p-4">{`#${String(
-                                    booking.customer_id
-                                ).padStart(5, "0")}`}</td>
-                                <td className="p-4">
-                                    {formatDate(booking.tanggal_konsultasi)}
-                                </td>
-                                <td className="p-4 font-medium">
-                                    {booking.customer?.name || "N/A"}
-                                </td>
-                                <td className="p-4">
-                                    {booking.metode_konsultasi}
-                                </td>
-                                <td className="p-4">
-                                    <StatusBadge
-                                        status={booking.status_pesanan}
-                                    />
-                                </td>
-                                <td className="p-4 flex gap-3 items-center">
-                                    <Link
-                                        to={`/admin/booking-management/${booking.id}`}
-                                    >
-                                        <DetailIcon />
-                                    </Link>
-                                    <button
-                                        onClick={() =>
-                                            openModal(
-                                                setDeleteModalOpen,
-                                                booking
-                                            )
-                                        }
-                                    >
-                                        <DeleteIcon />
-                                    </button>
+                        {/* Pastikan kita map state 'bookings' */}
+                        {bookings.length > 0 ? (
+                            bookings.map((booking, index) => (
+                                <tr
+                                    key={booking.id}
+                                    className="border-t hover:bg-gray-50"
+                                >
+                                    <td className="p-4">{index + 1}</td>
+                                    <td className="p-4">{`#${String(
+                                        booking.customer_id
+                                    ).padStart(5, "0")}`}</td>
+                                    <td className="p-4">
+                                        {formatDate(booking.tanggal_konsultasi)}
+                                    </td>
+                                    {/* Akses nama customer dari relasi */}
+                                    <td className="p-4 font-medium">
+                                        {booking.customer?.name || "N/A"}
+                                    </td>
+                                    <td className="p-4">
+                                        {booking.metode_konsultasi}
+                                    </td>
+                                    <td className="p-4">
+                                        <StatusBadge
+                                            status={booking.status_pesanan}
+                                        />
+                                    </td>
+                                    <td className="p-4 flex gap-3 items-center">
+                                        <Link
+                                            to={`/admin/booking-management/${booking.id}`}
+                                            title="Lihat Detail"
+                                        >
+                                            <DetailIcon />
+                                        </Link>
+                                        <button
+                                            onClick={() =>
+                                                openModal(
+                                                    setDeleteModalOpen,
+                                                    booking
+                                                )
+                                            }
+                                            title="Hapus"
+                                        >
+                                            <DeleteIcon />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td
+                                    colSpan="7"
+                                    className="p-4 text-center text-gray-500"
+                                >
+                                    Tidak ada data pesanan.
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -152,5 +216,5 @@ const BookingManagementPage = () => {
         </div>
     );
 };
-// Implementasi lengkap fetch, delete, openModal, formatDate disembunyikan
+
 export default BookingManagementPage;
