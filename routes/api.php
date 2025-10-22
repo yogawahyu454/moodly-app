@@ -8,6 +8,7 @@ use App\Http\Controllers\SuperAdmin\TempatKonselingController;
 use App\Http\Controllers\SuperAdmin\AdminManagementController;
 use App\Http\Controllers\SuperAdmin\KonselorManagementController;
 use App\Http\Controllers\SuperAdmin\CustomerManagementController;
+use App\Http\Controllers\SuperAdmin\BookingManagementController;
 use App\Http\Middleware\RoleMiddleware;
 
 /*
@@ -54,6 +55,8 @@ Route::group(['middleware' => [
             Route::post('customer-management/{user}/block', [CustomerManagementController::class, 'block']);
             Route::post('customer-management/{user}/unblock', [CustomerManagementController::class, 'unblock']);
             Route::apiResource('customer-management', CustomerManagementController::class)->parameters(['customer-management' => 'user'])->only(['index', 'show', 'destroy']);
+
+            Route::apiResource('booking-management', BookingManagementController::class)->only(['index', 'show', 'destroy']);
         });
     });
 });

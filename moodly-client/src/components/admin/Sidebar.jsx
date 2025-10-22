@@ -234,7 +234,11 @@ const SidebarMenu = ({ role }) => {
     // Definisikan menu untuk Super Admin
     const superAdminMenu = [
         { label: "Dashboard", path: "/admin/dashboard", icon: DashboardIcon },
-        { label: "Pesanan", path: "/admin/pesanan", icon: PesananIcon },
+        {
+            label: "Pesanan",
+            path: "/admin/booking-management",
+            icon: PesananIcon,
+        },
         {
             label: "Customer",
             path: "/admin/customer-management",
