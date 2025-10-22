@@ -235,7 +235,11 @@ const SidebarMenu = ({ role }) => {
     const superAdminMenu = [
         { label: "Dashboard", path: "/admin/dashboard", icon: DashboardIcon },
         { label: "Pesanan", path: "/admin/pesanan", icon: PesananIcon },
-        { label: "Customer", path: "/admin/customer", icon: CustomerIcon },
+        {
+            label: "Customer",
+            path: "/admin/customer-management",
+            icon: CustomerIcon,
+        },
         {
             label: "Konselor",
             path: "/admin/konselor-management",

@@ -30,6 +30,8 @@ import AdminManagementPage from "../pages/super-admin/admin/Index.jsx";
 import AdminDetailPage from "../pages/super-admin/admin/Show.jsx";
 import KonselorManagementPage from "../pages/super-admin/konselor/Index.jsx";
 import KonselorDetailPage from "../pages/super-admin/konselor/Show.jsx";
+import CustomerManagementPage from "../pages/super-admin/customer/Index.jsx";
+import CustomerDetailPage from "../pages/super-admin/customer/Show.jsx";
 
 // ==================================================================
 // --- PENJAGA ZONA ---
@@ -171,6 +173,14 @@ const AppRouter = () => {
                     <Route
                         path="/admin/konselor-management/:id"
                         element={<KonselorDetailPage />}
+                    />
+                    <Route
+                        path="/admin/customer-management"
+                        element={<CustomerManagementPage />}
+                    />
+                    <Route
+                        path="/admin/customer-management/:id"
+                        element={<CustomerDetailPage />}
                     />
                 </Route>
             </Route>
