@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\KonselorVerificationController;
 use App\Http\Controllers\Admin\CustomerVerificationController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Models\User;
+use App\Models\Booking;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,7 +66,10 @@ Route::group(['middleware' => [
         });
 
         Route::middleware(RoleMiddleware::class . ':admin,super-admin')->prefix('admin')->group(function () {
-            Route::apiResource('jadwal-konsultasi', JadwalKonsultasiController::class)->only(['index', 'show', 'destroy']);
+            Route::get('jadwal-konsultasi', [JadwalKonsultasiController::class, 'index']);
+            Route::get('jadwal-konsultasi/{booking:id}', [JadwalKonsultasiController::class, 'show']);
+            Route::delete('jadwal-konsultasi/{booking:id}', [JadwalKonsultasiController::class, 'destroy']);
+            Route::patch('jadwal-konsultasi/{booking:id}/status', [JadwalKonsultasiController::class, 'updateStatus']);
 
             // --- Rute Verifikasi Konselor ---
             Route::get('verifikasi-konselor', [KonselorVerificationController::class, 'index']);

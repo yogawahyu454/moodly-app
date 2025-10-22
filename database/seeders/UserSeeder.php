@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
     {
         // --- SUPER ADMIN ---
         User::updateOrCreate(
-            ['email' => 'superadmin@moodly.com'],
+            ['email' => 'ullulazmia.l@gmail.com'],
             [
                 'name' => 'Super Admin Moodly',
                 'role' => 'super-admin',
@@ -30,7 +30,7 @@ class UserSeeder extends Seeder
 
         // --- ADMIN ---
         User::updateOrCreate(
-            ['email' => 'admin1@moodly.com'],
+            ['email' => 'admin@moodly.com'],
             [
                 'name' => 'Admin Satu',
                 'role' => 'admin',
@@ -42,7 +42,7 @@ class UserSeeder extends Seeder
             ]
         );
         User::updateOrCreate(
-            ['email' => 'admin2@moodly.com'],
+            ['email' => 'admin1@moodly.com'],
             [
                 'name' => 'Admin Dua',
                 'role' => 'admin',
