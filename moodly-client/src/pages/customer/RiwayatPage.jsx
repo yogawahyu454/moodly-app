@@ -1,77 +1,38 @@
 import React, { useState, useEffect } from "react";
-// Link sudah di-import, ini penting
 import { Link, useNavigate } from "react-router-dom";
-// import { useAuth } from "../../context/AuthContext";
 
-// --- Komponen Ikon ---
+// Ikon Kalender
 function CalendarIcon(props) {
   return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
-      />
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
     </svg>
   );
 }
 
+// Ikon Jam
 function ClockIcon(props) {
   return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-      />
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     </svg>
   );
 }
 
-// --- Komponen-komponen Kecil ---
-
-// Tombol Tab (Versi paling kecil dengan padding py-1.5)
+// Tombol Tab (Segmen Tab)
 const TabButton = ({ title, isActive, onClick, isFirst = false, isLast = false }) => (
   <button
     onClick={onClick}
-    // Padding py-1.5 px-2 sudah cukup kecil
-    // Font text-xs font-semibold
-    // DITAMBAHKAN: whitespace-nowrap
     className={`flex-1 py-1.5 px-2 text-xs font-semibold text-center transition-colors duration-200 focus:outline-none whitespace-nowrap
-      ${
-        isActive
-          ? "bg-sky-500 text-white" // Active state
-          : "bg-white text-gray-700 hover:bg-sky-50" // Inactive state
-      }
-      ${
-        !isLast ? "border-r border-sky-200" : "" // Border pemisah lebih terang
-      }
-      ${
-        isFirst ? "rounded-l-lg" : "" 
-      }
-      ${
-        isLast ? "rounded-r-lg" : "" 
-      }
+      ${isActive ? "bg-sky-500 text-white" : "bg-white text-gray-700 hover:bg-sky-50"}
+      ${!isLast ? "border-r border-sky-200" : ""} 
+      ${isFirst ? "rounded-l-lg" : ""} 
+      ${isLast ? "rounded-r-lg" : ""}
     `}
   >
     {title}
   </button>
 );
-
 
 // --- DATA CONTOH ---
 const mockUpcoming = [
@@ -82,7 +43,7 @@ const mockUpcoming = [
     specialization: "Konseling anak",
     date: "12 - 09 - 2025",
     time: "16.00 - 17.00",
-    type: "Vidio Call",
+    type: "Video Call",
   },
   {
     id: 2,
@@ -102,7 +63,7 @@ const mockCanceled = [
     specialization: "Konseling kecemasan",
     date: "11 - 09 - 2025",
     time: "15.00 - 16.00",
-    type: "Vidio Call",
+    type: "Video Call",
   },
 ];
 const mockUnpaid = [
@@ -129,32 +90,18 @@ const mockCompleted = [
 ];
 // --- END OF DATA CONTOH ---
 
-// Kartu Appointment (Versi lebih kecil)
+// Kartu Appointment
 const AppointmentCard = ({ item, status }) => {
   return (
-    // Padding kartu p-4 -> p-3
     <div className="bg-white p-3 rounded-xl shadow-lg mb-4">
-      {/* Bagian Atas: Spesialisasi, Nama, Avatar */}
       <div className="flex justify-between items-start">
         <div className="flex-1">
-          <p className="text-xs text-gray-500 mb-1">
-            Spesialisasi: {item.specialization}
-          </p>
-          {/* Font nama text-sm -> text-xs */}
-          <h3 className="font-semibold text-gray-900 text-xs">
-            {item.name}
-          </h3>
+          <p className="text-xs text-gray-500 mb-1">Spesialisasi: {item.specialization}</p>
+          <h3 className="font-semibold text-gray-900 text-xs">{item.name}</h3>
         </div>
-        {/* Ukuran Avatar w-12 h-12 -> w-10 h-10 */}
-        <img
-          src={item.avatar}
-          alt={item.name}
-          className="w-10 h-10 rounded-full object-cover ml-2" // ml-3 diubah ke ml-2
-        />
+        <img src={item.avatar} alt={item.name} className="w-10 h-10 rounded-full object-cover ml-2" />
       </div>
 
-      {/* Bagian Tengah: Tanggal, Waktu, Tipe (Margin dikurangi) */}
-      {/* Margin atas mt-4 -> mt-3 */}
       <div className="flex items-center justify-between mt-3">
         <div className="flex items-center space-x-1.5">
           <CalendarIcon className="w-4 h-4 text-gray-400" />
@@ -164,49 +111,41 @@ const AppointmentCard = ({ item, status }) => {
           <ClockIcon className="w-4 h-4 text-gray-400" />
           <span className="text-xs text-gray-600">{item.time}</span>
         </div>
-        <Link
-          to="#"
-          className="text-xs font-semibold text-sky-500 hover:underline"
-        >
-          {item.type}
-        </Link>
+        <span className="text-xs font-semibold text-sky-500">{item.type}</span>
       </div>
 
-      {/* Garis Pemisah */}
-      {/* Margin my-4 -> my-3 */}
       <hr className="my-3" />
 
-      {/* Tombol Aksi (Padding diperkecil dan sudah menggunakan <Link>) */}
       <div className="flex justify-end items-center space-x-2">
         {status === "upcoming" && (
           <>
-            {/* Padding tombol px-4 py-2 -> px-3 py-1.5 */}
-            <button className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+            <Link
+              to={`/pembatalan/${item.id}`}
+              className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 text-center"
+            >
               Batalkan
-            </button>
+            </Link>
             <button className="px-3 py-1.5 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
               Mulai
             </button>
           </>
         )}
+
         {status === "canceled" && (
           <>
-            <span className="text-xs font-semibold text-red-500 mr-auto">
-              Telah Dibatalkan
-            </span>
+            <span className="text-xs font-semibold text-red-500 mr-auto">Telah Dibatalkan</span>
             <Link
-              to={`/riwayat/${item.id}`}
+              to={`/pembatalan/${item.id}`}
               className="px-3 py-1.5 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 text-center"
             >
               Detail
             </Link>
           </>
         )}
+
         {status === "unpaid" && (
           <>
-            <span className="text-xs font-semibold text-orange-500 mr-auto">
-              Menunggu Pembayaran
-            </span>
+            <span className="text-xs font-semibold text-orange-500 mr-auto">Menunggu Pembayaran</span>
             <Link
               to={`/riwayat/${item.id}`}
               className="px-3 py-1.5 rounded-md border border-blue-600 bg-white text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50 text-center"
@@ -236,20 +175,16 @@ const AppointmentCard = ({ item, status }) => {
   );
 };
 
-
-// --- Komponen Halaman Utama ---
 export default function RiwayatPage() {
-  const [activeTab, setActiveTab] = useState("upcoming"); // 'upcoming', 'canceled', 'unpaid', 'completed'
+  const [activeTab, setActiveTab] = useState("upcoming");
+  const navigate = useNavigate();
 
-  // State untuk menyimpan data
   const [upcomingData, setUpcomingData] = useState([]);
   const [canceledData, setCanceledData] = useState([]);
   const [unpaidData, setUnpaidData] = useState([]);
   const [completedData, setCompletedData] = useState([]);
 
-  // Mengisi data dengan data contoh saat komponen dimuat
   useEffect(() => {
-    // TODO: Ganti ini dengan fetch API Anda
     setUpcomingData(mockUpcoming);
     setCanceledData(mockCanceled);
     setUnpaidData(mockUnpaid);
@@ -283,67 +218,28 @@ export default function RiwayatPage() {
       );
     }
 
-    return data.map((item) => (
-      <AppointmentCard key={item.id} item={item} status={activeTab} />
-    ));
+    return data.map((item) => <AppointmentCard key={item.id} item={item} status={activeTab} />);
   };
 
   return (
     <div className="p-4 bg-gray-50 min-h-screen">
-      {/* Header */}
       <div className="flex items-center mb-4">
-        <button
-          onClick={() => window.history.back()}
-          className="text-gray-800"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 19.5 8.25 12l7.5-7.5"
-            />
+        <button onClick={() => navigate(-1)} className="text-gray-800">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
           </svg>
         </button>
-        <h1 className="text-xl font-bold text-center text-gray-800 flex-grow">
-          Riwayat
-        </h1>
-        <div className="w-6"></div> {/* Spacer */}
+        <h1 className="text-xl font-bold text-center text-gray-800 flex-grow">Riwayat</h1>
+        <div className="w-6"></div>
       </div>
 
-      {/* Container Tab (Gaya Segmented Control) */}
       <div className="flex w-full mb-4 rounded-lg border border-sky-300 overflow-hidden shadow-sm">
-        <TabButton
-          title="Akan Datang"
-          isActive={activeTab === "upcoming"}
-          onClick={() => setActiveTab("upcoming")}
-          isFirst={true} // Tandai tombol pertama
-        />
-        <TabButton
-          title="Dibatalkan"
-          isActive={activeTab === "canceled"}
-          onClick={() => setActiveTab("canceled")}
-        />
-        <TabButton
-          title="Belum Dibayar"
-          isActive={activeTab === "unpaid"}
-          onClick={() => setActiveTab("unpaid")}
-        />
-        <TabButton
-          title="Selesai"
-          isActive={activeTab === "completed"}
-          onClick={() => setActiveTab("completed")}
-          isLast={true} // Tandai tombol terakhir
-        />
+        <TabButton title="Akan Datang" isActive={activeTab === "upcoming"} onClick={() => setActiveTab("upcoming")} isFirst={true} />
+        <TabButton title="Dibatalkan" isActive={activeTab === "canceled"} onClick={() => setActiveTab("canceled")} />
+        <TabButton title="Belum Dibayar" isActive={activeTab === "unpaid"} onClick={() => setActiveTab("unpaid")} />
+        <TabButton title="Selesai" isActive={activeTab === "completed"} onClick={() => setActiveTab("completed")} isLast={true} />
       </div>
 
-      {/* Konten Tab */}
       <div>{renderContent()}</div>
     </div>
   );
