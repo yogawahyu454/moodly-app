@@ -28,7 +28,19 @@ import OnboardingPage from "../pages/auth/OnboardingPage";
 
 
 // --- Halaman Admin & Super Admin (Website) ---
+<<<<<<< HEAD
 import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index";
+=======
+import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
+import DurasiKonselingPage from "../pages/super-admin/konseling/durasi/Index.jsx";
+import TempatKonselingPage from "../pages/super-admin/konseling/tempat/Index.jsx";
+import AdminManagementPage from "../pages/super-admin/admin/Index.jsx";
+import AdminDetailPage from "../pages/super-admin/admin/Show.jsx";
+import KonselorManagementPage from "../pages/super-admin/konselor/Index.jsx";
+import KonselorDetailPage from "../pages/super-admin/konselor/Show.jsx";
+import CustomerManagementPage from "../pages/super-admin/customer/Index.jsx";
+import CustomerDetailPage from "../pages/super-admin/customer/Show.jsx";
+>>>>>>> d08719fb62c71bde941a2cf5fc3b8b822855b8fe
 
 // ==================================================================
 // --- PENJAGA ZONA CUSTOMER / KONSELOR (TAMPILAN MOBILE) ---
@@ -189,6 +201,41 @@ const AppRouter = () => {
                         path="/admin/jenis-konseling"
                         element={<JenisKonselingPage />}
                     />
+<<<<<<< HEAD
+=======
+                    <Route
+                        path="/admin/durasi-konseling"
+                        element={<DurasiKonselingPage />}
+                    />
+                    <Route
+                        path="/admin/tempat-konseling"
+                        element={<TempatKonselingPage />}
+                    />
+                    <Route
+                        path="/admin/admin-management"
+                        element={<AdminManagementPage />}
+                    />
+                    <Route
+                        path="/admin/admin-management/:id"
+                        element={<AdminDetailPage />}
+                    />
+                    <Route
+                        path="/admin/konselor-management"
+                        element={<KonselorManagementPage />}
+                    />
+                    <Route
+                        path="/admin/konselor-management/:id"
+                        element={<KonselorDetailPage />}
+                    />
+                    <Route
+                        path="/admin/customer-management"
+                        element={<CustomerManagementPage />}
+                    />
+                    <Route
+                        path="/admin/customer-management/:id"
+                        element={<CustomerDetailPage />}
+                    />
+>>>>>>> d08719fb62c71bde941a2cf5fc3b8b822855b8fe
                 </Route>
             </Route>
 
