@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+// Impor useNavigate untuk navigasi
+import { useNavigate } from "react-router-dom";
 
 // --- Komponen Ikon ---
 const SearchIcon = () => (
@@ -38,6 +40,9 @@ const ArrowRightIcon = () => (
 
 export default function KonselingPage() {
     const [activeTab, setActiveTab] = useState("Online");
+    // Inisialisasi hook useNavigate
+    const navigate = useNavigate();
+
     const counselingTypes = [
         {
             name: "Konseling Pernikahan",
@@ -64,6 +69,11 @@ export default function KonselingPage() {
             icon: "images/konseling/anak1.png",
         },
     ];
+
+    // Fungsi untuk handle klik tombol Book
+    const handleBookClick = () => {
+        navigate("/pilih-psikolog"); // Arahkan ke halaman pilih psikolog
+    };
 
     return (
         <>
@@ -115,11 +125,21 @@ export default function KonselingPage() {
                                 src={type.icon}
                                 alt={type.name}
                                 className="w-20 h-20"
+                                // Tambahkan fallback jika gambar lokal tidak ada
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src =
+                                        "https://placehold.co/80x80/E0F2FE/0EA5E9?text=Icon";
+                                }}
                             />
                             <p className="font-semibold text-gray-700 mt-3 text-sm">
                                 {type.name}
                             </p>
-                            <button className="mt-4 flex items-center gap-1 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-1 rounded-lg">
+                            {/* Tambahkan onClick ke tombol Book */}
+                            <button
+                                onClick={handleBookClick} // Panggil fungsi handleBookClick saat diklik
+                                className="mt-4 flex items-center gap-1 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-1 rounded-lg hover:bg-gray-200 transition-colors"
+                            >
                                 <span>Book</span>
                                 <ArrowRightIcon />
                             </button>

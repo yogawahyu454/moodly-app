@@ -22,10 +22,11 @@ import NotifikasiPage from "../pages/customer/NotifikasiPage";
 import GantiJadwalPage from "../pages/customer/GantiJadwalPage";
 import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
 import CancellationPage from "../pages/customer/CancellationPage";
-import PsikologPage from "../pages/customer/PsikologPage"; // Path ini mungkin perlu dicek lagi, apakah sama dengan PilihPsikologPage?
+import PsikologPage from "../pages/customer/PsikologPage";
 import ProfilePage from "../pages/customer/profile/ProfilePage";
 import EditProfilePage from "../pages/customer/profile/EditProfilePage";
 
+import TatapMukaPage from "../pages/customer/TatapMukaPage"; // <-- Import TatapMukaPage
 import DetailPembatalanPage from "../pages/customer/DetailPembatalanPage"; // Import DetailPembatalanPage
 import RatingPage from "../pages/customer/RatingPage"; // Import RatingPage
 import ChatPage from "../pages/customer/ChatPage"; // Import ChatPage
@@ -138,18 +139,20 @@ const AppRouter = () => {
                     <Route path="/konseling" element={<KonselingPage />} />
                     <Route path="/riwayat" element={<RiwayatPage />} />
                     <Route path="/notifikasi" element={<NotifikasiPage />} />
-                    {/* ✅ Rute Profile ada di sini */}
                     <Route path="/profile" element={<ProfilePage />} />
                 </Route>
 
                 {/* 2. Rute Full-Screen (Tanpa Navigasi Bawah - PageLayout) */}
                 <Route element={<PageLayout />}>
                     <Route path="/profile/edit" element={<EditProfilePage />} />
-                    <Route path="/pilih-psikolog" element={<PsikologPage />} />
+                    <Route
+                        path="/pilih-psikolog"
+                        element={<PsikologPage />}
+                    />{" "}
+                    <Route path="/tatap-muka" element={<TatapMukaPage />} />{" "}
+                    {/* <-- Rute baru ditambahkan */}
                     <Route path="/address" element={<AddressPage />} />
                     <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />
-                    {/* <Route path="/psikolog" element={<PsikologPage />} /> */}{" "}
-                    {/* Kemungkinan duplikat? */}
                     <Route
                         path="/riwayat/:id"
                         element={<DetailRiwayatPage />}
