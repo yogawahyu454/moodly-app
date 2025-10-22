@@ -11,7 +11,10 @@ use App\Http\Controllers\SuperAdmin\CustomerManagementController;
 use App\Http\Controllers\SuperAdmin\BookingManagementController;
 
 use App\Http\Controllers\Admin\JadwalKonsultasiController;
+use App\Http\Controllers\Admin\KonselorVerificationController;
+use App\Http\Controllers\Admin\CustomerVerificationController;
 use App\Http\Middleware\RoleMiddleware;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +66,18 @@ Route::group(['middleware' => [
 
         Route::middleware(RoleMiddleware::class . ':admin,super-admin')->prefix('admin')->group(function () {
             Route::apiResource('jadwal-konsultasi', JadwalKonsultasiController::class)->only(['index', 'show', 'destroy']);
+
+            // --- Rute Verifikasi Konselor ---
+            Route::get('verifikasi-konselor', [KonselorVerificationController::class, 'index']);
+            Route::get('verifikasi-konselor/{user:id}', [KonselorVerificationController::class, 'show']); // <-- KEMBALIKAN INI
+            Route::post('verifikasi-konselor/{user:id}/approve', [KonselorVerificationController::class, 'approve']);
+            Route::post('verifikasi-konselor/{user:id}/reject', [KonselorVerificationController::class, 'reject']);
+
+            // --- Rute Verifikasi Customer ---
+            Route::get('verifikasi-customer', [CustomerVerificationController::class, 'index']);
+            Route::get('verifikasi-customer/{user:id}', [CustomerVerificationController::class, 'show']);
+            Route::post('verifikasi-customer/{user:id}/approve', [CustomerVerificationController::class, 'approve']);
+            Route::post('verifikasi-customer/{user:id}/reject', [CustomerVerificationController::class, 'reject']);
         });
     });
 });
