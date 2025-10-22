@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // useNavigate sudah diimport
 
 // --- Komponen Ikon (Dibutuhkan oleh halaman ini) ---
 
@@ -66,7 +66,7 @@ function ClockIcon(props) {
 // --- Komponen Halaman Detail Riwayat ---
 export default function DetailRiwayatPage() {
   const { id } = useParams(); // Untuk mengambil ID dari URL, misal: /riwayat/5
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // useNavigate sudah diimport
 
   // Data dummy (menggunakan versi yang lebih kecil)
   const dummyData = {
@@ -94,12 +94,33 @@ export default function DetailRiwayatPage() {
     avatar: "https://i.pravatar.cc/100?img=1",
   };
 
+  // Fungsi untuk menyalin teks ke clipboard
+    const copyToClipboard = (textToCopy, fieldName) => {
+        // Gunakan document.execCommand untuk kompatibilitas lebih luas
+        const textArea = document.createElement("textarea");
+        textArea.value = textToCopy;
+        textArea.style.position = "fixed"; // Hindari scroll
+        textArea.style.left = "-9999px"; // Pindahkan keluar layar
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            const successful = document.execCommand('copy');
+            const msg = successful ? `${fieldName} berhasil disalin!` : `Gagal menyalin ${fieldName}.`;
+            alert(msg); // Ganti dengan notifikasi yang lebih baik
+        } catch (err) {
+            console.error(`Gagal menyalin ${fieldName}: `, err);
+            alert(`Gagal menyalin ${fieldName}.`);
+        }
+        document.body.removeChild(textArea);
+    };
+
+
   return (
-    // DIUBAH: Padding bawah (pb-20) dihapus dari div utama
     <div className="p-4 bg-gray-50 min-h-screen">
       {/* Header Halaman (versi kecil) */}
       <div className="flex items-center mb-4">
-        <button onClick={() => navigate(-1)} className="text-gray-800">
+        <button onClick={() => navigate(-1)} className="text-gray-800 p-1 -ml-1">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -147,7 +168,12 @@ export default function DetailRiwayatPage() {
           <h2 className="text-sm font-semibold text-gray-900">
             {dummyData.payment.method}
           </h2>
-          <span className="font-bold text-blue-700 text-base">BCA</span>
+          {/* Ganti dengan logo asli jika ada */}
+          <img
+             src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bank_Central_Asia_logo.svg/1280px-Bank_Central_Asia_logo.svg.png"
+             alt="BCA Logo"
+             className="h-4"
+          />
         </div>
         <div className="mb-2">
           <label className="text-xs text-gray-500 block mb-0.5">
@@ -157,7 +183,11 @@ export default function DetailRiwayatPage() {
             <span className="text-sm font-semibold text-gray-800">
               {dummyData.payment.vaNumber}
             </span>
-            <button className="text-blue-600 hover:text-blue-800">
+            <button
+                onClick={() => copyToClipboard(dummyData.payment.vaNumber, 'Nomor Virtual Account')}
+                className="text-blue-600 hover:text-blue-800 ml-2 flex-shrink-0"
+                title="Salin Nomor VA"
+            >
               <ClipboardIcon className="w-4 h-4" />
             </button>
           </div>
@@ -170,7 +200,11 @@ export default function DetailRiwayatPage() {
             <span className="text-sm font-bold text-blue-600">
               {dummyData.payment.total}
             </span>
-            <button className="text-blue-600 hover:text-blue-800">
+            <button
+                onClick={() => copyToClipboard(dummyData.payment.total, 'Total Pembayaran')}
+                className="text-blue-600 hover:text-blue-800 ml-2 flex-shrink-0"
+                title="Salin Total Pembayaran"
+            >
               <ClipboardIcon className="w-4 h-4" />
             </button>
           </div>
@@ -178,7 +212,6 @@ export default function DetailRiwayatPage() {
       </div>
 
       {/* 3. Kartu Detail Sesi Konseling */}
-      {/* DIUBAH: mb-3 dihapus dari kartu ini */}
       <div className="bg-white rounded-xl shadow-lg">
         <div className="p-3">
           <div className="flex justify-between items-center">
@@ -195,9 +228,10 @@ export default function DetailRiwayatPage() {
         </div>
         <div className="flex items-center space-x-3 px-3 pb-3">
           <img
-            src={dummyData.avatar}
-            alt={dummyData.name}
-            className="w-10 h-10 rounded-full object-cover"
+             src={dummyData.avatar}
+             onError={(e) => { e.target.onerror = null; e.target.src=`https://placehold.co/40x40/EBF8FF/7F9CF5?text=${dummyData.name.charAt(0)}`; }}
+             alt={dummyData.name}
+             className="w-10 h-10 rounded-full object-cover"
           />
           <div>
             <h3 className="font-semibold text-gray-900 text-xs">
@@ -229,7 +263,11 @@ export default function DetailRiwayatPage() {
             <span className="text-xs font-semibold text-gray-800 break-all">
               {dummyData.bookingId}
             </span>
-            <button className="text-blue-600 hover:text-blue-800 ml-2 flex-shrink-0">
+            <button
+                onClick={() => copyToClipboard(dummyData.bookingId, 'Booking ID')}
+                className="text-blue-600 hover:text-blue-800 ml-2 flex-shrink-0"
+                title="Salin Booking ID"
+            >
               <ClipboardIcon className="w-4 h-4" />
             </button>
           </div>
@@ -239,21 +277,22 @@ export default function DetailRiwayatPage() {
       {/* ============================================== */}
       {/* == PERBAIKAN DI SINI == */}
       {/* ============================================== */}
-      
+
       {/* 4. Tombol Aksi (Dipindahkan ke sini, tidak lagi sticky) */}
-      {/* Diberi margin atas 'mt-4' */}
       <div className="mt-4">
-        <button className="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg shadow-lg hover:bg-blue-700 transition-colors text-sm">
+        {/* Tombol ini sekarang menggunakan navigate untuk pindah halaman */}
+        <button
+            onClick={() => navigate(`/payment-instructions/${id}`)} // Arahkan ke halaman instruksi
+            className="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg shadow-lg hover:bg-blue-700 transition-colors text-sm"
+        >
           Lihat Invoice Pembayaran
         </button>
       </div>
-      
+
       {/* ============================================== */}
       {/* == AKHIR PERBAIKAN == */}
       {/* ============================================== */}
-      
-      {/* Tombol sticky yang lama DIHAPUS */}
-      
+
     </div>
   );
 }

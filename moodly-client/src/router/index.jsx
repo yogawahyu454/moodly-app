@@ -23,8 +23,15 @@ import DetailPembatalanPage from "../pages/customer/DetailPembatalanPage";
 import CancellationPage from "../pages/customer/CancellationPage";
 import PsikologPage from "../pages/customer/PsikologPage";
 import OnboardingPage from "../pages/auth/OnboardingPage";
+<<<<<<< HEAD
+import RatingPage from "../pages/customer/RatingPage"; // <-- IMPORT UNTUK RATING
+import ChatPage from "../pages/customer/ChatPage"; // <-- IMPORT UNTUK CHAT
+import PaymentInstructionsPage from "../pages/customer/PaymentInstructionsPage"; // <-- IMPORT BARU
+
+=======
 import RatingPage from "../pages/customer/RatingPage";
 import ChatPage from "../pages/customer/ChatPage";
+>>>>>>> b759abba1b2378b5e9c6793237609bb5f3cce372
 
 // --- Halaman Admin & Super Admin (Website) ---
 import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
@@ -164,7 +171,21 @@ const AppRouter = () => {
                     {/* --- RUTE BARU UNTUK RATING PAGE --- */}
                     <Route path="/beri-nilai/:id" element={<RatingPage />} />
                     {/* --- RUTE BARU UNTUK CHAT PAGE --- */}
+<<<<<<< HEAD
+                    <Route
+                        path="/chat/:id"
+                        element={<ChatPage />}
+                    />
+
+                    {/* --- RUTE BARU UNTUK PAYMENT INSTRUCTIONS --- */}
+                    <Route
+                        path="/payment-instructions/:id"
+                        element={<PaymentInstructionsPage />}
+                    />
+
+=======
                     <Route path="/chat/:id" element={<ChatPage />} />
+>>>>>>> b759abba1b2378b5e9c6793237609bb5f3cce372
                     {/* === AKHIR PERBAIKAN === */}
                 </Route>
 
