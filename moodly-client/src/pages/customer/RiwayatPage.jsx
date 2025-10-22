@@ -25,8 +25,8 @@ const TabButton = ({ title, isActive, onClick, isFirst = false, isLast = false }
     onClick={onClick}
     className={`flex-1 py-1.5 px-2 text-xs font-semibold text-center transition-colors duration-200 focus:outline-none whitespace-nowrap
       ${isActive ? "bg-sky-500 text-white" : "bg-white text-gray-700 hover:bg-sky-50"}
-      ${!isLast ? "border-r border-sky-200" : ""} 
-      ${isFirst ? "rounded-l-lg" : ""} 
+      ${!isLast ? "border-r border-sky-200" : ""}
+      ${isFirst ? "rounded-l-lg" : ""}
       ${isLast ? "rounded-r-lg" : ""}
     `}
   >
@@ -119,10 +119,9 @@ const AppointmentCard = ({ item, status }) => {
       <div className="flex justify-end items-center space-x-2">
         {status === "upcoming" && (
           <>
-            {/* --- PERBAIKAN DI SINI --- */}
             {/* Mengarah ke halaman untuk MELAKUKAN pembatalan */}
             <Link
-              to={`/batalkan/${item.id}`} 
+              to={`/batalkan/${item.id}`}
               className="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 text-center"
             >
               Batalkan
@@ -136,7 +135,6 @@ const AppointmentCard = ({ item, status }) => {
         {status === "canceled" && (
           <>
             <span className="text-xs font-semibold text-red-500 mr-auto">Telah Dibatalkan</span>
-            {/* --- PERBAIKAN DI SINI --- */}
             {/* Mengarah ke halaman DETAIL pembatalan */}
             <Link
               to={`/detail-pembatalan/${item.id}`}
@@ -147,27 +145,38 @@ const AppointmentCard = ({ item, status }) => {
           </>
         )}
 
+        {/* --- PERBAIKAN DI SINI --- */}
         {status === "unpaid" && (
           <>
             <span className="text-xs font-semibold text-orange-500 mr-auto">Menunggu Pembayaran</span>
+            {/* Tombol Lihat Detail mengarah ke Detail Riwayat */}
             <Link
               to={`/riwayat/${item.id}`}
               className="px-3 py-1.5 rounded-md border border-blue-600 bg-white text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50 text-center"
             >
               Lihat Detail
             </Link>
-            <button className="px-3 py-1.5 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">
-              Bayar Sekarang
-            </button>
-          </>
-        )}
-        {status === "completed" && (
-          <>
-            <button className="px-3 py-1.5 rounded-md border border-blue-600 bg-white text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50">
-              Beri Nilai
-            </button>
+            {/* Tombol Bayar Sekarang diubah menjadi Link dan mengarah ke Detail Riwayat */}
             <Link
               to={`/riwayat/${item.id}`}
+              className="px-3 py-1.5 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 text-center"
+            >
+              Bayar Sekarang
+            </Link>
+          </>
+        )}
+        {/* --- AKHIR PERBAIKAN --- */}
+
+        {status === "completed" && (
+          <>
+            <Link
+              to={`/beri-nilai/${item.id}`}
+              className="px-3 py-1.5 rounded-md border border-blue-600 bg-white text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50"
+            >
+              Beri Nilai
+            </Link>
+            <Link
+              to={`/chat/${item.id}`}
               className="px-3 py-1.5 rounded-md bg-blue-600 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 text-center"
             >
               Riwayat Chat
@@ -248,3 +257,4 @@ export default function RiwayatPage() {
     </div>
   );
 }
+

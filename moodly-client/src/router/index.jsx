@@ -18,13 +18,15 @@ import BerandaPage from "../pages/customer/BerandaPage";
 import KonselingPage from "../pages/customer/KonselingPage";
 import RiwayatPage from "../pages/customer/RiwayatPage";
 import NotifikasiPage from "../pages/customer/NotifikasiPage";
-import GantiJadwalPage from "../pages/customer/GantiJadwalPage";
+import GantiJadwalPage from "../pages/customer/GantiJadwalPage"; // <-- PERBAIKAN TYPO DI SINI
 import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
 // --- KEDUA HALAMAN INI SEKARANG DIGUNAKAN ---
-import DetailPembatalanPage from "../pages/customer/DetailPembatalanPage"; 
-import CancellationPage from "../pages/customer/CancellationPage"; 
+import DetailPembatalanPage from "../pages/customer/DetailPembatalanPage";
+import CancellationPage from "../pages/customer/CancellationPage";
 import PsikologPage from "../pages/customer/PsikologPage";
-import OnboardingPage from "../pages/auth/OnboardingPage"; 
+import OnboardingPage from "../pages/auth/OnboardingPage";
+import RatingPage from "../pages/customer/RatingPage"; // <-- IMPORT UNTUK RATING
+import ChatPage from "../pages/customer/ChatPage"; // <-- IMPORT UNTUK CHAT
 
 
 // --- Halaman Admin & Super Admin (Website) ---
@@ -38,6 +40,7 @@ import KonselorManagementPage from "../pages/super-admin/konselor/Index.jsx";
 import KonselorDetailPage from "../pages/super-admin/konselor/Show.jsx";
 import CustomerManagementPage from "../pages/super-admin/customer/Index.jsx";
 import CustomerDetailPage from "../pages/super-admin/customer/Show.jsx";
+// --- IMPORT BARU UNTUK BOOKING ---
 import BookingManagementPage from "../pages/super-admin/pesanan/Index.jsx";
 import BookingDetailPage from "../pages/super-admin/pesanan/Show.jsx";
 
@@ -137,7 +140,7 @@ const AppRouter = () => {
 
                 {/* 2. Rute Full-Screen (TANPA Navigasi Bawah) */}
                 <Route element={<PageLayout />}>
-                    <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />
+                    <Route path="/ganti-jadwal" element={<GantiJadwalPage />} /> {/* <-- Komponen yang benar sekarang */}
                     <Route path="/psikolog" element={<PsikologPage />} />
 
                     {/* --- RUTE ADDRESS PAGE DITAMBAHKAN DI SINI --- */}
@@ -148,7 +151,7 @@ const AppRouter = () => {
                         path="/riwayat/:id"
                         element={<DetailRiwayatPage />}
                     />
-                    
+
                     {/* === PERBAIKAN RUTE PEMBATALAN === */}
 
                     {/* Rute untuk HALAMAN MELAKUKAN PEMBATALAN (Aksi) */}
@@ -156,17 +159,29 @@ const AppRouter = () => {
                         path="/batalkan/:id"
                         element={<CancellationPage />}
                     />
-                    
+
                     {/* Rute untuk MELIHAT DETAIL PEMBATALAN (View) */}
                     <Route
                         path="/detail-pembatalan/:id"
                         element={<DetailPembatalanPage />}
                     />
-                    
+
+                    {/* --- RUTE BARU UNTUK RATING PAGE --- */}
+                    <Route
+                        path="/beri-nilai/:id"
+                        element={<RatingPage />}
+                    />
+
+                    {/* --- RUTE BARU UNTUK CHAT PAGE --- */}
+                    <Route
+                        path="/chat/:id"
+                        element={<ChatPage />}
+                    />
+
                     {/* === AKHIR PERBAIKAN === */}
 
-                </Route> 
-                
+                </Route>
+
                 {/* RUTE DUPLIKAT DIHAPUS DARI SINI */}
                 {/* <Route path="/cancel/:id" element={<CancellationPage />} /> */}
 
@@ -232,6 +247,7 @@ const AppRouter = () => {
                         path="/admin/customer-management/:id"
                         element={<CustomerDetailPage />}
                     />
+                    {/* --- RUTE BARU UNTUK BOOKING --- */}
                     <Route
                         path="/admin/booking-management"
                         element={<BookingManagementPage />}
@@ -259,3 +275,4 @@ const AppRouter = () => {
 };
 
 export default AppRouter;
+
