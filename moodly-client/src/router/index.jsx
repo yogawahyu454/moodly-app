@@ -22,6 +22,7 @@ import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
 import DetailPembatalanPage from "../pages/customer/DetailPembatalanPage";
 import CancellationPage from "../pages/customer/CancellationPage";
 import PsikologPage from "../pages/customer/PsikologPage";
+import PaymentInstructionsPage from "../pages/customer/PaymentInstructionsPage";
 import OnboardingPage from "../pages/auth/OnboardingPage";
 import RatingPage from "../pages/customer/RatingPage";
 import ChatPage from "../pages/customer/ChatPage";

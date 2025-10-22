@@ -32,22 +32,6 @@ Route::group(['middleware' => [
     // 1. Rute Autentikasi
     require __DIR__ . '/auth.php';
 
-    Route::get('admin/verifikasi-konselor/{user:id}', function (User $user) {
-        // Tes apakah $user berhasil di-binding
-        if ($user && $user->role === 'konselor') {
-            return response()->json([
-                'message' => 'TES ISOLASI BERHASIL!',
-                'user_id' => $user->id,
-                'user_name' => $user->name,
-                'user_role' => $user->role,
-                'user_status' => $user->status,
-            ]);
-        } else {
-            // Jika binding gagal atau role salah
-            return response()->json(['message' => 'TES ISOLASI GAGAL: Binding User gagal atau role salah.'], 404);
-        }
-    });
-
     // 2. Grup untuk SEMUA rute yang terproteksi
     Route::middleware('auth:sanctum')->group(function () {
 
@@ -82,9 +66,10 @@ Route::group(['middleware' => [
 
         Route::middleware(RoleMiddleware::class . ':admin,super-admin')->prefix('admin')->group(function () {
             Route::apiResource('jadwal-konsultasi', JadwalKonsultasiController::class)->only(['index', 'show', 'destroy']);
-            Route::get('verifikasi-konselor', [KonselorVerificationController::class, 'index']);
 
-            // Route::get('verifikasi-konselor/{user:id}', [KonselorVerificationController::class, 'show']);
+            // --- Rute Verifikasi Konselor ---
+            Route::get('verifikasi-konselor', [KonselorVerificationController::class, 'index']);
+            Route::get('verifikasi-konselor/{user:id}', [KonselorVerificationController::class, 'show']); // <-- KEMBALIKAN INI
             Route::post('verifikasi-konselor/{user:id}/approve', [KonselorVerificationController::class, 'approve']);
             Route::post('verifikasi-konselor/{user:id}/reject', [KonselorVerificationController::class, 'reject']);
 
