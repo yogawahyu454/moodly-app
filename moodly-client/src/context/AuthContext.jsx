@@ -1,43 +1,57 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import apiClient from "../api/axios";
 
-// 1. Buat Context
+// 1. Buat Context itu sendiri
 const AuthContext = createContext({});
 
-// 2. Buat Provider
+// 2. Buat Provider Component (dengan 'export')
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); // Mulai dengan loading = true
+    const [loading, setLoading] = useState(true);
 
-    // --- PERBAIKAN 1: getUser HANYA mengambil data ---
     const getUser = async () => {
-        const { data } = await apiClient.get("/api/user");
-        setUser(data);
+        try {
+            // Panggil /api/user untuk memeriksa sesi yang ada
+            const { data } = await apiClient.get("/api/user");
+            setUser(data);
+        } catch (e) {
+            // Abaikan error 401, berarti user belum login
+        } finally {
+            setLoading(false);
+        }
     };
 
-    // --- PERBAIKAN 2: useEffect MENANGANI loading ---
-    // Ini adalah perbaikan KUNCI untuk masalah "kembali ke homepage".
     useEffect(() => {
-        const fetchInitialUser = async () => {
-            try {
-                await getUser();
-            } catch (e) {
-                console.log("No user logged in on initial load.");
-            } finally {
-                // setLoading(false) HANYA dipanggil SETELAH
-                // getUser (baik sukses atau gagal) selesai.
-                setLoading(false);
-            }
-        };
-        fetchInitialUser();
-    }, []); // <-- Dependensi kosong sudah benar
+        // Panggil getUser hanya sekali saat aplikasi dimuat
+        getUser();
+    }, []);
 
-    // --- PERBAIKAN 3: Logika login/register/logout yang benar ---
-    const login = async (data) => {
+    const login = async (credentials) => {
         try {
             await apiClient.get("/sanctum/csrf-cookie");
-            await apiClient.post("/login", data);
-            await getUser(); // Ambil user baru setelah login
+            // PERBAIKAN: Pastikan endpoint menggunakan /api/login
+            await apiClient.post("/api/login", credentials);
+            // Solusi paling andal: Paksa reload halaman untuk sinkronisasi sesi
+            window.location.reload();
+        } catch (e) {
+            if (e.response && e.response.status === 422) {
+                throw e.response.data.errors;
+            } else {
+                // Lempar error umum jika bukan 422
+                throw new Error(
+                    e.response?.data?.message ||
+                        "Login gagal, silakan coba lagi."
+                );
+            }
+        }
+    };
+
+    const register = async (data) => {
+        try {
+            await apiClient.get("/sanctum/csrf-cookie");
+            // PERBAIKAN: Pastikan endpoint menggunakan /api/register
+            await apiClient.post("/api/register", data);
+            window.location.reload();
         } catch (e) {
             if (e.response && e.response.status === 422) {
                 throw e.response.data.errors;
@@ -46,39 +60,22 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // --- INI ADALAH PERBAIKAN TYPO ---
-    const register = async (data) => {
-        const { address, ...finalData } = data;
-        try {
-            await apiClient.get("/sanctum/csrf-cookie");
-            await apiClient.post("/register", finalData);
-            await getUser(); // Ambil user baru setelah register
-        } catch (e) { // <-- Kurung kurawal { } sudah ditambahkan
-            if (e.response && e.response.status === 422) {
-                throw e.response.data.errors;
-            }
-            throw e;
-        }
-    };
-
     const logout = async () => {
-        await apiClient.post("/logout");
-        setUser(null); // Langsung set user ke null
+        // PERBAIKAN: Pastikan endpoint menggunakan /api/logout
+        await apiClient.post("/api/logout");
+        window.location.reload();
     };
 
     return (
         <AuthContext.Provider
-            value={{ user, loading, getUser, login, register, logout }}
+            value={{ user, loading, login, register, logout }}
         >
-            {/* Di file AppRouter.jsx Anda sudah ada 'if (loading) return ...',
-              jadi 'children' di sini bisa langsung dirender.
-            */}
             {children}
         </AuthContext.Provider>
     );
 };
 
-// 3. Buat Custom Hook
+// 3. Buat Custom Hook (dengan 'export')
 export function useAuth() {
     return useContext(AuthContext);
 }
