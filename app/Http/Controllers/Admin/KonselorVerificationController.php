@@ -24,6 +24,11 @@ class KonselorVerificationController extends Controller
      */
     public function show(User $user)
     {
+        // ============= DEBUGGING =============
+        // Hentikan eksekusi di sini dan tampilkan isi variabel $user
+        dd($user);
+        // =====================================
+
         // Pastikan user adalah konselor
         if ($user->role !== 'konselor') {
             abort(404);

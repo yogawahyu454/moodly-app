@@ -324,6 +324,7 @@ const SidebarMenu = ({ role }) => {
             icon: CheckSquareIcon,
             children: [
                 { label: "Konselor", path: "/admin/verifikasi-konselor" },
+                { label: "Customer", path: "/admin/verifikasi-customer" },
             ],
         },
     ];

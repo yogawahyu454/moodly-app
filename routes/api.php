@@ -12,7 +12,9 @@ use App\Http\Controllers\SuperAdmin\BookingManagementController;
 
 use App\Http\Controllers\Admin\JadwalKonsultasiController;
 use App\Http\Controllers\Admin\KonselorVerificationController;
+use App\Http\Controllers\Admin\CustomerVerificationController;
 use App\Http\Middleware\RoleMiddleware;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +31,22 @@ Route::group(['middleware' => [
 
     // 1. Rute Autentikasi
     require __DIR__ . '/auth.php';
+
+    Route::get('admin/verifikasi-konselor/{user:id}', function (User $user) {
+        // Tes apakah $user berhasil di-binding
+        if ($user && $user->role === 'konselor') {
+            return response()->json([
+                'message' => 'TES ISOLASI BERHASIL!',
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'user_role' => $user->role,
+                'user_status' => $user->status,
+            ]);
+        } else {
+            // Jika binding gagal atau role salah
+            return response()->json(['message' => 'TES ISOLASI GAGAL: Binding User gagal atau role salah.'], 404);
+        }
+    });
 
     // 2. Grup untuk SEMUA rute yang terproteksi
     Route::middleware('auth:sanctum')->group(function () {
@@ -65,9 +83,16 @@ Route::group(['middleware' => [
         Route::middleware(RoleMiddleware::class . ':admin,super-admin')->prefix('admin')->group(function () {
             Route::apiResource('jadwal-konsultasi', JadwalKonsultasiController::class)->only(['index', 'show', 'destroy']);
             Route::get('verifikasi-konselor', [KonselorVerificationController::class, 'index']);
-            Route::get('verifikasi-konselor/{user}', [KonselorVerificationController::class, 'show']);
-            Route::post('verifikasi-konselor/{user}/approve', [KonselorVerificationController::class, 'approve']);
-            Route::post('verifikasi-konselor/{user}/reject', [KonselorVerificationController::class, 'reject']);
+
+            // Route::get('verifikasi-konselor/{user:id}', [KonselorVerificationController::class, 'show']);
+            Route::post('verifikasi-konselor/{user:id}/approve', [KonselorVerificationController::class, 'approve']);
+            Route::post('verifikasi-konselor/{user:id}/reject', [KonselorVerificationController::class, 'reject']);
+
+            // --- Rute Verifikasi Customer ---
+            Route::get('verifikasi-customer', [CustomerVerificationController::class, 'index']);
+            Route::get('verifikasi-customer/{user:id}', [CustomerVerificationController::class, 'show']);
+            Route::post('verifikasi-customer/{user:id}/approve', [CustomerVerificationController::class, 'approve']);
+            Route::post('verifikasi-customer/{user:id}/reject', [CustomerVerificationController::class, 'reject']);
         });
     });
 });

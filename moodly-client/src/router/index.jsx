@@ -43,6 +43,8 @@ import JadwalKonsultasiPage from "../pages/admin/jadwal-konsultasi/Index.jsx";
 import JadwalDetailPage from "../pages/admin/jadwal-konsultasi/Show.jsx";
 import VerifikasiKonselorPage from "../pages/admin/verifikasi-konselor/Index.jsx";
 import VerifikasiDetailPage from "../pages/admin/verifikasi-konselor/Show.jsx";
+import VerifikasiCustomerPage from "../pages/admin/verifikasi-customer/Index.jsx";
+import VerifikasiCustomerDetailPage from "../pages/admin/verifikasi-customer/Show.jsx";
 
 // ==================================================================
 // --- PENJAGA ZONA CUSTOMER / KONSELOR (TAMPILAN MOBILE) ---
@@ -253,6 +255,14 @@ const AppRouter = () => {
                     <Route
                         path="/admin/verifikasi-konselor/:id"
                         element={<VerifikasiDetailPage />}
+                    />
+                    <Route
+                        path="/admin/verifikasi-customer"
+                        element={<VerifikasiCustomerPage />}
+                    />
+                    <Route
+                        path="/admin/verifikasi-customer/:id"
+                        element={<VerifikasiCustomerDetailPage />}
                     />
                 </Route>
             </Route>

@@ -1,12 +1,18 @@
-import React from "react"; // Tambahkan useState jika perlu input alasan
+import React from "react"; // Hapus useState karena reason diambil dari parent
 
-const RejectModal = ({ isOpen, onClose, onConfirm, konselorName }) => {
-    // const [reason, setReason] = useState(''); // Jika perlu input alasan
+const RejectModal = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    konselorName,
+    setReason,
+    reason,
+}) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 w-full max-w-md text-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-8 w-full max-w-md text-center shadow-xl">
                 {/* Icon Silang */}
                 <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
                     <svg
@@ -25,25 +31,39 @@ const RejectModal = ({ isOpen, onClose, onConfirm, konselorName }) => {
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </div>
-                <h2 className="text-xl font-bold mb-4">Tolak Verifikasi?</h2>
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                    Tolak Verifikasi?
+                </h2>
                 <p className="text-gray-600 mb-6">
-                    Apakah Anda yakin ingin menolak verifikasi untuk konselor{" "}
-                    <span className="font-semibold">"{konselorName}"</span>?
-                    Status akan diubah menjadi 'Ditolak'.
+                    Yakin menolak verifikasi konselor{" "}
+                    <span className="font-semibold text-gray-900">
+                        "{konselorName}"
+                    </span>
+                    ? Status akan diubah menjadi 'Ditolak'.
                 </p>
-                {/* Opsional: Input Alasan Penolakan */}
-                {/* <textarea placeholder="Alasan penolakan (opsional)" className="w-full border rounded p-2 mb-4" rows="3" onChange={(e) => setReason(e.target.value)}></textarea> */}
+                {/* Input Alasan Penolakan */}
+                <textarea
+                    placeholder="Alasan penolakan (wajib diisi)"
+                    className="w-full border border-gray-300 rounded-lg p-2 mb-4 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows="3"
+                    onChange={(e) => setReason(e.target.value)} // Gunakan setter dari props
+                    value={reason} // Gunakan value dari props
+                ></textarea>
                 <div className="flex justify-center gap-4">
                     <button
                         onClick={onClose}
-                        className="px-6 py-2 bg-gray-200 rounded-lg"
+                        className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200"
                     >
                         Batal
                     </button>
-                    {/* Kirim reason jika ada: onClick={() => onConfirm(reason)} */}
                     <button
-                        onClick={onConfirm}
-                        className="px-6 py-2 bg-red-500 text-white rounded-lg"
+                        onClick={() => onConfirm(reason)} // Kirim reason saat konfirmasi
+                        disabled={!reason} // Disable jika reason kosong
+                        className={`px-6 py-2 bg-red-500 text-white rounded-lg transition-colors duration-200 ${
+                            !reason
+                                ? "opacity-50 cursor-not-allowed"
+                                : "hover:bg-red-600"
+                        }`}
                     >
                         Tolak
                     </button>
