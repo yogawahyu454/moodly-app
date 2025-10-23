@@ -1,6 +1,8 @@
-import React, { useState } from "react";
-// Impor useNavigate untuk navigasi
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+// Impor useNavigate dan useLocation
+import { useNavigate, useLocation } from "react-router-dom";
+// Impor apiClient
+import apiClient from "../../../api/axios";
 
 // --- Komponen Ikon ---
 const SearchIcon = () => (
@@ -38,41 +40,70 @@ const ArrowRightIcon = () => (
 );
 // --- Akhir Komponen Ikon ---
 
-export default function KonselingPage() {
-    const [activeTab, setActiveTab] = useState("Online");
-    // Inisialisasi hook useNavigate
+// Fungsi helper untuk mendapatkan tab awal dari URL
+const getInitialTab = (location) => {
+    const params = new URLSearchParams(location.search);
+    const type = params.get("type");
+    if (type === "Offline") return "Tatap Muka";
+    return "Online"; // Default
+};
+
+export default function BookingPage() {
+    const location = useLocation();
     const navigate = useNavigate();
 
-    const counselingTypes = [
-        {
-            name: "Konseling Pernikahan",
-            icon: "images/konseling/pernikahan1.png",
-        },
-        {
-            name: "Konseling Individu",
-            icon: "images/konseling/individu1.png",
-        },
-        {
-            name: "Konseling Keluarga",
-            icon: "images/konseling/keluarga1.png",
-        },
-        {
-            name: "Konseling Karir",
-            icon: "images/konseling/karir1.png",
-        },
-        {
-            name: "Konseling Depresi",
-            icon: "images/konseling/depresi1.png",
-        },
-        {
-            name: "Konseling Anak",
-            icon: "images/konseling/anak1.png",
-        },
-    ];
+    // State untuk data
+    const [activeTab, setActiveTab] = useState(() => getInitialTab(location));
+    const [allServices, setAllServices] = useState([]);
+    const [filteredServices, setFilteredServices] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // 1. Fetch data saat komponen mount
+    useEffect(() => {
+        const fetchServices = async () => {
+            try {
+                setLoading(true);
+                // Kita bisa gunakan ulang endpoint beranda-data
+                const response = await apiClient.get("/api/beranda-data");
+                setAllServices(response.data.services || []);
+                setError(null);
+            } catch (err) {
+                console.error("Gagal mengambil data layanan:", err);
+                setError("Gagal memuat data layanan.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchServices();
+    }, []);
+
+    // 2. Filter data saat tab atau search berubah
+    useEffect(() => {
+        // Tentukan tipe layanan berdasarkan tab aktif
+        const serviceType = activeTab === "Tatap Muka" ? "Offline" : "Online";
+
+        const filtered = allServices
+            .filter((service) => service.tipe_layanan === serviceType) // Filter berdasarkan tab
+            .filter((service) =>
+                service.jenis_konseling // Filter berdasarkan search
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+            );
+
+        setFilteredServices(filtered);
+    }, [allServices, activeTab, searchTerm]);
 
     // Fungsi untuk handle klik tombol Book
-    const handleBookClick = () => {
-        navigate("/pilih-psikolog"); // Arahkan ke halaman pilih psikolog
+    const handleBookClick = (service) => {
+        // Arahkan ke halaman find-counselor dengan membawa data service
+        navigate("/booking/find-counselor", {
+            state: {
+                serviceId: service.id,
+                serviceName: service.jenis_konseling,
+            },
+        });
     };
 
     return (
@@ -110,42 +141,66 @@ export default function KonselingPage() {
                         type="text"
                         placeholder="Pilih jenis konseling yang kamu butuhkan."
                         className="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                         <SearchIcon />
                     </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                    {counselingTypes.map((type, index) => (
-                        <div
-                            key={index}
-                            className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col items-center text-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1"
-                        >
-                            <img
-                                src={type.icon}
-                                alt={type.name}
-                                className="w-20 h-20"
-                                // Tambahkan fallback jika gambar lokal tidak ada
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src =
-                                        "https://placehold.co/80x80/E0F2FE/0EA5E9?text=Icon";
-                                }}
-                            />
-                            <p className="font-semibold text-gray-700 mt-3 text-sm">
-                                {type.name}
+
+                {/* Tampilkan Loading atau Error */}
+                {loading && (
+                    <div className="text-center text-gray-500">Memuat...</div>
+                )}
+                {error && (
+                    <div className="text-center text-red-500">{error}</div>
+                )}
+
+                {/* Tampilkan data dinamis */}
+                {!loading && !error && (
+                    <div className="grid grid-cols-2 gap-4">
+                        {filteredServices.length > 0 ? (
+                            filteredServices.map((service) => (
+                                <div
+                                    key={service.id}
+                                    className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col items-center text-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1"
+                                >
+                                    <img
+                                        src={
+                                            service.image_url ||
+                                            "https://placehold.co/80x80/E0F2FE/0EA5E9?text=Icon"
+                                        }
+                                        alt={service.jenis_konseling}
+                                        className="w-20 h-20 object-contain"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src =
+                                                "https://placehold.co/80x80/E0F2FE/0EA5E9?text=Icon";
+                                        }}
+                                    />
+                                    <p className="font-semibold text-gray-700 mt-3 text-sm">
+                                        {service.jenis_konseling}
+                                    </p>
+                                    <button
+                                        onClick={() => handleBookClick(service)} // Panggil fungsi dinamis
+                                        className="mt-4 flex items-center gap-1 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-1 rounded-lg hover:bg-gray-200 transition-colors"
+                                    >
+                                        <span>Book</span>
+                                        <ArrowRightIcon />
+                                    </button>
+                                </div>
+                            ))
+                        ) : (
+                            // Tampilkan jika tidak ada hasil
+                            <p className="col-span-2 text-center text-gray-500">
+                                {searchTerm
+                                    ? "Jenis konseling tidak ditemukan."
+                                    : "Layanan tidak tersedia untuk kategori ini."}
                             </p>
-                            {/* Tambahkan onClick ke tombol Book */}
-                            <button
-                                onClick={handleBookClick} // Panggil fungsi handleBookClick saat diklik
-                                className="mt-4 flex items-center gap-1 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-1 rounded-lg hover:bg-gray-200 transition-colors"
-                            >
-                                <span>Book</span>
-                                <ArrowRightIcon />
-                            </button>
-                        </div>
-                    ))}
-                </div>
+                        )}
+                    </div>
+                )}
             </main>
         </>
     );
