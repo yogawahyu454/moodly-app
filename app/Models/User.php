@@ -19,6 +19,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'avatar', // <-- TAMBAHKAN
         'email',
         'role',
         'status',
@@ -28,10 +29,12 @@ class User extends Authenticatable
         'district',
         'postal_code',
         'street_address',
+        'balance', // <-- TAMBAHKAN
         'password',
         'surat_izin_praktik',
         'spesialisasi',
         'rating',
+        'universitas', // <-- TAMBAHKAN
     ];
 
     /**

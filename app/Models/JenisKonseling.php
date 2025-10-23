@@ -16,6 +16,8 @@ class JenisKonseling extends Model
      */
     protected $fillable = [
         'jenis_konseling',
+        'tipe_layanan',
+        'image_url',
         'biaya_layanan',
         'nilai',
         'status',

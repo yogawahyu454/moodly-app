@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\SuperAdmin\JenisKonselingController;
 use App\Http\Controllers\SuperAdmin\DurasiKonselingController;
 use App\Http\Controllers\SuperAdmin\TempatKonselingController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\SuperAdmin\BookingManagementController;
 use App\Http\Controllers\Admin\JadwalKonsultasiController;
 use App\Http\Controllers\Admin\KonselorVerificationController;
 use App\Http\Controllers\Admin\CustomerVerificationController;
+
+use App\Http\Controllers\Customer\BerandaController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Models\User;
 use App\Models\Booking;
@@ -41,7 +44,10 @@ Route::group(['middleware' => [
             return $request->user();
         });
 
-        // Rute khusus Super Admin
+        // --- RUTE UNTUK CUSTOMER ---
+        Route::get('/beranda-data', [App\Http\Controllers\Customer\BerandaController::class, 'getBerandaData']);
+
+        // --- RUTE UNTUK SUPER ADMIN ---
         Route::middleware(RoleMiddleware::class . ':super-admin')->prefix('super-admin')->group(function () {
             Route::apiResource('jenis-konseling', JenisKonselingController::class);
             Route::apiResource('durasi-konseling', DurasiKonselingController::class);
@@ -65,6 +71,7 @@ Route::group(['middleware' => [
             Route::apiResource('booking-management', BookingManagementController::class)->only(['index', 'show', 'destroy']);
         });
 
+        // --- RUTE UNTUK ADMIN ---
         Route::middleware(RoleMiddleware::class . ':admin,super-admin')->prefix('admin')->group(function () {
             Route::get('jadwal-konsultasi', [JadwalKonsultasiController::class, 'index']);
             Route::get('jadwal-konsultasi/{booking:id}', [JadwalKonsultasiController::class, 'show']);
