@@ -52,6 +52,7 @@ Route::group(['middleware' => [
         Route::get('/history', [HistoryController::class, 'index']);
         Route::get('/history/{booking}', [HistoryController::class, 'show']);
         Route::patch('/history/{booking}/cancel', [HistoryController::class, 'cancel']);
+        Route::patch('/history/{booking}/reschedule', [HistoryController::class, 'reschedule']);
 
         // --- RUTE UNTUK SUPER ADMIN ---
         Route::middleware(RoleMiddleware::class . ':super-admin')->prefix('super-admin')->group(function () {

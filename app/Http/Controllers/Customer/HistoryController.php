@@ -87,4 +87,49 @@ class HistoryController extends Controller
             ], 500);
         }
     }
+
+    public function reschedule(Request $request, Booking $booking)
+    {
+        // Pastikan customer ini pemilik booking
+        if (Auth::id() !== $booking->customer_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Pastikan status booking memungkinkan untuk reschedule (misal: bukan 'Selesai' atau 'Batal')
+        if (!in_array($booking->status_pesanan, ['Dijadwalkan', 'Proses', 'Menunggu Konfirmasi'])) {
+            return response()->json(['message' => 'Status booking tidak memungkinkan untuk ganti jadwal.'], 400);
+        }
+
+        // Validasi input
+        $validated = $request->validate([
+            'alasan' => 'required|string|max:255',
+            'tanggalBaru' => 'required|date|after_or_equal:today', // Tanggal baru harus hari ini atau setelahnya
+            'catatan' => 'nullable|string',
+            // Kita mungkin perlu validasi jam baru juga di masa depan
+        ]);
+
+        // Update booking
+        try {
+            $booking->update([
+                // Set status kembali agar Admin bisa approve ulang
+                'status_pesanan' => 'Menunggu Konfirmasi',
+                'tanggal_konsultasi' => $validated['tanggalBaru'],
+                // Kosongkan alasan pembatalan jika sebelumnya ada
+                'alasan_pembatalan' => null,
+                'catatan_pembatalan' => null,
+                // TODO: Simpan alasan reschedule jika perlu (butuh kolom baru)
+                // 'alasan_reschedule' => $validated['alasan'],
+                // 'catatan_reschedule' => $validated['catatan'],
+            ]);
+
+            // TODO: Kirim notifikasi ke Admin?
+
+            return response()->json(['message' => 'Permintaan ganti jadwal berhasil dikirim. Menunggu konfirmasi Admin.']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal mengajukan ganti jadwal.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
