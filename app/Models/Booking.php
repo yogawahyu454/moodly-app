@@ -21,6 +21,8 @@ class Booking extends Model
         'metode_konsultasi',
         'status_pesanan',
         'total_harga',
+        'alasan_pembatalan',
+        'catatan_pembatalan',
     ];
 
     /**

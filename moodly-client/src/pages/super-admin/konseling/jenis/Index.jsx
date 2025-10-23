@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import apiClient from "../../../../api/axios";
-// Perbarui path import untuk menunjuk ke folder 'modals'
 import AddEditModal from "./modals/AddEditModal";
 import DeleteModal from "./modals/DeleteModal";
 
-// --- Komponen Ikon ---
+// (Ikon-ikon tetap sama, tidak perlu di-copy lagi)
 const EditIcon = () => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -58,18 +57,14 @@ const PlusIcon = () => (
     </svg>
 );
 
-// --- Komponen Utama Halaman ---
 const JenisKonselingPage = () => {
     const [jenisKonselingList, setJenisKonselingList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // --- State untuk Modal ---
     const [isAddEditModalOpen, setAddEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedJenisKonseling, setSelectedJenisKonseling] = useState(null);
 
-    // Fungsi untuk mengambil data
     const fetchJenisKonseling = async () => {
         try {
             setLoading(true);
@@ -86,19 +81,17 @@ const JenisKonselingPage = () => {
         }
     };
 
-    // Panggil fetchJenisKonseling saat komponen dimuat
     useEffect(() => {
         fetchJenisKonseling();
     }, []);
 
-    // --- Handler untuk membuka modal ---
     const handleOpenAddModal = () => {
-        setSelectedJenisKonseling(null); // Kosongkan data untuk mode "Add"
+        setSelectedJenisKonseling(null);
         setAddEditModalOpen(true);
     };
 
     const handleOpenEditModal = (data) => {
-        setSelectedJenisKonseling(data); // Isi data untuk mode "Edit"
+        setSelectedJenisKonseling(data);
         setAddEditModalOpen(true);
     };
 
@@ -107,26 +100,69 @@ const JenisKonselingPage = () => {
         setDeleteModalOpen(true);
     };
 
-    // --- Handler untuk aksi CRUD ---
-    const handleSave = async (data) => {
+    // --- LOGIKA SAVE DIPERBARUI ---
+    // Sekarang menerima (data teks) dan (file)
+    const handleSave = async (data, imageFile) => {
+        // 1. Buat FormData
+        const formData = new FormData();
+
+        // 2. Tambahkan semua data teks ke FormData
+        formData.append("jenis_konseling", data.jenis_konseling);
+        formData.append("tipe_layanan", data.tipe_layanan);
+        formData.append("biaya_layanan", data.biaya_layanan);
+        formData.append("nilai", data.nilai);
+        formData.append("status", data.status);
+
+        // 3. Tambahkan file gambar HANYA jika ada file baru
+        if (imageFile) {
+            formData.append("image", imageFile);
+        }
+
         try {
             if (selectedJenisKonseling) {
-                // Mode Edit (PUT)
-                await apiClient.put(
+                // --- Mode Edit (Update) ---
+                // Kita 'menipu' Laravel seolah-olah ini method PUT
+                formData.append("_method", "PUT");
+
+                // Kita HARUS pakai 'post' untuk mengirim FormData,
+                // tapi endpoint-nya sama dengan 'update'
+                await apiClient.post(
                     `/api/super-admin/jenis-konseling/${selectedJenisKonseling.id}`,
-                    data
+                    formData,
+                    {
+                        headers: {
+                            // Hapus content-type agar browser mengaturnya
+                            // menjadi 'multipart/form-data' secara otomatis
+                            "Content-Type": null,
+                        },
+                    }
                 );
             } else {
-                // Mode Add (POST)
-                await apiClient.post("/api/super-admin/jenis-konseling", data);
+                // --- Mode Add (Store) ---
+                await apiClient.post(
+                    "/api/super-admin/jenis-konseling",
+                    formData,
+                    {
+                        headers: {
+                            "Content-Type": null, // Sama, hapus header
+                        },
+                    }
+                );
             }
             setAddEditModalOpen(false);
-            fetchJenisKonseling(); // Muat ulang data setelah berhasil
+            fetchJenisKonseling();
         } catch (err) {
             console.error("Gagal menyimpan data:", err);
-            // TODO: Tampilkan pesan error ke pengguna di dalam modal
+            // Tangani error validasi (jika perlu)
+            if (err.response && err.response.status === 422) {
+                alert(
+                    "Gagal menyimpan: " +
+                        JSON.stringify(err.response.data.errors)
+                );
+            }
         }
     };
+    // --- AKHIR PERUBAHAN HANDLE SAVE ---
 
     const handleDelete = async () => {
         try {
@@ -134,7 +170,7 @@ const JenisKonselingPage = () => {
                 `/api/super-admin/jenis-konseling/${selectedJenisKonseling.id}`
             );
             setDeleteModalOpen(false);
-            fetchJenisKonseling(); // Muat ulang data
+            fetchJenisKonseling();
         } catch (err) {
             console.error("Gagal menghapus data:", err);
         }
@@ -156,13 +192,14 @@ const JenisKonselingPage = () => {
                 </button>
             </div>
 
-            {/* --- Tabel Data --- */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <table className="w-full text-left">
                     <thead className="bg-blue-100">
                         <tr>
                             <th className="p-4">No</th>
                             <th className="p-4">Jenis Konseling</th>
+                            <th className="p-4">Tipe Layanan</th>
+                            <th className="p-4">Ikon</th>
                             <th className="p-4">Biaya Layanan</th>
                             <th className="p-4">Nilai</th>
                             <th className="p-4">Status</th>
@@ -170,46 +207,77 @@ const JenisKonselingPage = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {jenisKonselingList.map((item, index) => (
-                            <tr key={item.id} className="border-t">
-                                <td className="p-4">{index + 1}</td>
-                                <td className="p-4">{item.jenis_konseling}</td>
-                                <td className="p-4">{item.biaya_layanan}</td>
-                                <td className="p-4">{item.nilai}</td>
-                                <td className="p-4">
-                                    <span
-                                        className={`px-2 py-1 text-sm rounded-full ${
-                                            item.status === "Aktif"
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-red-100 text-red-700"
-                                        }`}
-                                    >
-                                        {item.status}
-                                    </span>
-                                </td>
-                                <td className="p-4 flex gap-4">
-                                    <button
-                                        onClick={() =>
-                                            handleOpenEditModal(item)
-                                        }
-                                    >
-                                        <EditIcon />
-                                    </button>
-                                    <button
-                                        onClick={() =>
-                                            handleOpenDeleteModal(item)
-                                        }
-                                    >
-                                        <DeleteIcon />
-                                    </button>
+                        {jenisKonselingList.length > 0 ? (
+                            jenisKonselingList.map((item, index) => (
+                                <tr key={item.id} className="border-t">
+                                    <td className="p-4">{index + 1}</td>
+                                    <td className="p-4">
+                                        {item.jenis_konseling}
+                                    </td>
+                                    <td className="p-4">{item.tipe_layanan}</td>
+                                    <td className="p-4">
+                                        <img
+                                            // Gunakan item.image (dari accessor)
+                                            src={
+                                                item.image ||
+                                                "https://placehold.co/40x40/EBF4FF/3B82F6?text=?"
+                                            }
+                                            alt="Ikon"
+                                            className="w-10 h-10 rounded-md object-cover"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src =
+                                                    "https://placehold.co/40x40/EBF4FF/3B82F6?text=?";
+                                            }}
+                                        />
+                                    </td>
+                                    <td className="p-4">
+                                        {item.biaya_layanan}
+                                    </td>
+                                    <td className="p-4">{item.nilai}</td>
+                                    <td className="p-4">
+                                        <span
+                                            className={`px-2 py-1 text-sm rounded-full ${
+                                                item.status === "Aktif"
+                                                    ? "bg-green-100 text-green-700"
+                                                    : "bg-red-100 text-red-700"
+                                            }`}
+                                        >
+                                            {item.status}
+                                        </span>
+                                    </td>
+                                    <td className="p-4 flex gap-4">
+                                        <button
+                                            onClick={() =>
+                                                handleOpenEditModal(item)
+                                            }
+                                        >
+                                            <EditIcon />
+                                        </button>
+                                        <button
+                                            onClick={() =>
+                                                handleOpenDeleteModal(item)
+                                            }
+                                        >
+                                            <DeleteIcon />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td
+                                    colSpan="8"
+                                    className="p-4 text-center text-gray-500"
+                                >
+                                    Data belum tersedia.
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
 
-            {/* --- Render Modal --- */}
             <AddEditModal
                 isOpen={isAddEditModalOpen}
                 onClose={() => setAddEditModalOpen(false)}

@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\KonselorVerificationController;
 use App\Http\Controllers\Admin\CustomerVerificationController;
 
 use App\Http\Controllers\Customer\BerandaController;
+use App\Http\Controllers\Customer\HistoryController;
+
 use App\Http\Middleware\RoleMiddleware;
 use App\Models\User;
 use App\Models\Booking;
@@ -45,11 +47,16 @@ Route::group(['middleware' => [
         });
 
         // --- RUTE UNTUK CUSTOMER ---
-        Route::get('/beranda-data', [App\Http\Controllers\Customer\BerandaController::class, 'getBerandaData']);
+        // PERBAIKAN: Hapus namespace lengkap agar 'use' di atas terpakai
+        Route::get('/beranda-data', [BerandaController::class, 'getBerandaData']);
+        Route::get('/history', [HistoryController::class, 'index']);
+        Route::get('/history/{booking}', [HistoryController::class, 'show']);
+        Route::patch('/history/{booking}/cancel', [HistoryController::class, 'cancel']);
 
         // --- RUTE UNTUK SUPER ADMIN ---
         Route::middleware(RoleMiddleware::class . ':super-admin')->prefix('super-admin')->group(function () {
             Route::apiResource('jenis-konseling', JenisKonselingController::class);
+            Route::post('jenis-konseling/{id}', [JenisKonselingController::class, 'update']);
             Route::apiResource('durasi-konseling', DurasiKonselingController::class);
             Route::apiResource('tempat-konseling', TempatKonselingController::class);
 
