@@ -9,27 +9,32 @@ import AdminLayout from "../layouts/AdminLayout";
 import AuthAdminLayout from "../layouts/AuthAdminLayout";
 import PageLayout from "../layouts/PageLayout";
 
-// --- Halaman Customer & Auth (Mobile) ---
+// --- Halaman Auth (Mobile) ---
 import LoginPage from "../pages/auth/LoginPage";
 import AddressPage from "../pages/auth/AddressPage";
 import RegisterPage from "../pages/auth/RegisterPage";
-import BerandaPage from "../pages/customer/BerandaPage";
-import KonselingPage from "../pages/customer/KonselingPage";
-import RiwayatPage from "../pages/customer/RiwayatPage";
-import NotifikasiPage from "../pages/customer/NotifikasiPage";
-import GantiJadwalPage from "../pages/customer/GantiJadwalPage";
-import DetailRiwayatPage from "../pages/customer/DetailRiwayatPage";
-import DetailPembatalanPage from "../pages/customer/DetailPembatalanPage";
-import CancellationPage from "../pages/customer/CancellationPage";
-import PsikologPage from "../pages/customer/PsikologPage";
-import ProfilePage from "../pages/customer/profile/ProfilePage";
-import EditProfilePage from "../pages/customer/profile/EditProfilePage";
-
-import TatapMukaPage from "../pages/customer/TatapMukaPage"; // <-- Import TatapMukaPage
-import PaymentInstructionsPage from "../pages/customer/PaymentInstructionsPage";
 import OnboardingPage from "../pages/auth/OnboardingPage";
-import RatingPage from "../pages/customer/RatingPage";
-import ChatPage from "../pages/customer/ChatPage";
+
+// --- Halaman Customer (Mobile - REFAKTORED) ---
+import HomePage from "../pages/customer/HomePage";
+import NotificationPage from "../pages/customer/NotificationPage";
+
+import BookingPage from "../pages/customer/booking/Index";
+import FindCounselorPage from "../pages/customer/booking/FindCounselorPage";
+import InPersonPage from "../pages/customer/booking/InPersonPage";
+import PaymentPage from "../pages/customer/booking/PaymentPage";
+
+import HistoryPage from "../pages/customer/history/Index";
+import HistoryDetailPage from "../pages/customer/history/DetailPage";
+import RatingPage from "../pages/customer/history/RatingPage";
+import CancelPage from "../pages/customer/history/CancelPage";
+import CancelDetailPage from "../pages/customer/history/CancelDetailPage";
+import ReschedulePage from "../pages/customer/history/ReschedulePage";
+
+import ProfilePage from "../pages/customer/profile/Index";
+import EditProfilePage from "../pages/customer/profile/EditPage";
+
+import ChatPage from "../pages/customer/session/ChatPage";
 
 // --- Halaman Admin & Super Admin (Website) ---
 import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
@@ -63,7 +68,7 @@ const GuestGuard = () => {
             user.role?.includes("super-admin") ? (
             <Navigate to="/admin/dashboard" />
         ) : (
-            <Navigate to="/beranda" />
+            <Navigate to="/home" /> // <-- DIUBAH ke /home
         );
     }
     return <Outlet />; // Jika belum login, tampilkan halaman (login, register)
@@ -131,74 +136,75 @@ const AppRouter = () => {
                     <Route path="/register" element={<RegisterPage />} />
                 </Route>
             </Route>
+
             {/* ====================================================== */}
-            {/* == PERBAIKAN DI SINI == */}
+            {/* == AREA REFAKTOR ZONA CUSTOMER == */}
             {/* ====================================================== */}
             <Route element={<ProtectedGuard />}>
                 {/* 1. Rute yang PAKAI Navigasi Bawah */}
                 <Route element={<MobileLayout />}>
-                    <Route path="/beranda" element={<BerandaPage />} />
-                    <Route path="/konseling" element={<KonselingPage />} />
-                    <Route path="/riwayat" element={<RiwayatPage />} />
-                    <Route path="/notifikasi" element={<NotifikasiPage />} />
+                    <Route path="/home" element={<HomePage />} />
+                    <Route path="/booking" element={<BookingPage />} />
+                    <Route path="/history" element={<HistoryPage />} />
+                    <Route
+                        path="/notifications"
+                        element={<NotificationPage />}
+                    />
                     <Route path="/profile" element={<ProfilePage />} />
+
+                    {/* Redirect darurat jika ada yg masih akses /beranda */}
+                    <Route path="/beranda" element={<Navigate to="/home" />} />
                 </Route>
 
                 {/* 2. Rute Full-Screen (TANPA Navigasi Bawah) */}
                 <Route element={<PageLayout />}>
-                    <Route path="/profile/edit" element={<EditProfilePage />} />
-                    <Route
-                        path="/pilih-psikolog"
-                        element={<PsikologPage />}
-                    />{" "}
-                    <Route path="/tatap-muka" element={<TatapMukaPage />} />{" "}
-                    {/* <-- Rute baru ditambahkan */}
+                    {/* Auth Flow (lanjutan) */}
                     <Route path="/address" element={<AddressPage />} />
-                    <Route path="/ganti-jadwal" element={<GantiJadwalPage />} />
-                    <Route
-                        path="/ganti-jadwal"
-                        element={<GantiJadwalPage />}
-                    />{" "}
-                    {/* <-- Komponen yang benar sekarang */}
-                    <Route path="/psikolog" element={<PsikologPage />} />
-                    {/* --- RUTE ADDRESS PAGE DITAMBAHKAN DI SINI --- */}
-                    <Route path="/address" element={<AddressPage />} />
-                    {/* RUTE UNTUK DETAIL RIWAYAT */}
-                    <Route
-                        path="/riwayat/:id"
-                        element={<DetailRiwayatPage />}
-                    />
-                    {/* === PERBAIKAN RUTE PEMBATALAN === */}
-                    {/* Rute untuk HALAMAN MELAKUKAN PEMBATALAN (Aksi) */}
-                    <Route
-                        path="/batalkan/:id"
-                        element={<CancellationPage />}
-                    />
-                    {/* Rute untuk MELIHAT DETAIL PEMBATALAN (View) */}
-                    <Route
-                        path="/detail-pembatalan/:id"
-                        element={<DetailPembatalanPage />}
-                    />
-                    {/* --- RUTE BARU UNTUK RATING PAGE --- */}
-                    <Route path="/beri-nilai/:id" element={<RatingPage />} />
-                    {/* --- RUTE BARU UNTUK CHAT PAGE --- */}
-                    <Route path="/chat/:id" element={<ChatPage />} />
-                    {/* --- RUTE BARU UNTUK PAYMENT INSTRUCTIONS --- */}
-                    <Route
-                        path="/payment-instructions/:id"
-                        element={<PaymentInstructionsPage />}
-                    />
-                    <Route path="/chat/:id" element={<ChatPage />} />
-                    {/* === AKHIR PERBAIKAN === */}
-                </Route>
 
-                {/* RUTE DUPLIKAT DIHAPUS DARI SINI */}
-                {/* <Route path="/cancel/:id" element={<CancellationPage />} /> */}
-            </Route>{" "}
-            {/* <-- Tag penutup ProtectedGuard */}
+                    {/* Profile Flow */}
+                    <Route path="/profile/edit" element={<EditProfilePage />} />
+
+                    {/* Booking Flow */}
+                    <Route
+                        path="/booking/find-counselor"
+                        element={<FindCounselorPage />}
+                    />
+                    <Route
+                        path="/booking/in-person"
+                        element={<InPersonPage />}
+                    />
+                    <Route
+                        path="/booking/payment/:id"
+                        element={<PaymentPage />}
+                    />
+
+                    {/* History Flow */}
+                    <Route
+                        path="/history/:id"
+                        element={<HistoryDetailPage />}
+                    />
+                    <Route
+                        path="/history/reschedule"
+                        element={<ReschedulePage />}
+                    />
+                    <Route
+                        path="/history/cancel/:id"
+                        element={<CancelPage />}
+                    />
+                    <Route
+                        path="/history/cancel-detail/:id"
+                        element={<CancelDetailPage />}
+                    />
+                    <Route path="/history/rate/:id" element={<RatingPage />} />
+
+                    {/* Session Flow */}
+                    <Route path="/session/chat/:id" element={<ChatPage />} />
+                </Route>
+            </Route>
             {/* ====================================================== */}
-            {/* == AKHIR PERBAIKAN == */}
+            {/* == AKHIR REFAKTOR == */}
             {/* ====================================================== */}
+
             {/* === ZONA ADMIN (WEBSITE) === */}
             <Route element={<AdminGuestGuard />}>
                 <Route element={<AuthAdminLayout />}>
@@ -255,7 +261,6 @@ const AppRouter = () => {
                         path="/admin/customer-management/:id"
                         element={<CustomerDetailPage />}
                     />
-                    {/* --- RUTE BARU UNTUK BOOKING --- */}
                     <Route
                         path="/admin/booking-management"
                         element={<BookingManagementPage />}
@@ -290,6 +295,7 @@ const AppRouter = () => {
                     />
                 </Route>
             </Route>
+
             {/* === RUTE FALLBACK === */}
             {/* Arahkan / ke /login jika tidak ada rute lain yang cocok di awal */}
             <Route path="/" element={<Navigate to="/login" />} />

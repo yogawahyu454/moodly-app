@@ -1,19 +1,7 @@
 import React from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
-// Placeholder useAuth, sesuaikan dengan path asli Anda jika diperlukan
-// import { useAuth } from "../context/AuthContext";
-
-// --- Placeholder Context (Agar bisa jalan di sini) ---
-const AuthContext = React.createContext(null);
-const useAuth = () => {
-    // Return dummy user/loading state
-    return (
-        React.useContext(AuthContext) || {
-            user: { name: "User", role: ["customer"] },
-            loading: false,
-        }
-    );
-};
+// Menggunakan useAuth yang asli dari Context
+import { useAuth } from "../context/AuthContext";
 
 // --- Komponen Ikon Baru (Disesuaikan dengan Desain Referensi) ---
 
@@ -161,20 +149,14 @@ const BottomNavItem = ({ to, icon, label, active }) => (
 
 // --- Komponen Layout Utama ---
 export default function MobileLayout() {
-    // Gunakan placeholder user jika useAuth asli error
-    const { user } = useAuth() || {
-        user: {
-            name: "User",
-            avatar: null,
-            city: "Yogyakarta",
-            province: "Indonesia DIY",
-        },
-    };
+    // Menggunakan useAuth asli
+    const { user } = useAuth();
     const location = useLocation();
     const currentPath = location.pathname;
 
     // Tentukan apakah header harus ditampilkan
-    const showHeader = currentPath === "/beranda"; // Hanya tampil di beranda
+    // PERUBAHAN: Diperbarui ke "/home"
+    const showHeader = currentPath === "/home"; // Hanya tampil di beranda
 
     return (
         <div className="bg-gray-100 min-h-screen font-sans">
@@ -210,7 +192,10 @@ export default function MobileLayout() {
                                 </div>
                             </div>
                         </div>
-                        <BellIcon />
+                        {/* PERUBAHAN: BellIcon menjadi Link ke /notifications */}
+                        <Link to="/notifications">
+                            <BellIcon />
+                        </Link>
                     </header>
                 )}
 
@@ -228,30 +213,34 @@ export default function MobileLayout() {
                 {" "}
                 {/* Pastikan z-index lebih rendah dari header jika header sticky */}
                 <div className="flex justify-around items-center h-16">
+                    {/* PERUBAHAN: Item Beranda */}
                     <BottomNavItem
-                        to="/beranda"
-                        icon={<HomeIcon active={currentPath === "/beranda"} />}
-                        label="Beranda"
-                        active={currentPath === "/beranda"}
+                        to="/home"
+                        icon={<HomeIcon active={currentPath === "/home"} />}
+                        label="Home"
+                        active={currentPath === "/home"}
                     />
+                    {/* PERUBAHAN: Item Konseling */}
                     <BottomNavItem
-                        to="/konseling"
+                        to="/booking"
                         icon={
                             <CounselingIcon
-                                active={currentPath === "/konseling"}
+                                active={currentPath === "/booking"}
                             />
                         }
-                        label="Konseling"
-                        active={currentPath === "/konseling"}
+                        label="Booking"
+                        active={currentPath === "/booking"}
                     />
+                    {/* PERUBAHAN: Item Riwayat */}
                     <BottomNavItem
-                        to="/riwayat"
+                        to="/history"
                         icon={
-                            <HistoryIcon active={currentPath === "/riwayat"} />
+                            <HistoryIcon active={currentPath === "/history"} />
                         }
-                        label="Riwayat"
-                        active={currentPath === "/riwayat"}
+                        label="History"
+                        active={currentPath === "/history"}
                     />
+                    {/* TETAP: Item Profile */}
                     <BottomNavItem
                         to="/profile"
                         icon={
