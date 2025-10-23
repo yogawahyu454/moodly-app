@@ -44,6 +44,7 @@ const ArrowRightIcon = () => (
 const getInitialTab = (location) => {
     const params = new URLSearchParams(location.search);
     const type = params.get("type");
+    // Perbaiki: Sesuaikan dengan nilai 'tipe_layanan' dari backend ('Offline')
     if (type === "Offline") return "Tatap Muka";
     return "Online"; // Default
 };
@@ -95,16 +96,33 @@ export default function BookingPage() {
         setFilteredServices(filtered);
     }, [allServices, activeTab, searchTerm]);
 
-    // Fungsi untuk handle klik tombol Book
+    // --- FUNGSI HANDLE BOOK CLICK YANG DIPERBARUI ---
     const handleBookClick = (service) => {
-        // Arahkan ke halaman find-counselor dengan membawa data service
-        navigate("/booking/find-counselor", {
-            state: {
-                serviceId: service.id,
-                serviceName: service.jenis_konseling,
-            },
-        });
+        // Cek tipe layanan
+        if (service.tipe_layanan === "Online") {
+            // Jika Online, arahkan ke halaman pilih psikolog
+            navigate("/booking/find-counselor", {
+                state: {
+                    serviceId: service.id,
+                    serviceName: service.jenis_konseling,
+                    method: "Online", // Tandai sebagai Online
+                },
+            });
+        } else if (service.tipe_layanan === "Offline") {
+            // Jika Offline, arahkan ke halaman pilih tempat (InPersonPage)
+            navigate("/booking/in-person", {
+                state: {
+                    serviceId: service.id,
+                    serviceName: service.jenis_konseling,
+                    // Tidak perlu method di sini, karena halaman InPersonPage akan meneruskannya
+                },
+            });
+        } else {
+            console.warn("Tipe layanan tidak dikenal:", service.tipe_layanan);
+            // Fallback atau tampilkan error jika perlu
+        }
     };
+    // ---------------------------------------------
 
     return (
         <>
@@ -139,22 +157,26 @@ export default function BookingPage() {
                 <div className="relative mb-6">
                     <input
                         type="text"
-                        placeholder="Pilih jenis konseling yang kamu butuhkan."
+                        placeholder="Cari jenis konseling..." // Ganti placeholder
                         className="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        {" "}
+                        {/* Disable pointer events */}
                         <SearchIcon />
                     </div>
                 </div>
 
                 {/* Tampilkan Loading atau Error */}
                 {loading && (
-                    <div className="text-center text-gray-500">Memuat...</div>
+                    <div className="text-center text-gray-500 py-5">
+                        Memuat...
+                    </div>
                 )}
                 {error && (
-                    <div className="text-center text-red-500">{error}</div>
+                    <div className="text-center text-red-500 py-5">{error}</div>
                 )}
 
                 {/* Tampilkan data dinamis */}
@@ -167,12 +189,13 @@ export default function BookingPage() {
                                     className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col items-center text-center transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1"
                                 >
                                     <img
+                                        // Gunakan service.image (hasil dari accessor di backend)
                                         src={
-                                            service.image_url ||
+                                            service.image ||
                                             "https://placehold.co/80x80/E0F2FE/0EA5E9?text=Icon"
                                         }
                                         alt={service.jenis_konseling}
-                                        className="w-20 h-20 object-contain"
+                                        className="w-20 h-20 object-contain" // object-contain
                                         onError={(e) => {
                                             e.target.onerror = null;
                                             e.target.src =
@@ -193,10 +216,11 @@ export default function BookingPage() {
                             ))
                         ) : (
                             // Tampilkan jika tidak ada hasil
-                            <p className="col-span-2 text-center text-gray-500">
+                            <p className="col-span-2 text-center text-gray-500 py-5">
                                 {searchTerm
                                     ? "Jenis konseling tidak ditemukan."
-                                    : "Layanan tidak tersedia untuk kategori ini."}
+                                    : `Tidak ada layanan "${activeTab}" saat ini.`}{" "}
+                                {/* Pesan lebih jelas */}
                             </p>
                         )}
                     </div>
