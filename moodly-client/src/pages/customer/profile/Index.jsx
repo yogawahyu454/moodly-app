@@ -1,7 +1,41 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
-// Hapus useAuth jika tidak dipakai langsung di sini
-// import { useAuth } from "../context/AuthContext";
+// Hapus useAuth jika tidak dipakai langsung di sini dan ambil dari context
+// import { useAuth } from "../context/AuthContext"; // Sesuaikan path jika perlu
+
+// --- Placeholder Context (Agar bisa jalan di sini) ---
+const AuthContext = React.createContext(null);
+const useAuth = () => {
+    // Return dummy user/loading state
+    return (
+        React.useContext(AuthContext) || {
+            user: {
+                name: "Indira Rahmania",
+                email: "indirarahmania@gmail.com",
+                avatar: "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=600",
+            },
+            loading: false,
+            logout: () => {},
+        }
+    );
+};
+const AuthProvider = ({ children }) => {
+    const value = {
+        user: {
+            name: "Indira Rahmania",
+            email: "indirarahmania@gmail.com",
+            avatar: "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        loading: false,
+        logout: () => {
+            console.log("logout placeholder");
+        },
+    };
+    return (
+        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    );
+};
+// --- Akhir Placeholder Context ---
 
 // --- Komponen Ikon ---
 const UserIcon = () => (
@@ -126,81 +160,79 @@ const MenuItem = ({ icon, label, onClick }) => (
 );
 
 export default function ProfilePage() {
-    // const { user, logout } = useAuth(); // Ambil user dan fungsi logout dari context jika perlu
+    const { user, logout } = useAuth(); // Ambil user dan fungsi logout dari context
     const navigate = useNavigate(); // Hook untuk navigasi
-
-    // Dummy data user (ganti dengan data asli dari useAuth)
-    const user = {
-        name: "Indira Rahmania",
-        email: "indirarahmania@gmail.com",
-        avatar: "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=600",
-    };
 
     const handleLogout = () => {
         // Panggil fungsi logout asli dari context jika ada
-        // logout();
-        console.log("Logout clicked"); // Placeholder
+        logout(); // Memanggil fungsi logout dari placeholder context
+        console.log("Logout clicked");
         navigate("/login"); // Arahkan ke login setelah logout
     };
 
-    // PERBAIKAN: Fungsi untuk navigasi ke Edit Profile (sesuaikan path jika perlu)
-    const handleEditProfileClick = () => {
-        // Pastikan path ini terdaftar di AppRouter.jsx Anda
-        navigate("/profile/edit"); // Menggunakan path '/profile/edit'
-    };
+    // Fungsi navigasi baru
+    const handleEditProfileClick = () => navigate("/profile/edit");
+    const handleChangeEmailClick = () => navigate("/profile/change-email"); // Asumsi path
+    const handleChangePasswordClick = () =>
+        navigate("/profile/change-password"); // Asumsi path
+    const handleHelpClick = () => navigate("/help"); // Asumsi path
 
     return (
-        <div className="bg-white min-h-full font-sans pt-8 pb-4 px-4">
-            {/* Info Profil Atas */}
-            <div className="flex flex-col items-center text-center mb-8">
-                <img
-                    // Gunakan avatar user atau fallback
-                    src={
-                        user?.avatar ||
-                        `https://ui-avatars.com/api/?name=${
-                            user?.name?.charAt(0) || "U"
-                        }&background=EBF4FF&color=3B82F6&bold=true`
-                    }
-                    alt="Profile Avatar"
-                    className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg mb-3"
-                />
-                <h2 className="text-xl font-bold text-gray-800">
-                    {user?.name || "Nama Pengguna"}
-                </h2>
-                <p className="text-sm text-gray-500 mt-1">
-                    {user?.email || "email@example.com"}
-                </p>
-            </div>
+        // Gunakan AuthProvider di sini agar useAuth() bekerja
+        <AuthProvider>
+            <div className="bg-white min-h-full font-sans pt-8 pb-4 px-4">
+                {/* Info Profil Atas */}
+                <div className="flex flex-col items-center text-center mb-8">
+                    <img
+                        // Gunakan avatar user atau fallback
+                        src={
+                            user?.avatar ||
+                            `https://ui-avatars.com/api/?name=${
+                                user?.name?.charAt(0) || "U"
+                            }&background=EBF4FF&color=3B82F6&bold=true`
+                        }
+                        alt="Profile Avatar"
+                        className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg mb-3"
+                    />
+                    <h2 className="text-xl font-bold text-gray-800">
+                        {user?.name || "Nama Pengguna"}
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                        {user?.email || "email@example.com"}
+                    </p>
+                </div>
 
-            {/* Daftar Menu */}
-            <div className="space-y-3">
-                {/* PERBAIKAN: Tambahkan onClick ke MenuItem Profile */}
-                <MenuItem
-                    icon={<UserIcon />}
-                    label="Profile"
-                    onClick={handleEditProfileClick} // Memanggil fungsi navigasi
-                />
-                <MenuItem
-                    icon={<MailIcon />}
-                    label="Email"
-                    onClick={() => console.log("Email clicked")}
-                />
-                <MenuItem
-                    icon={<LockIcon />}
-                    label="Ubah Kata sandi"
-                    onClick={() => console.log("Ubah Kata Sandi clicked")}
-                />
-                <MenuItem
-                    icon={<HelpCircleIcon />}
-                    label="Bantuan"
-                    onClick={() => console.log("Bantuan clicked")}
-                />
-                <MenuItem
-                    icon={<LogOutIcon />}
-                    label="Log Out"
-                    onClick={handleLogout}
-                />
+                {/* Daftar Menu */}
+                <div className="space-y-3">
+                    {/* PERBAIKAN: Tambahkan onClick ke MenuItem Profile */}
+                    <MenuItem
+                        icon={<UserIcon />}
+                        label="Profile"
+                        onClick={handleEditProfileClick} // Memanggil fungsi navigasi
+                    />
+                    {/* 👇 PERBAIKAN onClick 👇 */}
+                    <MenuItem
+                        icon={<MailIcon />}
+                        label="Email"
+                        onClick={handleChangeEmailClick} // Arahkan ke halaman ganti email
+                    />
+                    <MenuItem
+                        icon={<LockIcon />}
+                        label="Ubah Kata sandi"
+                        onClick={handleChangePasswordClick} // Arahkan ke halaman ganti password
+                    />
+                    <MenuItem
+                        icon={<HelpCircleIcon />}
+                        label="Bantuan"
+                        onClick={handleHelpClick} // Arahkan ke halaman bantuan
+                    />
+                    <MenuItem
+                        icon={<LogOutIcon />}
+                        label="Log Out"
+                        onClick={handleLogout}
+                    />
+                </div>
             </div>
-        </div>
+        </AuthProvider>
     );
 }
