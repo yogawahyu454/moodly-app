@@ -1,3 +1,5 @@
+// src/router/index.jsx (atau path file router Anda)
+
 import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -33,10 +35,12 @@ import ReschedulePage from "../pages/customer/history/ReschedulePage";
 
 import ProfilePage from "../pages/customer/profile/Index";
 import EditProfilePage from "../pages/customer/profile/EditPage";
+import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage"; // <-- 1. TAMBAHKAN IMPORT INI
 
 import ChatPage from "../pages/customer/session/ChatPage";
 
 // --- Halaman Admin & Super Admin (Website) ---
+// (Semua import halaman admin tetap sama...)
 import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
 import DurasiKonselingPage from "../pages/super-admin/konseling/durasi/Index.jsx";
 import TempatKonselingPage from "../pages/super-admin/konseling/tempat/Index.jsx";
@@ -48,7 +52,6 @@ import CustomerManagementPage from "../pages/super-admin/customer/Index.jsx";
 import CustomerDetailPage from "../pages/super-admin/customer/Show.jsx";
 import BookingManagementPage from "../pages/super-admin/pesanan/Index.jsx";
 import BookingDetailPage from "../pages/super-admin/pesanan/Show.jsx";
-
 import JadwalKonsultasiPage from "../pages/admin/jadwal-konsultasi/Index.jsx";
 import JadwalDetailPage from "../pages/admin/jadwal-konsultasi/Show.jsx";
 import VerifikasiKonselorPage from "../pages/admin/verifikasi-konselor/Index.jsx";
@@ -56,27 +59,22 @@ import VerifikasiDetailPage from "../pages/admin/verifikasi-konselor/Show.jsx";
 import VerifikasiCustomerPage from "../pages/admin/verifikasi-customer/Index.jsx";
 import VerifikasiCustomerDetailPage from "../pages/admin/verifikasi-customer/Show.jsx";
 
-// ==================================================================
-// --- PENJAGA ZONA CUSTOMER / KONSELOR (TAMPILAN MOBILE) ---
-// ==================================================================
-
+// --- (Komponen Guard tetap sama) ---
 const GuestGuard = () => {
     const { user } = useAuth();
     if (user) {
-        // Jika sudah login, lempar ke beranda yang sesuai
         return user.role?.includes("admin") ||
             user.role?.includes("super-admin") ? (
             <Navigate to="/admin/dashboard" />
         ) : (
-            <Navigate to="/home" /> // <-- DIUBAH ke /home
+            <Navigate to="/home" />
         );
     }
-    return <Outlet />; // Jika belum login, tampilkan halaman (login, register)
+    return <Outlet />;
 };
 
 const ProtectedGuard = () => {
     const { user } = useAuth();
-    // Admin & Super Admin tidak boleh mengakses zona mobile
     if (
         !user ||
         user.role?.includes("admin") ||
@@ -84,16 +82,11 @@ const ProtectedGuard = () => {
     ) {
         return <Navigate to="/login" />;
     }
-    return <Outlet />; // Jika user adalah customer/konselor, izinkan akses
+    return <Outlet />;
 };
-
-// ==================================================================
-// --- PENJAGA ZONA ADMIN / SUPER ADMIN (TAMPILAN WEBSITE) ---
-// ==================================================================
 
 const AdminGuestGuard = () => {
     const { user } = useAuth();
-    // Jika sudah login sebagai admin, lempar ke dashboard
     return user &&
         (user.role?.includes("admin") || user.role?.includes("super-admin")) ? (
         <Navigate to="/admin/dashboard" />
@@ -104,7 +97,6 @@ const AdminGuestGuard = () => {
 
 const AdminProtectedGuard = () => {
     const { user } = useAuth();
-    // Hanya izinkan jika sudah login DAN rolenya admin atau super-admin
     return user &&
         (user.role?.includes("admin") || user.role?.includes("super-admin")) ? (
         <Outlet />
@@ -117,7 +109,6 @@ const AdminProtectedGuard = () => {
 const AppRouter = () => {
     const { loading } = useAuth();
 
-    // Tampilkan loading screen saat status autentikasi sedang diperiksa
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -131,7 +122,6 @@ const AppRouter = () => {
             {/* === ZONA CUSTOMER (MOBILE) === */}
             <Route element={<GuestGuard />}>
                 <Route element={<AuthLayout />}>
-                    {/* <Route path="/" element={<OnboardingPage />} /> */}
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                 </Route>
@@ -151,8 +141,6 @@ const AppRouter = () => {
                         element={<NotificationPage />}
                     />
                     <Route path="/profile" element={<ProfilePage />} />
-
-                    {/* Redirect darurat jika ada yg masih akses /beranda */}
                     <Route path="/beranda" element={<Navigate to="/home" />} />
                 </Route>
 
@@ -163,6 +151,12 @@ const AppRouter = () => {
 
                     {/* Profile Flow */}
                     <Route path="/profile/edit" element={<EditProfilePage />} />
+
+                    {/* 👇 2. TAMBAHKAN RUTE BARU DI SINI 👇 */}
+                    <Route
+                        path="/profile/change-email"
+                        element={<ChangeEmailPage />}
+                    />
 
                     {/* Booking Flow */}
                     <Route
@@ -201,11 +195,9 @@ const AppRouter = () => {
                     <Route path="/session/chat/:id" element={<ChatPage />} />
                 </Route>
             </Route>
-            {/* ====================================================== */}
-            {/* == AKHIR REFAKTOR == */}
-            {/* ====================================================== */}
 
             {/* === ZONA ADMIN (WEBSITE) === */}
+            {/* (Rute admin tetap sama...) */}
             <Route element={<AdminGuestGuard />}>
                 <Route element={<AuthAdminLayout />}>
                     <Route path="/admin/login" element={<LoginPage />} />
@@ -297,7 +289,6 @@ const AppRouter = () => {
             </Route>
 
             {/* === RUTE FALLBACK === */}
-            {/* Arahkan / ke /login jika tidak ada rute lain yang cocok di awal */}
             <Route path="/" element={<Navigate to="/login" />} />
             <Route
                 path="*"
