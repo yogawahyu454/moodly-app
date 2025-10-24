@@ -35,6 +35,10 @@ import ProfilePage from "../pages/customer/profile/Index";
 import EditProfilePage from "../pages/customer/profile/EditPage";
 import ChangePasswordPage from "../pages/customer/profile/ChangePasswordPage";
 import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage";
+
+import HelpPage from "../pages/customer/help/Index";
+import FaqPage from "../pages/customer/help/FaqPage";
+import ChatAdminPage from "../pages/customer/help/ChatAdminPage";
 import ChatPage from "../pages/customer/session/ChatPage";
 
 // --- Halaman Admin & Super Admin (Website) ---
@@ -120,7 +124,7 @@ const AppRouter = () => {
             {/* === ZONA AUTH CUSTOMER (MOBILE) === */}
             <Route element={<GuestGuard />}>
                 <Route element={<AuthLayout />}>
-                    {/* <Route path="/" element={<OnboardingPage />} /> */}
+                    <Route path="/" element={<OnboardingPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                 </Route>
@@ -128,7 +132,6 @@ const AppRouter = () => {
 
             {/* === ZONA CUSTOMER TERPROTEKSI (MOBILE) === */}
             <Route element={<ProtectedGuard />}>
-                {/* 1. Rute yang PAKAI Navigasi Bawah */}
                 <Route element={<MobileLayout />}>
                     <Route path="/home" element={<HomePage />} />
                     <Route path="/booking" element={<BookingPage />} />
@@ -142,14 +145,10 @@ const AppRouter = () => {
                         path="/beranda"
                         element={<Navigate to="/home" />}
                     />{" "}
-                    {/* Redirect */}
                 </Route>
 
-                {/* 2. Rute Full-Screen (TANPA Navigasi Bawah) */}
                 <Route element={<PageLayout />}>
-                    {/* Auth Flow (lanjutan) */}
                     <Route path="/address" element={<AddressPage />} />
-                    {/* Profile Flow */}
                     <Route path="/profile/edit" element={<EditProfilePage />} />
                     <Route
                         path="/profile/change-password"
@@ -159,7 +158,6 @@ const AppRouter = () => {
                         path="/profile/change-email"
                         element={<ChangeEmailPage />}
                     />
-                    {/* Booking Flow */}
                     <Route
                         path="/booking/find-counselor"
                         element={<FindCounselorPage />}
@@ -171,7 +169,7 @@ const AppRouter = () => {
                     <Route
                         path="/booking/tempat/:id"
                         element={<LocationDetailPage />}
-                    />{" "}
+                    />
                     <Route
                         path="/booking/payment/:id"
                         element={<PaymentPage />}
@@ -183,8 +181,7 @@ const AppRouter = () => {
                     <Route
                         path="/history/reschedule/:id"
                         element={<ReschedulePage />}
-                    />{" "}
-                    {/* Tambahkan :id */}
+                    />
                     <Route
                         path="/history/cancel/:id"
                         element={<CancelPage />}
@@ -194,7 +191,12 @@ const AppRouter = () => {
                         element={<CancelDetailPage />}
                     />
                     <Route path="/history/rate/:id" element={<RatingPage />} />
-                    {/* Session Flow */}
+                    <Route path="/help" element={<HelpPage />} />
+                    <Route path="/help/faq" element={<FaqPage />} />
+                    <Route
+                        path="/help/chat-admin"
+                        element={<ChatAdminPage />}
+                    />
                     <Route path="/session/chat/:id" element={<ChatPage />} />
                 </Route>
             </Route>
@@ -207,7 +209,6 @@ const AppRouter = () => {
             </Route>
             <Route element={<AdminProtectedGuard />}>
                 <Route element={<AdminLayout />}>
-                    {/* Rute Admin/SuperAdmin tetap sama */}
                     <Route
                         path="/admin"
                         element={<Navigate to="/admin/dashboard" />}

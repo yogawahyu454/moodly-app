@@ -1,41 +1,6 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
-// Hapus useAuth jika tidak dipakai langsung di sini dan ambil dari context
-// import { useAuth } from "../context/AuthContext"; // Sesuaikan path jika perlu
-
-// --- Placeholder Context (Agar bisa jalan di sini) ---
-const AuthContext = React.createContext(null);
-const useAuth = () => {
-    // Return dummy user/loading state
-    return (
-        React.useContext(AuthContext) || {
-            user: {
-                name: "Indira Rahmania",
-                email: "indirarahmania@gmail.com",
-                avatar: "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=600",
-            },
-            loading: false,
-            logout: () => {},
-        }
-    );
-};
-const AuthProvider = ({ children }) => {
-    const value = {
-        user: {
-            name: "Indira Rahmania",
-            email: "indirarahmania@gmail.com",
-            avatar: "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=600",
-        },
-        loading: false,
-        logout: () => {
-            console.log("logout placeholder");
-        },
-    };
-    return (
-        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-    );
-};
-// --- Akhir Placeholder Context ---
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
 
 // --- Komponen Ikon ---
 const UserIcon = () => (
@@ -118,7 +83,7 @@ const LogOutIcon = () => (
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="text-gray-500"
+        className="text-gray-500" // Ubah warna jadi merah jika diinginkan: text-red-500
     >
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
         <polyline points="16 17 21 12 16 7"></polyline>
@@ -144,95 +109,122 @@ const ChevronRightIcon = () => (
 // --- Akhir Komponen Ikon ---
 
 // --- Komponen Item Menu ---
-const MenuItem = ({ icon, label, onClick }) => (
+const MenuItem = (
+    { icon, label, onClick, isLogout = false } // Tambah prop isLogout
+) => (
     <button
         onClick={onClick}
-        className="w-full flex items-center justify-between bg-gray-100 p-4 rounded-lg hover:bg-gray-200 transition-colors duration-200 group"
+        className={`w-full flex items-center justify-between p-4 rounded-lg transition-colors duration-200 group ${
+            isLogout
+                ? "bg-red-50 hover:bg-red-100" // Styling khusus logout
+                : "bg-gray-100 hover:bg-gray-200"
+        }`}
     >
         <div className="flex items-center gap-3">
-            {icon}
-            <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+            {React.cloneElement(icon, {
+                // Ubah warna ikon logout
+                className: isLogout ? "text-red-500" : "text-gray-500",
+            })}
+            <span
+                className={`text-sm font-medium group-hover:text-gray-900 ${
+                    isLogout ? "text-red-700" : "text-gray-700"
+                }`}
+            >
                 {label}
             </span>
         </div>
-        <ChevronRightIcon />
+        {!isLogout && <ChevronRightIcon />}{" "}
+        {/* Sembunyikan panah untuk logout */}
     </button>
 );
 
 export default function ProfilePage() {
-    const { user, logout } = useAuth(); // Ambil user dan fungsi logout dari context
-    const navigate = useNavigate(); // Hook untuk navigasi
+    // Ambil user dan fungsi logout dari context asli
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
 
-    const handleLogout = () => {
-        // Panggil fungsi logout asli dari context jika ada
-        logout(); // Memanggil fungsi logout dari placeholder context
-        console.log("Logout clicked");
-        navigate("/login"); // Arahkan ke login setelah logout
+    const handleLogout = async () => {
+        try {
+            if (logout) {
+                await logout(); // Panggil fungsi logout dari context (asynchronous)
+            }
+            console.log("Logout successful");
+            // Navigasi ke login SETELAH logout berhasil
+            navigate("/login");
+        } catch (error) {
+            console.error("Logout failed:", error);
+            // Tampilkan pesan error jika perlu
+        }
     };
 
-    // Fungsi navigasi baru
+    // Fungsi navigasi diperbarui
     const handleEditProfileClick = () => navigate("/profile/edit");
-    const handleChangeEmailClick = () => navigate("/profile/change-email"); // Asumsi path
+    const handleChangeEmailClick = () => navigate("/profile/change-email");
     const handleChangePasswordClick = () =>
-        navigate("/profile/change-password"); // Asumsi path
-    const handleHelpClick = () => navigate("/help"); // Asumsi path
+        navigate("/profile/change-password");
+
+    const handleHelpClick = () => navigate("/help");
 
     return (
-        // Gunakan AuthProvider di sini agar useAuth() bekerja
-        <AuthProvider>
-            <div className="bg-white min-h-full font-sans pt-8 pb-4 px-4">
-                {/* Info Profil Atas */}
-                <div className="flex flex-col items-center text-center mb-8">
-                    <img
-                        // Gunakan avatar user atau fallback
-                        src={
-                            user?.avatar ||
-                            `https://ui-avatars.com/api/?name=${
-                                user?.name?.charAt(0) || "U"
-                            }&background=EBF4FF&color=3B82F6&bold=true`
-                        }
-                        alt="Profile Avatar"
-                        className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg mb-3"
-                    />
-                    <h2 className="text-xl font-bold text-gray-800">
-                        {user?.name || "Nama Pengguna"}
-                    </h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                        {user?.email || "email@example.com"}
-                    </p>
-                </div>
-
-                {/* Daftar Menu */}
-                <div className="space-y-3">
-                    {/* PERBAIKAN: Tambahkan onClick ke MenuItem Profile */}
-                    <MenuItem
-                        icon={<UserIcon />}
-                        label="Profile"
-                        onClick={handleEditProfileClick} // Memanggil fungsi navigasi
-                    />
-                    {/* 👇 PERBAIKAN onClick 👇 */}
-                    <MenuItem
-                        icon={<MailIcon />}
-                        label="Email"
-                        onClick={handleChangeEmailClick} // Arahkan ke halaman ganti email
-                    />
-                    <MenuItem
-                        icon={<LockIcon />}
-                        label="Ubah Kata sandi"
-                        onClick={handleChangePasswordClick} // Arahkan ke halaman ganti password
-                    />
-                    <MenuItem
-                        icon={<HelpCircleIcon />}
-                        label="Bantuan"
-                        onClick={handleHelpClick} // Arahkan ke halaman bantuan
-                    />
-                    <MenuItem
-                        icon={<LogOutIcon />}
-                        label="Log Out"
-                        onClick={handleLogout}
-                    />
-                </div>
+        <div className="bg-white min-h-full font-sans pt-8 pb-4 px-4">
+            {/* Info Profil Atas */}
+            <div className="flex flex-col items-center text-center mb-8">
+                <img
+                    // Gunakan avatar user dari context
+                    src={
+                        user?.avatar || // Gunakan accessor avatar jika ada
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            user?.name || "U"
+                        )}&background=EBF4FF&color=3B82F6&bold=true`
+                    }
+                    alt="Profile Avatar"
+                    className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg mb-3"
+                    onError={(e) => {
+                        // Fallback jika avatar gagal load
+                        e.target.onerror = null; // Prevent infinite loop
+                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            user?.name || "U"
+                        )}&background=EBF4FF&color=3B82F6&bold=true`;
+                    }}
+                />
+                <h2 className="text-xl font-bold text-gray-800">
+                    {user?.name || "Nama Pengguna"}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                    {user?.email || "email@example.com"}
+                </p>
             </div>
-        </AuthProvider>
+
+            {/* Daftar Menu */}
+            <div className="space-y-3">
+                <MenuItem
+                    icon={<UserIcon />}
+                    label="Edit Profile" // Ubah label
+                    onClick={handleEditProfileClick}
+                />
+                <MenuItem
+                    icon={<MailIcon />}
+                    label="Email"
+                    onClick={handleChangeEmailClick}
+                />
+                <MenuItem
+                    icon={<LockIcon />}
+                    label="Ubah Kata sandi"
+                    onClick={handleChangePasswordClick}
+                />
+                {/* --- PERBAIKAN: Gunakan handleHelpClick --- */}
+                <MenuItem
+                    icon={<HelpCircleIcon />}
+                    label="Bantuan" // Kembalikan label
+                    onClick={handleHelpClick} // Panggil fungsi yang benar
+                />
+                <MenuItem
+                    icon={<LogOutIcon />}
+                    label="Log Out"
+                    onClick={handleLogout}
+                    isLogout={true} // Tandai sebagai tombol logout
+                />
+            </div>
+        </div>
     );
 }
