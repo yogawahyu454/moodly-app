@@ -1,5 +1,3 @@
-// src/router/index.jsx (atau path file router Anda)
-
 import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -17,14 +15,14 @@ import AddressPage from "../pages/auth/AddressPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import OnboardingPage from "../pages/auth/OnboardingPage";
 
-// --- Halaman Customer (Mobile - REFAKTORED) ---
+// --- Halaman Customer (Mobile) ---
 import HomePage from "../pages/customer/HomePage";
 import NotificationPage from "../pages/customer/NotificationPage";
-
 import BookingPage from "../pages/customer/booking/Index";
 import FindCounselorPage from "../pages/customer/booking/FindCounselorPage";
 import InPersonPage from "../pages/customer/booking/InPersonPage";
 import PaymentPage from "../pages/customer/booking/PaymentPage";
+import LocationDetailPage from "../pages/customer/booking/LocationDetailPage";
 
 import HistoryPage from "../pages/customer/history/Index";
 import HistoryDetailPage from "../pages/customer/history/DetailPage";
@@ -35,12 +33,11 @@ import ReschedulePage from "../pages/customer/history/ReschedulePage";
 
 import ProfilePage from "../pages/customer/profile/Index";
 import EditProfilePage from "../pages/customer/profile/EditPage";
-import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage"; // <-- 1. TAMBAHKAN IMPORT INI
-
+import ChangePasswordPage from "../pages/customer/profile/ChangePasswordPage";
+import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage";
 import ChatPage from "../pages/customer/session/ChatPage";
 
 // --- Halaman Admin & Super Admin (Website) ---
-// (Semua import halaman admin tetap sama...)
 import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
 import DurasiKonselingPage from "../pages/super-admin/konseling/durasi/Index.jsx";
 import TempatKonselingPage from "../pages/super-admin/konseling/tempat/Index.jsx";
@@ -52,6 +49,7 @@ import CustomerManagementPage from "../pages/super-admin/customer/Index.jsx";
 import CustomerDetailPage from "../pages/super-admin/customer/Show.jsx";
 import BookingManagementPage from "../pages/super-admin/pesanan/Index.jsx";
 import BookingDetailPage from "../pages/super-admin/pesanan/Show.jsx";
+
 import JadwalKonsultasiPage from "../pages/admin/jadwal-konsultasi/Index.jsx";
 import JadwalDetailPage from "../pages/admin/jadwal-konsultasi/Show.jsx";
 import VerifikasiKonselorPage from "../pages/admin/verifikasi-konselor/Index.jsx";
@@ -59,7 +57,7 @@ import VerifikasiDetailPage from "../pages/admin/verifikasi-konselor/Show.jsx";
 import VerifikasiCustomerPage from "../pages/admin/verifikasi-customer/Index.jsx";
 import VerifikasiCustomerDetailPage from "../pages/admin/verifikasi-customer/Show.jsx";
 
-// --- (Komponen Guard tetap sama) ---
+// --- Guards (Tetap Sama) ---
 const GuestGuard = () => {
     const { user } = useAuth();
     if (user) {
@@ -119,17 +117,16 @@ const AppRouter = () => {
 
     return (
         <Routes>
-            {/* === ZONA CUSTOMER (MOBILE) === */}
+            {/* === ZONA AUTH CUSTOMER (MOBILE) === */}
             <Route element={<GuestGuard />}>
                 <Route element={<AuthLayout />}>
+                    {/* <Route path="/" element={<OnboardingPage />} /> */}
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                 </Route>
             </Route>
 
-            {/* ====================================================== */}
-            {/* == AREA REFAKTOR ZONA CUSTOMER == */}
-            {/* ====================================================== */}
+            {/* === ZONA CUSTOMER TERPROTEKSI (MOBILE) === */}
             <Route element={<ProtectedGuard />}>
                 {/* 1. Rute yang PAKAI Navigasi Bawah */}
                 <Route element={<MobileLayout />}>
@@ -141,23 +138,27 @@ const AppRouter = () => {
                         element={<NotificationPage />}
                     />
                     <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/beranda" element={<Navigate to="/home" />} />
+                    <Route
+                        path="/beranda"
+                        element={<Navigate to="/home" />}
+                    />{" "}
+                    {/* Redirect */}
                 </Route>
 
                 {/* 2. Rute Full-Screen (TANPA Navigasi Bawah) */}
                 <Route element={<PageLayout />}>
                     {/* Auth Flow (lanjutan) */}
                     <Route path="/address" element={<AddressPage />} />
-
                     {/* Profile Flow */}
                     <Route path="/profile/edit" element={<EditProfilePage />} />
-
-                    {/* 👇 2. TAMBAHKAN RUTE BARU DI SINI 👇 */}
+                    <Route
+                        path="/profile/change-password"
+                        element={<ChangePasswordPage />}
+                    />
                     <Route
                         path="/profile/change-email"
                         element={<ChangeEmailPage />}
                     />
-
                     {/* Booking Flow */}
                     <Route
                         path="/booking/find-counselor"
@@ -168,19 +169,22 @@ const AppRouter = () => {
                         element={<InPersonPage />}
                     />
                     <Route
+                        path="/booking/tempat/:id"
+                        element={<LocationDetailPage />}
+                    />{" "}
+                    <Route
                         path="/booking/payment/:id"
                         element={<PaymentPage />}
                     />
-
-                    {/* History Flow */}
                     <Route
                         path="/history/:id"
                         element={<HistoryDetailPage />}
                     />
                     <Route
-                        path="/history/reschedule"
+                        path="/history/reschedule/:id"
                         element={<ReschedulePage />}
-                    />
+                    />{" "}
+                    {/* Tambahkan :id */}
                     <Route
                         path="/history/cancel/:id"
                         element={<CancelPage />}
@@ -190,14 +194,12 @@ const AppRouter = () => {
                         element={<CancelDetailPage />}
                     />
                     <Route path="/history/rate/:id" element={<RatingPage />} />
-
                     {/* Session Flow */}
                     <Route path="/session/chat/:id" element={<ChatPage />} />
                 </Route>
             </Route>
 
             {/* === ZONA ADMIN (WEBSITE) === */}
-            {/* (Rute admin tetap sama...) */}
             <Route element={<AdminGuestGuard />}>
                 <Route element={<AuthAdminLayout />}>
                     <Route path="/admin/login" element={<LoginPage />} />
@@ -205,6 +207,7 @@ const AppRouter = () => {
             </Route>
             <Route element={<AdminProtectedGuard />}>
                 <Route element={<AdminLayout />}>
+                    {/* Rute Admin/SuperAdmin tetap sama */}
                     <Route
                         path="/admin"
                         element={<Navigate to="/admin/dashboard" />}

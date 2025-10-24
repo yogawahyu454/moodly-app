@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom"; // Import Link
+import { useNavigate, useLocation, Link } from "react-router-dom"; // Tambahkan Link
 import apiClient from "../../../api/axios"; // Sesuaikan path
 
 // --- Komponen Ikon ---
+
+// Icon Panah Kiri (di header)
 function ArrowLeftIcon(props) {
-    // Header Back Arrow
     return (
         <svg
             {...props}
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            // Ganti warna stroke menjadi putih untuk header biru
-            stroke="currentColor" // Disesuaikan di className
+            strokeWidth={2} // Dibuat lebih tebal sedikit
+            stroke="currentColor"
         >
             <path
                 strokeLinecap="round"
@@ -24,160 +24,106 @@ function ArrowLeftIcon(props) {
     );
 }
 
-function StarIcon(props) {
-    // Rating Star
+// Icon Daun (Nyaman)
+function LeafIcon(props) {
     return (
         <svg
             {...props}
             xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"
+            />
+        </svg>
+    );
+}
+
+// Icon Jam (Tanpa Antri)
+function ClockIconSolid(props) {
+    // Versi solid fill
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
             fill="currentColor"
         >
             <path
                 fillRule="evenodd"
-                d="M10.868 2.884c.321-.772 1.415-.772 1.736 0l1.83 4.401 4.753.39c.83.069 1.171 1.028.536 1.601l-3.435 3.016 1.03 4.634c.176.79-.71 1.4-1.442.993L10 15.176l-4.276 2.748c-.732.407-1.618-.203-1.442-.993l1.03-4.634L1.737 9.276c-.635-.573-.294-1.532.536-1.601l4.753-.39 1.83-4.401Z"
+                d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
                 clipRule="evenodd"
             />
         </svg>
     );
 }
 
-// Ikon Baru untuk Fitur
-const LeafIcon = (props) => (
-    <svg
-        {...props}
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-    >
-        <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
-        />
-        {/* Menggunakan path daun yang lebih sederhana */}
-        <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M9.172 16.172a4 4 0 0 1 5.656 0M9 10h.01M15 10h.01M4.71 5.71a9.96 9.96 0 0 1 14.58 0"
-        />{" "}
-        {/* Garis lengkung bawah */}
-        <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 18a6 6 0 0 0-6-6h12a6 6 0 0 0-6 6Z"
-        />{" "}
-        {/* Bentuk daun */}
-    </svg>
-);
-const ClockIconFeatures = (props) => (
-    <svg
-        {...props}
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-    >
-        <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-        />
-    </svg>
-);
-const LockIcon = (props) => (
-    <svg
-        {...props}
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-    >
-        <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
-        />
-    </svg>
-);
-
-// --- Komponen Kartu Tempat (Tetap Sama, mungkin styling disesuaikan sedikit) ---
-const TempatCard = ({ tempat }) => {
-    const navigate = useNavigate();
-    const location = useLocation();
-
-    const handleClick = () => {
-        navigate(`/booking/tempat/${tempat.id}`, {
-            state: location.state,
-        });
-    };
-
+// Icon Gembok (Aman)
+function LockIcon(props) {
     return (
-        <button
-            onClick={handleClick}
-            // Ubah shadow dan border agar lebih halus
-            className="w-full text-left bg-white rounded-xl shadow-sm overflow-hidden transition-transform duration-300 hover:scale-[1.03] active:scale-95 border border-gray-100"
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
         >
-            <img
-                src={
-                    tempat.image ||
-                    "https://placehold.co/400x200/EBF4FF/BFDBFE?text=Tempat"
-                } // Ubah warna placeholder
-                alt={tempat.nama_tempat}
-                className="w-full h-32 object-cover"
-                onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src =
-                        "https://placehold.co/400x200/EBF4FF/BFDBFE?text=Tempat";
-                }}
+            <path
+                fillRule="evenodd"
+                d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3A5.25 5.25 0 0 0 12 1.5Zm-3.75 5.25v3a.75.75 0 0 0 1.5 0v-3a3.75 3.75 0 1 1 7.5 0v3a.75.75 0 0 0 1.5 0v-3a5.25 5.25 0 0 0-10.5 0Z"
+                clipRule="evenodd"
             />
-            <div className="p-3">
-                <h3 className="font-bold text-gray-800 text-base">
-                    {tempat.nama_tempat}
-                </h3>
-                {/* Modifikasi alamat agar lebih singkat jika perlu */}
-                <p className="text-xs text-gray-500 mt-1 truncate">
-                    {tempat.alamat}
-                </p>
-                <div className="flex items-center mt-2">
-                    <StarIcon className="w-4 h-4 text-yellow-400" />
-                    <span className="text-xs font-semibold text-gray-700 ml-1">
-                        {tempat.rating?.toFixed(1) || "N/A"}
-                    </span>
-                    <span className="text-xs text-gray-500 ml-2">
-                        ({tempat.review_count || 0}+ Reviews)
-                    </span>
-                </div>
-            </div>
-        </button>
+        </svg>
     );
-};
+}
 
+// Icon Bintang (Rating)
+function StarIcon(props) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+        >
+            <path
+                fillRule="evenodd"
+                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354l-4.597 2.622c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                clipRule="evenodd"
+            />
+        </svg>
+    );
+}
+
+// --- Komponen Halaman ---
 export default function InPersonPage() {
     const navigate = useNavigate();
     const location = useLocation();
+    // Ambil data serviceId dan serviceName dari state navigasi
+    const { serviceId, serviceName } = location.state || {};
 
     const [tempatList, setTempatList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Fetch data tempat konseling saat komponen mount
     useEffect(() => {
         const fetchTempatKonseling = async () => {
-            // ... (logika fetch data tetap sama) ...
             try {
                 setLoading(true);
                 const response = await apiClient.get(
                     "/api/booking/tempat-konseling"
                 );
-                setTempatList(response.data);
+                setTempatList(response.data || []); // Pastikan array
                 setError(null);
             } catch (err) {
                 console.error("Gagal mengambil data tempat:", err);
                 setError("Gagal memuat daftar tempat.");
+                setTempatList([]); // Kosongkan jika error
             } finally {
                 setLoading(false);
             }
@@ -185,90 +131,155 @@ export default function InPersonPage() {
         fetchTempatKonseling();
     }, []);
 
+    // Handle klik pada kartu tempat
+    const handleTempatClick = (tempatId) => {
+        // --- TAMBAHKAN LOG DI SINI ---
+        console.log(
+            "Navigating to detail page for tempatId:",
+            tempatId,
+            "Type:",
+            typeof tempatId
+        );
+        // -----------------------------
+
+        // Navigasi ke halaman detail tempat
+        navigate(`/booking/tempat/${tempatId}`, {
+            state: { serviceId, serviceName }, // Kirim juga info service
+        });
+    };
+
     return (
-        // Ubah bg-sky-50 menjadi lebih terang atau sesuai desain
         <div className="bg-pink-50 min-h-screen">
-            {/* Header Baru */}
-            <header className="bg-cyan-500 p-4 pt-6 flex items-center sticky top-0 z-10 text-white rounded-b-2xl shadow-md">
+            {" "}
+            {/* Latar belakang pink lembut */}
+            {/* Header Biru */}
+            <header className="bg-sky-500 p-4 flex items-center sticky top-0 z-10 text-white rounded-b-2xl shadow-lg">
                 <button
-                    // Arahkan kembali ke /booking
-                    onClick={() =>
-                        navigate("/booking", { state: location.state })
-                    }
-                    className="p-2 -ml-2 rounded-full hover:bg-cyan-600 transition-colors"
+                    onClick={() => navigate(-1)} // Tombol kembali
+                    className="p-2 -ml-2 text-white" // Warna putih
                 >
-                    {/* Ganti warna ikon menjadi putih */}
-                    <ArrowLeftIcon className="w-6 h-6 text-white" />
+                    <ArrowLeftIcon className="w-6 h-6" />
                 </button>
-                <h1 className="text-lg font-bold text-center flex-grow -ml-2">
-                    {" "}
-                    {/* Sesuaikan margin jika perlu */}
+                <h1 className="text-lg font-bold text-center flex-grow -ml-4">
                     Tatap Muka
                 </h1>
-                {/* Spacer jika perlu agar judul benar-benar di tengah */}
-                <div className="w-10"></div>
+                {/* Spacer agar judul tetap di tengah */}
+                <div className="w-6"></div>
             </header>
-
-            {/* Bagian Fitur Ikon Baru */}
-            <section className="px-4 py-3 flex justify-around items-center bg-white shadow-sm rounded-lg mx-4 -mt-4 relative z-0">
-                <div className="flex flex-col items-center text-center">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-1">
-                        <LeafIcon className="w-5 h-5 text-blue-500" />
+            {/* Ikon Fitur */}
+            <div className="px-4 py-3 flex justify-around items-center bg-white rounded-lg mx-4 -mt-5 relative z-20 shadow">
+                <div className="flex flex-col items-center gap-1">
+                    <div className="bg-sky-100 p-2 rounded-full">
+                        <LeafIcon className="w-5 h-5 text-sky-600" />
                     </div>
-                    <span className="text-xs font-medium text-gray-600">
+                    <span className="text-xs font-semibold text-gray-700">
                         Nyaman
                     </span>
                 </div>
-                <div className="flex flex-col items-center text-center">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-1">
-                        <ClockIconFeatures className="w-5 h-5 text-blue-500" />
+                <div className="flex flex-col items-center gap-1">
+                    <div className="bg-sky-100 p-2 rounded-full">
+                        <ClockIconSolid className="w-5 h-5 text-sky-600" />
                     </div>
-                    <span className="text-xs font-medium text-gray-600">
+                    <span className="text-xs font-semibold text-gray-700">
                         Tanpa Antri
                     </span>
                 </div>
-                <div className="flex flex-col items-center text-center">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-1">
-                        <LockIcon className="w-5 h-5 text-blue-500" />
+                <div className="flex flex-col items-center gap-1">
+                    <div className="bg-sky-100 p-2 rounded-full">
+                        <LockIcon className="w-5 h-5 text-sky-600" />
                     </div>
-                    <span className="text-xs font-medium text-gray-600">
+                    <span className="text-xs font-semibold text-gray-700">
                         Aman
                     </span>
                 </div>
-            </section>
-
-            {/* Teks Deskriptif Baru */}
-            <section className="px-4 pt-5 pb-2">
-                <h2 className="text-base font-bold text-gray-800">
+            </div>
+            {/* Konten Utama */}
+            <main className="p-4 pt-6">
+                {" "}
+                {/* Beri padding atas */}
+                <h2 className="text-lg font-bold text-gray-800 mb-1">
                     Rumah Moodly
                 </h2>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 mb-4">
                     Tempat aman untuk mengenal dan menyembuhkan diri.
                 </p>
-            </section>
-
-            {/* Konten Utama (Daftar Tempat) */}
-            {/* Hapus bg-sky-50 dari main, sudah ada di div terluar */}
-            <main className="p-4 pt-0">
+                {/* Loading & Error State */}
                 {loading && (
-                    <div className="text-center py-10">Memuat tempat...</div>
+                    <div className="text-center py-10 text-gray-500">
+                        Memuat tempat...
+                    </div>
                 )}
                 {error && (
                     <div className="text-center py-10 text-red-500">
                         {error}
                     </div>
                 )}
-
+                {/* Daftar Tempat */}
                 {!loading && !error && (
-                    <div className="grid grid-cols-1 gap-4">
-                        {" "}
-                        {/* Hanya 1 kolom sesuai desain */}
+                    <div className="space-y-4">
                         {tempatList.length > 0 ? (
                             tempatList.map((tempat) => (
-                                <TempatCard key={tempat.id} tempat={tempat} />
+                                <button
+                                    key={tempat.id}
+                                    onClick={() => handleTempatClick(tempat.id)} // Periksa ID di sini
+                                    className="w-full bg-white p-3 rounded-2xl shadow-md flex items-start gap-4 transition-transform duration-200 hover:scale-[1.02]"
+                                >
+                                    <img
+                                        src={
+                                            tempat.image ||
+                                            "https://placehold.co/120x90/E0F2FE/0EA5E9?text=Tempat"
+                                        } // Gunakan URL dari API atau placeholder
+                                        alt={tempat.nama_tempat}
+                                        className="w-32 h-24 rounded-lg object-cover flex-shrink-0"
+                                        onError={(e) => {
+                                            // Fallback jika gambar gagal load
+                                            e.target.onerror = null;
+                                            e.target.src =
+                                                "https://placehold.co/120x90/E0F2FE/0EA5E9?text=Tempat";
+                                        }}
+                                    />
+                                    <div className="text-left">
+                                        <h3 className="font-bold text-base text-gray-800">
+                                            {tempat.nama_tempat}
+                                        </h3>
+                                        {/* Tampilkan kota saja dari alamat */}
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            {tempat.alamat
+                                                ?.split(",")[1]
+                                                ?.trim() || tempat.alamat}
+                                        </p>
+                                        <div className="flex items-center gap-1 mt-2">
+                                            {[...Array(5)].map((_, i) => (
+                                                <StarIcon
+                                                    key={i}
+                                                    className={`w-4 h-4 ${
+                                                        i <
+                                                        Math.round(
+                                                            tempat.rating || 0
+                                                        )
+                                                            ? "text-yellow-400"
+                                                            : "text-gray-300"
+                                                    }`}
+                                                />
+                                            ))}
+                                            <span className="text-sm font-bold text-gray-700 ml-1">
+                                                {/* Tampilkan rating dengan 1 desimal */}
+                                                {/* Gunakan Number() untuk memastikan tipe data */}
+                                                {tempat.rating
+                                                    ? Number(
+                                                          tempat.rating
+                                                      ).toFixed(1)
+                                                    : "N/A"}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-gray-400 mt-1">
+                                            {tempat.review_count || 0}+ Reviews
+                                        </p>
+                                    </div>
+                                </button>
                             ))
                         ) : (
-                            <p className="col-span-1 text-center text-gray-500 py-10">
+                            <p className="text-center text-gray-500 py-10">
                                 Tidak ada tempat konseling yang tersedia saat
                                 ini.
                             </p>
@@ -276,6 +287,6 @@ export default function InPersonPage() {
                     </div>
                 )}
             </main>
-        </div> // Tutup div terluar
+        </div>
     );
 }
