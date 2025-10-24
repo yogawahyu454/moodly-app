@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany; // <-- TAMBAHKAN Import HasMany
 
 class Booking extends Model
 {
@@ -21,8 +22,8 @@ class Booking extends Model
         'metode_konsultasi',
         'status_pesanan',
         'total_harga',
-        'alasan_pembatalan',
-        'catatan_pembatalan',
+        'alasan_pembatalan', // <-- Pastikan ada dari migrasi sebelumnya
+        'catatan_pembatalan', // <-- Pastikan ada dari migrasi sebelumnya
     ];
 
     /**
@@ -49,5 +50,24 @@ class Booking extends Model
         return $this->belongsTo(JenisKonseling::class);
     }
 
+    // --- RELASI BARU ---
+    /**
+     * Get all of the chat messages for the booking.
+     */
+    public function chatMessages(): HasMany
+    {
+        return $this->hasMany(ChatMessage::class);
+    }
+    // --- AKHIR RELASI BARU ---
+
     // Tambahkan relasi lain jika perlu (Durasi, Tempat)
+    public function durasiKonseling(): BelongsTo
+    {
+        return $this->belongsTo(DurasiKonseling::class);
+    }
+
+    public function tempatKonseling(): BelongsTo
+    {
+        return $this->belongsTo(TempatKonseling::class);
+    }
 }

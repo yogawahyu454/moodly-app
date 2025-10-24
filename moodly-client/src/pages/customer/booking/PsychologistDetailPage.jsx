@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom"; // useParams untuk ID
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom"; // Import useLocation
+import apiClient from "../../../api/axios"; // Sesuaikan path
 
 // --- Komponen Ikon ---
 const BackArrowIcon = () => (
@@ -10,10 +11,10 @@ const BackArrowIcon = () => (
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor" // Warna diatur dari parent
-        strokeWidth="2"
+        strokeWidth="2.5" // Sedikit lebih tebal
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="text-white group-hover:text-gray-100"
+        className="text-white group-hover:text-gray-100" // Warna ikon putih
     >
         <line x1="19" y1="12" x2="5" y2="12"></line>
         <polyline points="12 19 5 12 12 5"></polyline>
@@ -32,7 +33,7 @@ const StarIcon = () => (
 const EducationIcon = () => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 text-cyan-600"
+        className="h-5 w-5 text-cyan-600 flex-shrink-0" // Tambah flex-shrink-0
         viewBox="0 0 20 20"
         fill="currentColor"
     >
@@ -42,7 +43,7 @@ const EducationIcon = () => (
 const LicenseIcon = () => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 text-cyan-600"
+        className="h-5 w-5 text-cyan-600 flex-shrink-0" // Tambah flex-shrink-0
         viewBox="0 0 20 20"
         fill="currentColor"
     >
@@ -55,45 +56,122 @@ const LicenseIcon = () => (
 );
 // --- Akhir Komponen Ikon ---
 
+// --- Komponen Ikon Metode Layanan ---
+const VoiceCallIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5 mr-1.5"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+    >
+        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+    </svg>
+);
+const ChatIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5 mr-1.5"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+    >
+        <path
+            fillRule="evenodd"
+            d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
+            clipRule="evenodd"
+        />
+    </svg>
+);
+const VideoCallIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5 mr-1.5"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+    >
+        <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A.5.5 0 0014 7.5v5a.5.5 0 00.553.494l2-1A.5.5 0 0017 11.5v-3a.5.5 0 00-.447-.494l-2-1z" />
+    </svg>
+);
+// --- Akhir Ikon Metode Layanan ---
+
 export default function PsychologistDetailPage() {
     const navigate = useNavigate();
-    const { id } = useParams(); // Ambil ID dari URL
+    const { id: counselorId } = useParams(); // Ambil ID dari URL, ganti nama jadi counselorId
+    const location = useLocation(); // Untuk data dari halaman sebelumnya
+    const { serviceId, serviceName, tempatId, tempatName, method } =
+        location.state || {};
+
     const [activeTab, setActiveTab] = useState("Profile Psikolog");
+    const [psychologistData, setPsychologistData] = useState(null); // State untuk data
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Dummy data psikolog (Idealnya fetch data berdasarkan ID)
-    const psychologistData = {
-        id: 2, // Cocokkan dengan ID dari daftar sebelumnya
-        name: "Vina Amalia, M.Psi., Psikolog",
-        rating: 4.9,
-        reviews: "(200+ ulasan)",
-        image: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=600",
-        specialties: [
-            "Stress",
-            "Keluarga",
-            "Pasangan",
-            "Kecemasan",
-            "Remaja",
-            "Kecanduan",
-            "Pernikahan",
-        ],
-        education: [
-            "S2 Magister Psikologi Profesi Universitas Panjajaran",
-            "S1 Sarjana Psikologi Universitas Padjajaran",
-        ],
-        license: "SIPP: 09187-03/3104-22-2-1",
-        servesVia: ["Chat", "Video Call", "Tatap Muka"], // Contoh
-    };
-
-    // Filter data psikolog berdasarkan ID jika diperlukan (jika data tidak di-fetch)
-    // const psychologist = psychologistData; // Asumsikan data sudah benar
+    // Fetch data detail psikolog berdasarkan ID
+    useEffect(() => {
+        const fetchPsychologistDetail = async () => {
+            if (!counselorId) {
+                setError("ID Konselor tidak valid.");
+                setLoading(false);
+                return;
+            }
+            try {
+                setLoading(true);
+                const response = await apiClient.get(
+                    `/api/booking/counselors/${counselorId}`
+                );
+                setPsychologistData(response.data);
+                setError(null);
+            } catch (err) {
+                setError("Gagal memuat detail psikolog.");
+                console.error("Fetch detail error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPsychologistDetail();
+    }, [counselorId]); // Fetch ulang jika ID berubah
 
     const handleBack = () => {
         navigate(-1); // Kembali ke halaman sebelumnya
     };
 
+    // Handle klik "Mulai Konseling"
+    const handleStartCounseling = () => {
+        // Arahkan ke halaman jadwal, bawa semua state yang relevan
+        navigate(`/booking/schedule`, {
+            // Asumsi halaman jadwal adalah /booking/schedule
+            state: {
+                serviceId,
+                serviceName,
+                tempatId,
+                tempatName,
+                counselorId,
+                counselorName: psychologistData?.name,
+                method: activeTab === "Jadwal" ? method : null, // Kirim method jika di tab Jadwal
+            },
+        });
+    };
+
+    if (loading)
+        return <div className="p-4 text-center">Memuat detail psikolog...</div>;
+    if (error)
+        return <div className="p-4 text-center text-red-500">{error}</div>;
+    if (!psychologistData)
+        return (
+            <div className="p-4 text-center">
+                Data psikolog tidak ditemukan.
+            </div>
+        );
+
+    // Format rating (pastikan number)
+    const ratingValue = psychologistData.rating
+        ? Number(psychologistData.rating)
+        : null;
+    const ratingDisplay = ratingValue !== null ? ratingValue.toFixed(1) : "N/A";
+
     return (
-        <div className="bg-gradient-to-b from-cyan-100 to-gray-50 min-h-full font-sans">
-            {/* Header dengan tombol back */}
+        // Gunakan bg-gray-50 untuk konsistensi
+        <div className="bg-gray-50 min-h-screen font-sans">
+            {/* Header */}
             <header className="bg-cyan-400 p-4 pt-6 flex items-center sticky top-0 z-20 text-white shadow-md">
                 <button
                     onClick={handleBack}
@@ -103,24 +181,34 @@ export default function PsychologistDetailPage() {
                     <BackArrowIcon />
                 </button>
                 <h1 className="text-lg font-bold text-center flex-grow -translate-x-4">
-                    Psikolog {psychologistData.name.split(",")[0]}{" "}
                     {/* Ambil nama depan saja */}
+                    Psikolog {psychologistData.name?.split(",")[0]}
                 </h1>
                 <div className="w-8"></div> {/* Spacer */}
             </header>
 
             {/* Konten Utama */}
-            <main className="relative p-4 pb-20">
+            <main className="relative p-4 pb-24">
                 {" "}
-                {/* Padding bottom for button */}
+                {/* Tambah padding bottom lebih banyak */}
                 {/* Profile Card */}
                 <div className="relative bg-white p-4 rounded-xl shadow-lg flex flex-col items-center text-center -mt-12 z-10 mb-6">
-                    {" "}
-                    {/* Tarik ke atas */}
                     <img
-                        src={psychologistData.image}
+                        src={
+                            psychologistData.avatar ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                psychologistData.name || "P"
+                            )}&background=EBF4FF&color=3B82F6&bold=true`
+                        }
                         alt={psychologistData.name}
-                        className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md -mt-12 mb-2" // Tarik avatar ke atas
+                        className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md -mt-12 mb-2"
+                        onError={(e) => {
+                            // Fallback
+                            e.target.onerror = null;
+                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                psychologistData.name || "P"
+                            )}&background=EBF4FF&color=3B82F6&bold=true`;
+                        }}
                     />
                     <h2 className="font-bold text-lg text-gray-800">
                         {psychologistData.name}
@@ -128,10 +216,11 @@ export default function PsychologistDetailPage() {
                     <div className="flex items-center mt-1">
                         <StarIcon />
                         <span className="text-sm font-semibold text-yellow-500 ml-1">
-                            {psychologistData.rating.toFixed(1)}
+                            {ratingDisplay}
                         </span>
                         <span className="text-xs text-gray-400 ml-1.5">
-                            {psychologistData.reviews}
+                            {/* Gunakan data review jika ada, atau fallback */}
+                            {psychologistData.reviews || "(0 ulasan)"}
                         </span>
                     </div>
                 </div>
@@ -167,15 +256,23 @@ export default function PsychologistDetailPage() {
                                 Keahlian
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                                {psychologistData.specialties.map(
-                                    (tag, index) => (
-                                        <span
-                                            key={index}
-                                            className="text-xs font-semibold px-3 py-1 rounded-full bg-cyan-100 text-cyan-700"
-                                        >
-                                            {tag}
-                                        </span>
+                                {/* Tampilkan spesialisasi dari data API */}
+                                {Array.isArray(psychologistData.spesialisasi) &&
+                                psychologistData.spesialisasi.length > 0 ? (
+                                    psychologistData.spesialisasi.map(
+                                        (tag, index) => (
+                                            <span
+                                                key={index}
+                                                className="text-xs font-semibold px-3 py-1 rounded-full bg-cyan-100 text-cyan-700"
+                                            >
+                                                {tag}
+                                            </span>
+                                        )
                                     )
+                                ) : (
+                                    <span className="text-xs text-gray-400">
+                                        Belum ada data keahlian.
+                                    </span>
                                 )}
                             </div>
                         </div>
@@ -183,33 +280,47 @@ export default function PsychologistDetailPage() {
                         {/* Tentang Psikolog */}
                         <div className="bg-white p-4 rounded-xl shadow space-y-3">
                             <h3 className="font-bold text-gray-700 text-base">
-                                Tentang {psychologistData.name.split(",")[0]}
+                                Tentang {psychologistData.name?.split(",")[0]}
                             </h3>
-                            <div>
-                                <h4 className="flex items-center gap-1.5 font-semibold text-sm text-gray-600 mb-1">
-                                    <EducationIcon /> Pendidikan
-                                </h4>
-                                <ul className="list-disc list-inside pl-1 space-y-0.5">
-                                    {psychologistData.education.map(
-                                        (edu, index) => (
-                                            <li
-                                                key={index}
-                                                className="text-xs text-gray-500"
-                                            >
-                                                {edu}
-                                            </li>
-                                        )
-                                    )}
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="flex items-center gap-1.5 font-semibold text-sm text-gray-600 mb-1">
-                                    <LicenseIcon /> Nomor Izin Praktek
-                                </h4>
-                                <p className="text-xs text-gray-500 pl-1">
-                                    {psychologistData.license}
-                                </p>
-                            </div>
+                            {/* Tampilkan Universitas */}
+                            {psychologistData.universitas && (
+                                <div className="flex items-start gap-1.5">
+                                    <EducationIcon />
+                                    <div>
+                                        <h4 className="font-semibold text-sm text-gray-600 mb-0.5">
+                                            Pendidikan
+                                        </h4>
+                                        {/* Asumsi universitas adalah string tunggal, bisa dipecah jika perlu */}
+                                        <p className="text-xs text-gray-500">
+                                            {psychologistData.universitas}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                            {/* Tampilkan Nomor Izin */}
+                            {psychologistData.surat_izin_praktik && (
+                                <div className="flex items-start gap-1.5">
+                                    <LicenseIcon />
+                                    <div>
+                                        <h4 className="font-semibold text-sm text-gray-600 mb-0.5">
+                                            Nomor Izin Praktek
+                                        </h4>
+                                        <p className="text-xs text-gray-500">
+                                            {
+                                                psychologistData.surat_izin_praktik
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                            {/* Tampilkan jika tidak ada data */}
+                            {!psychologistData.universitas &&
+                                !psychologistData.surat_izin_praktik && (
+                                    <p className="text-xs text-gray-400">
+                                        Informasi pendidikan dan lisensi belum
+                                        tersedia.
+                                    </p>
+                                )}
                         </div>
 
                         {/* Melayani Via */}
@@ -218,32 +329,65 @@ export default function PsychologistDetailPage() {
                                 Melayani via:
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                                {psychologistData.servesVia.map(
-                                    (method, index) => (
-                                        <span
-                                            key={index}
-                                            className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-600"
-                                        >
-                                            {method}
-                                        </span>
+                                {/* Tampilkan metode layanan dari data API */}
+                                {Array.isArray(psychologistData.servesVia) &&
+                                psychologistData.servesVia.length > 0 ? (
+                                    psychologistData.servesVia.map(
+                                        (method, index) => (
+                                            <span
+                                                key={index}
+                                                className="flex items-center text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-600"
+                                            >
+                                                {/* Pilih ikon berdasarkan metode */}
+                                                {method === "Voice Call" && (
+                                                    <VoiceCallIcon />
+                                                )}
+                                                {method === "Chat" && (
+                                                    <ChatIcon />
+                                                )}
+                                                {(method === "Video Call" ||
+                                                    method ===
+                                                        "Vidio Call") && (
+                                                    <VideoCallIcon />
+                                                )}
+                                                {method}
+                                            </span>
+                                        )
                                     )
+                                ) : (
+                                    <span className="text-xs text-gray-400">
+                                        Metode layanan belum ditentukan.
+                                    </span>
                                 )}
                             </div>
                         </div>
                     </div>
                 )}
+                {/* --- Konten Tab Jadwal (Sementara) --- */}
                 {activeTab === "Jadwal" && (
                     <div className="bg-white p-4 rounded-xl shadow text-center text-gray-500">
-                        {/* Konten Jadwal akan ditampilkan di sini */}
-                        Jadwal belum tersedia.
+                        {/* TODO: Implementasikan komponen pemilihan jadwal di sini */}
+                        <p className="font-semibold mb-4">Fitur Jadwal</p>
+                        <p>
+                            Pilih Waktu, Durasi, Tanggal, Jam, dan Media
+                            Konseling.
+                        </p>
+                        <p className="mt-4 text-sm">
+                            (Komponen jadwal akan diimplementasikan di sini)
+                        </p>
                     </div>
                 )}
             </main>
 
             {/* Tombol Mulai Konseling (Fixed Bottom) */}
             <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white border-t border-gray-200 shadow-[0_-2px_5px_rgba(0,0,0,0.05)] z-20">
-                <button className="w-full bg-cyan-500 text-white font-bold py-3 px-4 rounded-lg shadow hover:bg-cyan-600 transition-colors active:scale-95">
-                    Mulai konseling dengan {psychologistData.name.split(",")[0]}
+                <button
+                    onClick={handleStartCounseling} // Panggil handleStartCounseling
+                    className="w-full bg-cyan-500 text-white font-bold py-3 px-4 rounded-lg shadow hover:bg-cyan-600 transition-colors active:scale-95 disabled:bg-gray-400"
+                    // disabled={activeTab !== 'Jadwal'} // Aktifkan jika tombol hanya berfungsi di tab Jadwal
+                >
+                    Mulai konseling dengan{" "}
+                    {psychologistData.name?.split(",")[0]}
                 </button>
             </div>
         </div>
