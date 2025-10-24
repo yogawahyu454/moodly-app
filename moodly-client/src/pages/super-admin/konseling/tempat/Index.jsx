@@ -56,6 +56,17 @@ const PlusIcon = () => (
         <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
 );
+// Icon Bintang (untuk rating)
+const StarIcon = ({ filled }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className={`h-4 w-4 ${filled ? "text-yellow-400" : "text-gray-300"}`}
+        viewBox="0 0 20 20"
+        fill="currentColor"
+    >
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+);
 
 const TempatKonselingPage = () => {
     const [tempatList, setTempatList] = useState([]);
@@ -71,11 +82,13 @@ const TempatKonselingPage = () => {
             const response = await apiClient.get(
                 "/api/super-admin/tempat-konseling"
             );
-            setTempatList(response.data);
+            // Pastikan data yang diterima adalah array
+            setTempatList(Array.isArray(response.data) ? response.data : []);
             setError(null);
         } catch (err) {
             setError("Gagal memuat data. Silakan coba lagi.");
             console.error(err);
+            setTempatList([]); // Set ke array kosong jika error
         } finally {
             setLoading(false);
         }
@@ -100,22 +113,56 @@ const TempatKonselingPage = () => {
         setDeleteModalOpen(true);
     };
 
-    const handleSave = async (data) => {
-        try {
-            if (selectedTempat) {
-                await apiClient.put(
-                    `/api/super-admin/tempat-konseling/${selectedTempat.id}`,
-                    data
-                );
-            } else {
-                await apiClient.post("/api/super-admin/tempat-konseling", data);
+    // --- PERUBAHAN: Kirim sebagai FormData ---
+    const handleSave = async (formData) => {
+        // Konversi data biasa ke FormData
+        const dataToSend = new FormData();
+        Object.keys(formData).forEach((key) => {
+            // Hanya kirim file jika ada, atau jika bukan file kirim nilainya
+            if (key === "image" && formData[key] instanceof File) {
+                dataToSend.append(key, formData[key]);
+            } else if (key !== "image") {
+                // Pastikan nilai tidak null/undefined sebelum dikirim
+                dataToSend.append(key, formData[key] ?? "");
             }
+            // Jika key adalah image tapi bukan File (misal saat edit tanpa ganti gambar),
+            // kita tidak append apa-apa, backend akan handle
+        });
+
+        // Penting untuk method spoofing saat update dengan FormData
+        if (selectedTempat) {
+            dataToSend.append("_method", "PUT"); // Laravel butuh ini
+        }
+
+        try {
+            const url = selectedTempat
+                ? `/api/super-admin/tempat-konseling/${selectedTempat.id}`
+                : // Gunakan POST untuk update karena FormData tidak support PUT/PATCH native
+                  "/api/super-admin/tempat-konseling";
+
+            await apiClient.post(url, dataToSend, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
             setAddEditModalOpen(false);
             fetchData();
         } catch (err) {
             console.error("Gagal menyimpan data:", err);
+            // Tampilkan error (jika ada response error dari backend)
+            if (
+                err.response &&
+                err.response.data &&
+                err.response.data.message
+            ) {
+                alert(`Error: ${err.response.data.message}`); // Ganti dengan notifikasi
+            } else {
+                alert("Gagal menyimpan data. Periksa koneksi atau input Anda."); // Ganti dengan notifikasi
+            }
         }
     };
+    // --- AKHIR PERUBAHAN ---
 
     const handleDelete = async () => {
         try {
@@ -126,6 +173,7 @@ const TempatKonselingPage = () => {
             fetchData();
         } catch (err) {
             console.error("Gagal menghapus data:", err);
+            alert("Gagal menghapus data."); // Ganti dengan notifikasi
         }
     };
 
@@ -145,13 +193,20 @@ const TempatKonselingPage = () => {
                 </button>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <table className="w-full text-left">
+            <div className="bg-white rounded-lg shadow-md overflow-x-auto">
+                {" "}
+                {/* Tambah overflow-x-auto */}
+                <table className="w-full text-left min-w-[800px]">
+                    {" "}
+                    {/* Tambah min-width */}
                     <thead className="bg-blue-100">
                         <tr>
                             <th className="p-4">No</th>
+                            <th className="p-4">Gambar</th> {/* <-- BARU */}
                             <th className="p-4">Nama Tempat</th>
                             <th className="p-4">Alamat</th>
+                            <th className="p-4">Rating</th> {/* <-- BARU */}
+                            <th className="p-4">Reviews</th> {/* <-- BARU */}
                             <th className="p-4">Status</th>
                             <th className="p-4">Aksi</th>
                         </tr>
@@ -160,11 +215,42 @@ const TempatKonselingPage = () => {
                         {tempatList.map((item, index) => (
                             <tr key={item.id} className="border-t">
                                 <td className="p-4">{index + 1}</td>
+                                <td className="p-4">
+                                    {" "}
+                                    {/* <-- BARU */}
+                                    <img
+                                        src={
+                                            item.image ||
+                                            "https://placehold.co/60x40/EBF4FF/7F9CF5?text=Img"
+                                        } // Gunakan item.image dari accessor
+                                        alt={item.nama_tempat}
+                                        className="w-16 h-12 object-cover rounded"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src =
+                                                "https://placehold.co/60x40/EBF4FF/7F9CF5?text=Err";
+                                        }} // Fallback
+                                    />
+                                </td>
                                 <td className="p-4">{item.nama_tempat}</td>
                                 <td className="p-4">{item.alamat}</td>
+                                <td className="p-4 flex items-center">
+                                    {" "}
+                                    {/* <-- BARU */}
+                                    <StarIcon filled={true} />{" "}
+                                    {/* Sederhana, bisa dibuat lebih dinamis */}
+                                    <span className="ml-1">
+                                        {item.rating?.toFixed(1) ?? "N/A"}
+                                    </span>
+                                </td>
+                                <td className="p-4">
+                                    {item.review_count ?? 0}
+                                </td>{" "}
+                                {/* <-- BARU */}
                                 <td className="p-4">
                                     <span
-                                        className={`px-2 py-1 text-sm rounded-full ${
+                                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                            // Ukuran teks diubah ke xs
                                             item.status === "Aktif"
                                                 ? "bg-green-100 text-green-700"
                                                 : "bg-red-100 text-red-700"
