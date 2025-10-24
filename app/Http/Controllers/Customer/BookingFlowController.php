@@ -42,33 +42,20 @@ class BookingFlowController extends Controller
      */
     public function getCounselors(Request $request)
     {
-        // Validasi input (opsional, jika ada filter)
-        // $request->validate(['serviceId' => 'nullable|integer|exists:jenis_konselings,id']);
-
         try {
             $query = User::where('role', 'konselor')
-                ->where('status', 'Active') // Hanya ambil yang aktif
+                // --- PERUBAHAN DI SINI ---
+                ->where('status', 'Terverifikasi') // Filter hanya yang sudah diverifikasi
+                // --------------------------
                 ->select('id', 'name', 'avatar', 'universitas', 'spesialisasi', 'rating'); // Pilih kolom yg relevan
 
-            // TODO: Logika filter berdasarkan serviceId (jika diperlukan)
-            // if ($request->has('serviceId')) {
-            //     // Ambil spesialisasi yang relevan dengan serviceId
-            //     // Lalu filter konselor berdasarkan spesialisasi tersebut
-            // }
-            // TODO: Logika filter berdasarkan tempatId (jika diperlukan untuk Cara B)
-            // if ($request->has('tempatId')) {
-            //     $tempatId = $request->input('tempatId');
-            //     $query->whereHas('tempatKonseling', function ($q) use ($tempatId) {
-            //         $q->where('tempat_konseling_id', $tempatId);
-            //     });
-            // }
-
+            // TODO: Logika filter berdasarkan serviceId atau tempatId (jika diperlukan nanti)
 
             $counselors = $query->orderBy('name')->get();
 
             return response()->json($counselors);
         } catch (\Exception $e) {
-            Log::error('Error fetching counselors:', ['error' => $e->getMessage()]); // Log error
+            Log::error('Error fetching counselors list:', ['error' => $e->getMessage()]); // Log error
             return response()->json([
                 'message' => 'Gagal mengambil data konselor.',
                 'error' => $e->getMessage()
