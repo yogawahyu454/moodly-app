@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage; // <-- Import Storage
+use Illuminate\Validation\Rule;         // <-- Import Rule
 use Illuminate\Validation\Rules\Password;
 
 class KonselorManagementController extends Controller
@@ -13,6 +15,7 @@ class KonselorManagementController extends Controller
     // Mengambil semua user dengan role 'konselor'
     public function index()
     {
+        // Eager load relasi jika ada, atau ambil data dasar
         return User::where('role', 'konselor')->latest()->get();
     }
 
@@ -27,19 +30,39 @@ class KonselorManagementController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
             'phone' => 'nullable|string|max:20',
             'city' => 'nullable|string|max:255',
+            // --- Validasi Kolom Baru ---
+            'universitas' => 'nullable|string|max:255',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
+            'spesialisasi' => 'nullable|array', // Validasi jika Anda ingin mengirim spesialisasi dari sini
+            'spesialisasi.*' => 'string|max:100', // Validasi tiap item array
+            'rating' => 'nullable|numeric|min:0|max:5', // Tambahkan jika perlu
+            // Tambahkan validasi lain jika ada (provinsi, alamat, dll.)
         ]);
+
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            // Simpan gambar ke storage/app/public/avatars
+            // Pastikan folder 'avatars' ada atau dibuat otomatis
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        }
 
         $konselor = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'phone' => $validated['phone'],
-            'city' => $validated['city'],
+            'phone' => $validated['phone'] ?? null,
+            'city' => $validated['city'] ?? null,
+            'universitas' => $validated['universitas'] ?? null, // Simpan universitas
+            'avatar' => $avatarPath, // Simpan path avatar
+            'spesialisasi' => $validated['spesialisasi'] ?? null, // Simpan spesialisasi (jika dikirim)
+            'rating' => $validated['rating'] ?? null, // Simpan rating (jika dikirim)
             'role' => 'konselor', // Otomatis set role sebagai konselor
-            'status' => 'Verifikasi', // Status awal untuk konselor baru
+            // Status awal mungkin lebih baik 'Terverifikasi' jika dibuat lgsg oleh Super Admin?
+            // Atau tetap 'Verifikasi' jika butuh approval Admin? Sesuaikan.
+            'status' => 'Verifikasi',
         ]);
 
-        return response()->json($konselor, 201);
+        return response()->json($konselor, 21);
     }
 
 
@@ -52,12 +75,85 @@ class KonselorManagementController extends Controller
         return $user;
     }
 
+    // --- METHOD UPDATE BARU ---
+    /**
+     * Memperbarui data konselor yang sudah ada.
+     * Menggunakan POST dengan _method=PUT karena FormData
+     */
+    public function update(Request $request, User $user)
+    {
+        if ($user->role !== 'konselor') {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            // 'sometimes' berarti hanya validasi jika field dikirim
+            'name' => 'sometimes|required|string|max:255',
+            // Abaikan email unik milik user ini sendiri
+            'email' => ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'phone' => 'nullable|string|max:20',
+            'city' => 'nullable|string|max:255',
+            'universitas' => 'nullable|string|max:255',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'spesialisasi' => 'nullable|array',
+            'spesialisasi.*' => 'string|max:100',
+            'rating' => 'nullable|numeric|min:0|max:5',
+            // Password tidak diupdate di sini, bisa dibuat endpoint terpisah jika perlu
+        ]);
+
+        $avatarPath = $user->avatar; // Simpan path lama defaultnya
+
+        if ($request->hasFile('avatar')) {
+            // 1. Hapus avatar lama jika ada
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            // 2. Simpan avatar baru
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar'] = $avatarPath; // Masukkan path baru ke data yg akan diupdate
+        } else {
+            // Jika tidak ada file baru, pastikan 'avatar' tidak ikut diupdate
+            // (kecuali jika ada fitur hapus avatar, bisa ditambahkan logikanya)
+            unset($validated['avatar']);
+        }
+
+
+        // Update data user
+        // Filter hanya data yg divalidasi dan bukan null (kecuali yg memang boleh null)
+        $updateData = collect($validated)->filter(function ($value, $key) {
+            return $value !== null || in_array($key, ['phone', 'city', 'universitas', 'avatar', 'spesialisasi', 'rating']); // Kolom yg boleh null
+        })->all();
+
+
+        // Update spesialisasi secara terpisah jika dikirim
+        if (isset($validated['spesialisasi'])) {
+            $updateData['spesialisasi'] = $validated['spesialisasi'];
+        }
+
+
+        $user->update($updateData);
+
+
+        // Load ulang data user untuk mendapatkan URL avatar terbaru
+        $user->refresh();
+
+        return response()->json($user);
+    }
+    // --- AKHIR METHOD UPDATE ---
+
+
     // Menghapus konselor
     public function destroy(User $user)
     {
         if ($user->role !== 'konselor') {
             abort(404);
         }
+
+        // Hapus avatar dari storage jika ada
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
         $user->delete();
         return response()->json(null, 204);
     }
@@ -77,8 +173,10 @@ class KonselorManagementController extends Controller
         if ($user->role !== 'konselor') {
             abort(404);
         }
-        // Saat di-unblock, kembalikan ke status Verifikasi atau Terverifikasi
-        $user->update(['status' => 'Verifikasi']);
+        // Saat di-unblock, kembalikan ke status 'Terverifikasi' jika sebelumnya aktif,
+        // atau 'Verifikasi' jika belum pernah diverifikasi (logika ini bisa disesuaikan)
+        // Untuk sederhana, kita set ke 'Terverifikasi'
+        $user->update(['status' => 'Terverifikasi']);
         return response()->json($user);
     }
 }

@@ -28,7 +28,7 @@ class BerandaController extends Controller
             // 2. Ambil data konselor (User dengan role 'konselor')
             // Pastikan admin sudah approve 'status' menjadi 'Active'
             $counselors = User::where('role', 'konselor')
-                ->where('status', 'Active')
+                ->where('status', 'Terverifikasi')
                 ->select('id', 'name', 'avatar', 'universitas', 'spesialisasi', 'rating')
                 ->take(4) // Ambil 4 konselor
                 ->get();

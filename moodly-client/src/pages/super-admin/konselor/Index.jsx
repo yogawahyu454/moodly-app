@@ -120,11 +120,12 @@ const StatusBadge = ({ status }) => {
         Ditolak: "bg-orange-100 text-orange-700",
         Banned: "bg-red-100 text-red-700 font-bold",
         Offline: "bg-gray-100 text-gray-700",
+        Active: "bg-blue-100 text-blue-700", // Tambahkan status 'Active' jika ada
     };
     return (
         <span
             className={`px-3 py-1 text-sm font-medium rounded-full ${
-                styles[status] || styles.Offline
+                styles[status] || styles.Offline // Fallback ke Offline
             }`}
         >
             {status}
@@ -150,7 +151,8 @@ const KonselorManagementPage = () => {
             const response = await apiClient.get(
                 "/api/super-admin/konselor-management"
             );
-            setKonselors(response.data);
+            // Pastikan data yang diterima adalah array
+            setKonselors(Array.isArray(response.data) ? response.data : []);
             setError(null);
         } catch (err) {
             setError("Gagal memuat data konselor.");
@@ -165,21 +167,68 @@ const KonselorManagementPage = () => {
     }, []);
 
     // --- Handler untuk Aksi CRUD ---
+    // PERUBAHAN: handleSave sekarang menerima data (termasuk file)
     const handleSave = async (data, setErrors) => {
+        // Buat FormData untuk mengirim file
+        const formData = new FormData();
+        Object.keys(data).forEach((key) => {
+            // Khusus untuk spesialisasi (array), kirim sebagai JSON string atau per item
+            if (key === "spesialisasi" && Array.isArray(data[key])) {
+                // Kirim tiap item agar backend bisa handle sebagai array
+                data[key].forEach((item, index) => {
+                    formData.append(`${key}[${index}]`, item);
+                });
+            } else if (data[key] !== null && data[key] !== undefined) {
+                // Hindari mengirim null/undefined
+                formData.append(key, data[key]);
+            }
+        });
+
+        // Hapus password confirmation jika ada (karena tidak perlu dikirim)
+        formData.delete("password_confirmation");
+
+        // Jika sedang edit, tambahkan _method PUT
+        if (selectedKonselor) {
+            // Annoying: Kita belum punya state edit di sini, AddModal tidak tahu sedang edit
+            // Solusi sementara: Jika ada selectedKonselor, anggap sedang edit
+            // Nanti kita akan buat EditModal terpisah
+            // formData.append('_method', 'PUT'); // Backend controller sudah handle POST untuk update
+            console.log("Edit mode logic needs EditModal");
+        }
+
         try {
-            await apiClient.post("/api/super-admin/konselor-management", data);
-            setAddModalOpen(false);
-            fetchData();
+            // Kirim request POST (backend handle POST untuk create & update)
+            const url = selectedKonselor // Jika ada selectedKonselor, anggap edit
+                ? `/api/super-admin/konselor-management/${selectedKonselor.id}`
+                : "/api/super-admin/konselor-management";
+
+            await apiClient.post(url, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data", // Penting untuk file upload
+                },
+            });
+
+            setAddModalOpen(false); // Tutup modal Add
+            // TODO: Tutup modal Edit jika nanti dibuat terpisah
+            setSelectedKonselor(null); // Reset selection
+            fetchData(); // Muat ulang data
         } catch (err) {
             if (err.response && err.response.status === 422) {
                 setErrors(err.response.data.errors);
             } else {
-                console.error("Gagal menambah konselor:", err);
+                console.error("Gagal menyimpan konselor:", err);
+                // Tampilkan pesan error umum ke user jika perlu
+                alert(
+                    `Gagal menyimpan: ${
+                        err.response?.data?.message || err.message
+                    }`
+                );
             }
         }
     };
 
     const handleBlock = async () => {
+        if (!selectedKonselor) return;
         try {
             await apiClient.post(
                 `/api/super-admin/konselor-management/${selectedKonselor.id}/block`
@@ -188,10 +237,12 @@ const KonselorManagementPage = () => {
             fetchData();
         } catch (err) {
             console.error("Gagal memblokir konselor:", err);
+            alert("Gagal memblokir konselor.");
         }
     };
 
     const handleUnblock = async () => {
+        if (!selectedKonselor) return;
         try {
             await apiClient.post(
                 `/api/super-admin/konselor-management/${selectedKonselor.id}/unblock`
@@ -200,10 +251,12 @@ const KonselorManagementPage = () => {
             fetchData();
         } catch (err) {
             console.error("Gagal membuka blokir konselor:", err);
+            alert("Gagal membuka blokir konselor.");
         }
     };
 
     const handleDelete = async () => {
+        if (!selectedKonselor) return;
         try {
             await apiClient.delete(
                 `/api/super-admin/konselor-management/${selectedKonselor.id}`
@@ -212,12 +265,25 @@ const KonselorManagementPage = () => {
             fetchData();
         } catch (err) {
             console.error("Gagal menghapus konselor:", err);
+            alert("Gagal menghapus konselor.");
         }
     };
 
+    // Fungsi helper untuk membuka modal
     const openModal = (setter, konselor = null) => {
+        setSelectedKonselor(konselor); // Set data terpilih
+        setter(true); // Buka modal yang sesuai
+    };
+
+    // --- PERBAIKAN: Fungsi untuk membuka Edit Modal (Nanti pakai EditModal terpisah) ---
+    const handleOpenEditModal = (konselor) => {
+        // Untuk sementara, kita pakai AddModal tapi isi data awal
+        // Ini kurang ideal karena AddModal punya validasi password
         setSelectedKonselor(konselor);
-        setter(true);
+        setAddModalOpen(true);
+        console.warn(
+            "Using AddModal for editing. Consider creating a separate EditModal."
+        );
     };
 
     if (loading) return <div className="p-6">Memuat data...</div>;
@@ -228,22 +294,30 @@ const KonselorManagementPage = () => {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Data Konselor</h1>
                 <button
-                    onClick={() => openModal(setAddModalOpen)}
+                    onClick={() => openModal(setAddModalOpen)} // Buka modal Add
                     className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2"
                 >
                     <PlusIcon />
                     Tambah Konselor
                 </button>
             </div>
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <table className="w-full text-left">
+            <div className="bg-white rounded-lg shadow-md overflow-x-auto">
+                {" "}
+                {/* Tambah overflow-x-auto */}
+                <table className="w-full text-left whitespace-nowrap">
+                    {" "}
+                    {/* Tambah whitespace-nowrap */}
                     <thead className="bg-blue-100">
                         <tr>
                             <th className="p-4">No</th>
-                            <th className="p-4">ID Konselor</th>
+                            <th className="p-4">ID</th>
+                            {/* --- Kolom Baru: Avatar --- */}
+                            <th className="p-4">Avatar</th>
                             <th className="p-4">Nama</th>
                             <th className="p-4">Email</th>
                             <th className="p-4">No Telepon</th>
+                            {/* --- Kolom Baru: Universitas --- */}
+                            <th className="p-4">Universitas</th>
                             <th className="p-4">Kota</th>
                             <th className="p-4">Rating</th>
                             <th className="p-4">Status</th>
@@ -257,60 +331,131 @@ const KonselorManagementPage = () => {
                                 <td className="p-4">{`#${String(
                                     konselor.id
                                 ).padStart(5, "0")}`}</td>
+                                {/* --- Sel Baru: Avatar --- */}
+                                <td className="p-4">
+                                    <img
+                                        src={
+                                            konselor.avatar ||
+                                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                                konselor.name
+                                            )}&background=EBF4FF&color=3B82F6&bold=true`
+                                        }
+                                        alt={konselor.name}
+                                        className="w-10 h-10 rounded-full object-cover"
+                                        onError={(e) => {
+                                            // Fallback jika URL gagal load
+                                            e.target.onerror = null;
+                                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                                konselor.name
+                                            )}&background=EBF4FF&color=3B82F6&bold=true`;
+                                        }}
+                                    />
+                                </td>
                                 <td className="p-4 font-medium">
                                     {konselor.name}
                                 </td>
                                 <td className="p-4">{konselor.email}</td>
                                 <td className="p-4">{konselor.phone || "-"}</td>
+                                {/* --- Sel Baru: Universitas --- */}
+                                <td className="p-4">
+                                    {konselor.universitas || "-"}
+                                </td>
                                 <td className="p-4">{konselor.city || "-"}</td>
-                                <td className="p-4 flex items-center gap-1">
-                                    <StarIcon /> {konselor.rating || "N/A"}
+                                <td className="p-4">
+                                    <div className="flex items-center gap-1">
+                                        <StarIcon />{" "}
+                                        {konselor.rating
+                                            ? Number(konselor.rating).toFixed(1)
+                                            : "N/A"}
+                                    </div>
                                 </td>
                                 <td className="p-4">
                                     <StatusBadge status={konselor.status} />
                                 </td>
-                                <td className="p-4 flex gap-3 items-center">
-                                    <Link
-                                        to={`/admin/konselor-management/${konselor.id}`}
-                                    >
-                                        <DetailIcon />
-                                    </Link>
-                                    {konselor.status === "Banned" ? (
+                                <td className="p-4">
+                                    <div className="flex gap-3 items-center">
+                                        <Link
+                                            to={`/admin/konselor-management/${konselor.id}`}
+                                            title="Lihat Detail"
+                                        >
+                                            <DetailIcon />
+                                        </Link>
+                                        {/* --- PERBAIKAN: Tombol Edit (sementara pakai AddModal) --- */}
+                                        <button
+                                            onClick={() =>
+                                                handleOpenEditModal(konselor)
+                                            }
+                                            title="Edit"
+                                        >
+                                            {/* Ganti ikon edit jika perlu */}
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="20"
+                                                height="20"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="text-blue-500 hover:text-blue-700"
+                                            >
+                                                <path d="M12 20h9" />
+                                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                            </svg>
+                                        </button>
+                                        {/* --- Akhir Perbaikan --- */}
+                                        {konselor.status === "Banned" ? (
+                                            <button
+                                                onClick={() =>
+                                                    openModal(
+                                                        setUnblockModalOpen,
+                                                        konselor
+                                                    )
+                                                }
+                                                title="Unblock"
+                                            >
+                                                <UnblockIcon />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() =>
+                                                    openModal(
+                                                        setBlockModalOpen,
+                                                        konselor
+                                                    )
+                                                }
+                                                title="Block"
+                                            >
+                                                <BlockIcon />
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() =>
                                                 openModal(
-                                                    setUnblockModalOpen,
+                                                    setDeleteModalOpen,
                                                     konselor
                                                 )
                                             }
+                                            title="Hapus"
                                         >
-                                            <UnblockIcon />
+                                            <DeleteIcon />
                                         </button>
-                                    ) : (
-                                        <button
-                                            onClick={() =>
-                                                openModal(
-                                                    setBlockModalOpen,
-                                                    konselor
-                                                )
-                                            }
-                                        >
-                                            <BlockIcon />
-                                        </button>
-                                    )}
-                                    <button
-                                        onClick={() =>
-                                            openModal(
-                                                setDeleteModalOpen,
-                                                konselor
-                                            )
-                                        }
-                                    >
-                                        <DeleteIcon />
-                                    </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
+                        {/* Tambahkan baris jika tidak ada data */}
+                        {konselors.length === 0 && (
+                            <tr>
+                                <td
+                                    colSpan="11"
+                                    className="text-center p-6 text-gray-500"
+                                >
+                                    Tidak ada data konselor.
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -318,26 +463,31 @@ const KonselorManagementPage = () => {
             {/* Render semua modal */}
             <AddModal
                 isOpen={isAddModalOpen}
-                onClose={() => setAddModalOpen(false)}
+                onClose={() => {
+                    setAddModalOpen(false);
+                    setSelectedKonselor(null);
+                }} // Reset selection saat tutup
                 onSave={handleSave}
+                initialData={selectedKonselor} // Kirim data awal jika edit
+                isEditMode={!!selectedKonselor} // Tandai jika mode edit
             />
             <BlockModal
                 isOpen={isBlockModalOpen}
                 onClose={() => setBlockModalOpen(false)}
                 onConfirm={handleBlock}
-                konselor={selectedKonselor}
+                konselorName={selectedKonselor?.name} // Kirim nama saja
             />
             <UnblockModal
                 isOpen={isUnblockModalOpen}
                 onClose={() => setUnblockModalOpen(false)}
                 onConfirm={handleUnblock}
-                konselor={selectedKonselor}
+                konselorName={selectedKonselor?.name} // Kirim nama saja
             />
             <DeleteModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleDelete}
-                konselorName={selectedKonselor?.name}
+                konselorName={selectedKonselor?.name} // Kirim nama saja
             />
         </div>
     );
