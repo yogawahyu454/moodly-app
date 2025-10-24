@@ -24,19 +24,16 @@ import NotificationPage from "../pages/customer/NotificationPage";
 import BookingPage from "../pages/customer/booking/Index";
 import FindCounselorPage from "../pages/customer/booking/FindCounselorPage";
 import InPersonPage from "../pages/customer/booking/InPersonPage";
+import TempatDetailPage from "../pages/customer/booking/TempatDetailPage";
 import PaymentPage from "../pages/customer/booking/PaymentPage";
-
 import HistoryPage from "../pages/customer/history/Index";
 import HistoryDetailPage from "../pages/customer/history/DetailPage";
 import RatingPage from "../pages/customer/history/RatingPage";
 import CancelPage from "../pages/customer/history/CancelPage";
 import CancelDetailPage from "../pages/customer/history/CancelDetailPage";
 import ReschedulePage from "../pages/customer/history/ReschedulePage";
-
 import ProfilePage from "../pages/customer/profile/Index";
 import EditProfilePage from "../pages/customer/profile/EditPage";
-import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage"; // <-- 1. TAMBAHKAN IMPORT INI
-
 import ChatPage from "../pages/customer/session/ChatPage";
 
 // --- Halaman Admin & Super Admin (Website) ---
@@ -166,6 +163,10 @@ const AppRouter = () => {
                     <Route
                         path="/booking/in-person"
                         element={<InPersonPage />}
+                    />
+                    <Route
+                        path="/booking/tempat/:tempatId"
+                        element={<TempatDetailPage />}
                     />
                     <Route
                         path="/booking/payment/:id"
