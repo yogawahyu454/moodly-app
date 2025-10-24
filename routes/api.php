@@ -17,11 +17,13 @@ use App\Http\Controllers\Admin\CustomerVerificationController;
 
 use App\Http\Controllers\Customer\BerandaController;
 use App\Http\Controllers\Customer\HistoryController;
-use App\Http\Controllers\Customer\BookingFlowController;
+use App\Http\Controllers\Customer\BookingFlowController; // Pastikan ini ada
 
 use App\Http\Middleware\RoleMiddleware;
 use App\Models\User;
 use App\Models\Booking;
+use App\Models\TempatKonseling; // <-- Import ini jika belum ada
+
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +56,13 @@ Route::group(['middleware' => [
         Route::patch('/history/{booking}/cancel', [HistoryController::class, 'cancel']);
         Route::patch('/history/{booking}/reschedule', [HistoryController::class, 'reschedule']);
         Route::get('/booking/tempat-konseling', [BookingFlowController::class, 'getTempatKonseling']);
+
+        // --- RUTE DETAIL TEMPAT YANG HILANG ---
+        // Parameter {tempatKonseling} harus sama dengan variabel $tempatKonseling di controller
+        Route::get('/booking/tempat-konseling/{tempatKonseling}', [BookingFlowController::class, 'getTempatDetail'])
+            ->where('tempatKonseling', '[0-9]+'); // Constraint untuk ID numerik
+        // ------------------------------------
+
         Route::get('/booking/counselors', [BookingFlowController::class, 'getCounselors']);
 
         // --- RUTE UNTUK SUPER ADMIN ---
