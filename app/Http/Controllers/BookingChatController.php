@@ -6,7 +6,8 @@ use App\Models\Booking;
 use App\Models\ChatMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate; // <-- Import Gate
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log; // <-- Import Log
 
 // TODO: Import Notifikasi jika sudah siap
 // use App\Notifications\NewChatMessageNotification;
@@ -14,25 +15,48 @@ use Illuminate\Support\Facades\Gate; // <-- Import Gate
 class BookingChatController extends Controller
 {
     /**
-     * Mengambil pesan chat untuk booking tertentu.
+     * Mengambil pesan chat DAN data booking untuk booking tertentu.
      * GET /api/booking/{booking}/chat/messages
      */
     public function index(Booking $booking)
     {
-        // Otorisasi: Pastikan user yang login adalah customer atau konselor dari booking ini
-        // Gunakan Gate/Policy untuk otorisasi yang lebih rapi
-        Gate::authorize('viewChat', $booking);
+        try {
+            // Otorisasi: Pastikan user yang login adalah customer atau konselor dari booking ini
+            Gate::authorize('viewChat', $booking);
 
-        // Ambil pesan, urutkan dari yang terlama, sertakan data pengirim
-        $messages = $booking->chatMessages()
-            ->with('sender:id,name,avatar') // Hanya ambil kolom yg perlu dari sender
-            ->orderBy('created_at', 'asc')
-            ->get();
+            // --- PERUBAHAN: Load data konselor/customer untuk header chat ---
+            $booking->load([
+                'konselor:id,name,avatar',
+                'customer:id,name,avatar'
+            ]);
+            // --- AKHIR PERUBAHAN ---
 
-        // TODO: Tandai pesan sebagai sudah dibaca oleh user yang login (jika perlu)
-        // Misal: $booking->chatMessages()->where('sender_id', '!=', Auth::id())->where('is_read', false)->update(['is_read' => true]);
+            // Ambil pesan, urutkan dari yang terlama, sertakan data pengirim
+            $messages = $booking->chatMessages()
+                ->with('sender:id,name,avatar') // Hanya ambil kolom yg perlu dari sender
+                ->orderBy('created_at', 'asc')
+                ->get();
 
-        return response()->json($messages);
+            // TODO: Tandai pesan sebagai sudah dibaca (jika perlu)
+            // $booking->chatMessages()
+            //     ->where('sender_id', '!=', Auth::id())
+            //     ->where('is_read', false)
+            //     ->update(['is_read' => true]);
+
+            // --- PERUBAHAN: Kembalikan booking dan messages ---
+            return response()->json([
+                'booking' => $booking,
+                'messages' => $messages,
+            ]);
+            // --- AKHIR PERUBAHAN ---
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            Log::warning('Authorization failed for viewing chat:', ['booking_id' => $booking->id, 'user_id' => Auth::id()]);
+            return response()->json(['message' => 'Anda tidak diizinkan mengakses chat ini.'], 403);
+        } catch (\Exception $e) {
+            Log::error('Error fetching chat messages:', ['booking_id' => $booking->id, 'error' => $e->getMessage()]);
+            return response()->json(['message' => 'Gagal mengambil data chat.'], 500);
+        }
     }
 
     /**
@@ -41,42 +65,43 @@ class BookingChatController extends Controller
      */
     public function store(Request $request, Booking $booking)
     {
-        // Otorisasi
-        Gate::authorize('sendMessage', $booking);
+        try {
+            // Otorisasi: Pastikan user boleh mengirim pesan (cek status booking)
+            Gate::authorize('sendMessage', $booking);
 
-        // Validasi
-        $validated = $request->validate([
-            'message' => 'required|string|max:1000', // Batasi panjang pesan
-        ]);
+            // Validasi
+            $validated = $request->validate([
+                'message' => 'required|string|max:1000',
+            ]);
 
-        // Buat pesan baru
-        $message = $booking->chatMessages()->create([
-            'sender_id' => Auth::id(),
-            'message' => $validated['message'],
-            'is_read' => false, // Default belum dibaca
-        ]);
+            // Buat pesan baru
+            $message = $booking->chatMessages()->create([
+                'sender_id' => Auth::id(),
+                'message' => $validated['message'],
+                'is_read' => false,
+            ]);
 
-        // Muat data pengirim untuk respon
-        $message->load('sender:id,name,avatar');
+            // Muat data pengirim untuk respon
+            $message->load('sender:id,name,avatar');
 
-        // TODO: Kirim notifikasi ke penerima
-        $recipient = ($booking->customer_id === Auth::id()) ? $booking->konselor : $booking->customer;
-        // if ($recipient) {
-        //     $recipient->notify(new NewChatMessageNotification($message, $booking));
-        // }
+            // TODO: Kirim notifikasi/event (misal: Laravel Echo) ke penerima
+            // $recipient = ($booking->customer_id === Auth::id()) ? $booking->konselor : $booking->customer;
+            // if ($recipient) {
+            // ... (logika notifikasi)
+            // }
 
-        return response()->json($message, 201); // 201 = Created
-    }
+            return response()->json($message, 201); // 201 = Created
 
-    // Hapus helper function authorizeBookingAccess jika menggunakan Gate/Policy
-    /*
-    private function authorizeBookingAccess(Booking $booking)
-    {
-        $user = Auth::user();
-        if ($booking->customer_id !== $user->id && $booking->konselor_id !== $user->id) {
-            abort(403, 'Anda tidak memiliki akses ke percakapan ini.');
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            Log::warning('Authorization failed for sending message:', ['booking_id' => $booking->id, 'user_id' => Auth::id()]);
+            // Cek status booking untuk pesan error yg lebih spesifik
+            if (!in_array($booking->status_pesanan, ['Aktif', 'Dijadwalkan'])) {
+                return response()->json(['message' => 'Sesi konseling ini sudah berakhir.'], 403);
+            }
+            return response()->json(['message' => 'Anda tidak diizinkan mengirim pesan.'], 403);
+        } catch (\Exception $e) {
+            Log::error('Error storing chat message:', ['booking_id' => $booking->id, 'error' => $e->getMessage()]);
+            return response()->json(['message' => 'Gagal mengirim pesan.'], 500);
         }
-        // ... (cek lainnya)
     }
-    */
 }
