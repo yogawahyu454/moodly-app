@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             DurasiKonselingSeeder::class,
             TempatKonselingSeeder::class,
             BookingSeeder::class,
+            CounselorAvailabilitySeeder::class,
         ]);
     }
 }

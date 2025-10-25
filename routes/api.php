@@ -96,6 +96,12 @@ Route::group(['middleware' => [
             Route::apiResource('konselor-management', KonselorManagementController::class)->parameters(['konselor-management' => 'user']);
             Route::post('konselor-management/{user}', [KonselorManagementController::class, 'update']);
 
+            // Manajemen Jadwal Konselor
+            Route::get('konselor-management/{user}/availabilities', [KonselorManagementController::class, 'getAvailabilities']);
+            Route::post('konselor-management/{user}/availabilities', [KonselorManagementController::class, 'storeAvailability']);
+            Route::put('konselor-management/{user}/availabilities/{availability}', [KonselorManagementController::class, 'updateAvailability']);
+            Route::delete('konselor-management/{user}/availabilities/{availability}', [KonselorManagementController::class, 'destroyAvailability']);
+
             // Manajemen Customer
             Route::post('customer-management/{user}/block', [CustomerManagementController::class, 'block']);
             Route::post('customer-management/{user}/unblock', [CustomerManagementController::class, 'unblock']);
