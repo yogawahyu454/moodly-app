@@ -20,11 +20,7 @@ return [
         'login',
         'logout',
         'register',
-        'sanctum/csrf-cookie',
-        'forgot-password',
-        'reset-password',
-        'email/verification-notification',
-        'verify-email/{id}/{hash}',
+        'sanctum/csrf-cookie'
     ],
 
     'allowed_methods' => ['*'],

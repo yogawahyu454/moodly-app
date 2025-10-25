@@ -3,7 +3,6 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// --- Import Controllers ---
 use App\Http\Controllers\SuperAdmin\JenisKonselingController;
 use App\Http\Controllers\SuperAdmin\DurasiKonselingController;
 use App\Http\Controllers\SuperAdmin\TempatKonselingController;
@@ -21,12 +20,10 @@ use App\Http\Controllers\Customer\HistoryController;
 use App\Http\Controllers\Customer\BookingFlowController;
 use App\Http\Controllers\BookingChatController;
 
-// --- Import Middleware & Models ---
 use App\Http\Middleware\RoleMiddleware;
-use App\Models\User; // Digunakan di route model binding
-use App\Models\Booking; // Digunakan di route model binding
-use App\Models\TempatKonseling; // Digunakan di route model binding
-use App\Models\JenisKonseling; // Digunakan di route model binding
+use App\Models\User;
+use App\Models\Booking;
+use App\Models\TempatKonseling;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,125 +38,88 @@ Route::group(['middleware' => [
     \Illuminate\Session\Middleware\StartSession::class,
 ]], function () {
 
-    // 1. Rute Autentikasi (Didefinisikan di auth.php)
+    // 1. Rute Autentikasi
     require __DIR__ . '/auth.php';
 
-    // 2. Grup untuk SEMUA rute yang terproteksi (membutuhkan login)
+    // 2. Grup untuk SEMUA rute yang terproteksi
     Route::middleware('auth:sanctum')->group(function () {
 
-        // Rute umum: Mengambil data user yang sedang login
+        // Rute umum
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
 
-        // ============================
         // --- RUTE UNTUK CUSTOMER ---
-        // ============================
         Route::get('/beranda-data', [BerandaController::class, 'getBerandaData']);
+        // History
+        Route::get('/history', [HistoryController::class, 'index']);
+        Route::get('/history/{booking}', [HistoryController::class, 'show']);
+        Route::patch('/history/{booking}/cancel', [HistoryController::class, 'cancel']);
+        Route::patch('/history/{booking}/reschedule', [HistoryController::class, 'reschedule']);
+        // Booking Flow
+        Route::get('/booking/tempat-konseling', [BookingFlowController::class, 'getTempatKonseling']);
+        Route::get('/booking/tempat-konseling/{tempatKonseling}', [BookingFlowController::class, 'getTempatDetail'])
+            ->where('tempatKonseling', '[0-9]+');
+        Route::get('/booking/counselors', [BookingFlowController::class, 'getCounselors']);
+        // --- RUTE BARU: Detail Konselor ---
+        Route::get('/booking/counselors/{konselor}', [BookingFlowController::class, 'showCounselor'])
+            ->where('konselor', '[0-9]+'); // Pastikan {konselor} sesuai nama parameter di controller
+        // --- AKHIR RUTE BARU ---
 
-        // History Routes
-        Route::prefix('history')->group(function () {
-            Route::get('/', [HistoryController::class, 'index']);
-            Route::get('/{booking}', [HistoryController::class, 'show'])->where('booking', '[0-9]+');
-            Route::patch('/{booking}/cancel', [HistoryController::class, 'cancel'])->where('booking', '[0-9]+');
-            Route::patch('/{booking}/reschedule', [HistoryController::class, 'reschedule'])->where('booking', '[0-9]+');
+        // Booking Chat
+        Route::prefix('booking/{booking}/chat')->group(function () {
+            Route::get('/messages', [BookingChatController::class, 'index'])->where('booking', '[0-9]+');
+            Route::post('/messages', [BookingChatController::class, 'store'])->where('booking', '[0-9]+');
         });
 
-        // Booking Flow Routes
-        Route::prefix('booking')->group(function () {
-            Route::get('/tempat-konseling', [BookingFlowController::class, 'getTempatKonseling']);
-            // Gunakan nama parameter yang sama dengan variabel di method controller
-            Route::get('/tempat-konseling/{tempatKonseling}', [BookingFlowController::class, 'getTempatDetail'])
-                ->where('tempatKonseling', '[0-9]+');
-            Route::get('/counselors', [BookingFlowController::class, 'getCounselors']);
-            // Gunakan nama parameter yang sama dengan variabel di method controller
-            Route::get('/counselors/{konselor}', [BookingFlowController::class, 'showCounselor'])
-                ->where('konselor', '[0-9]+');
-            // --- RUTE BARU: Opsi Jadwal ---
-            Route::get('/counselors/{konselor}/schedule-options', [BookingFlowController::class, 'getScheduleOptions'])
-                ->where('konselor', '[0-9]+'); // Pastikan constraint ada
-            // --- AKHIR RUTE BARU ---
-        });
 
-        // Booking Chat Routes
-        Route::prefix('booking/{booking}/chat')
-            ->where('booking', '[0-9]+') // Constraint untuk {booking}
-            ->group(function () {
-                Route::get('/messages', [BookingChatController::class, 'getMessages']);
-                Route::post('/messages', [BookingChatController::class, 'sendMessage']);
-            });
-
-        // =============================
         // --- RUTE UNTUK SUPER ADMIN ---
-        // =============================
         Route::middleware(RoleMiddleware::class . ':super-admin')->prefix('super-admin')->group(function () {
-            // Pengaturan Konseling
             Route::apiResource('jenis-konseling', JenisKonselingController::class);
-            // Gunakan nama parameter default {jenis_konseling} atau sesuaikan parameter di controller/resource
-            Route::post('jenis-konseling/{jenis_konseling}', [JenisKonselingController::class, 'update'])->where('jenis_konseling', '[0-9]+');
+            Route::post('jenis-konseling/{jenisKonseling}', [JenisKonselingController::class, 'update']);
             Route::apiResource('durasi-konseling', DurasiKonselingController::class);
             Route::apiResource('tempat-konseling', TempatKonselingController::class);
-            // Gunakan nama parameter default {tempat_konseling} atau sesuaikan
-            Route::post('tempat-konseling/{tempat_konseling}', [TempatKonselingController::class, 'update'])->where('tempat_konseling', '[0-9]+');
+            Route::post('tempat-konseling/{tempatKonseling}', [TempatKonselingController::class, 'update']);
 
-            // Manajemen User (Admin)
-            Route::prefix('admin-management')->group(function () {
-                Route::post('/{user}/block', [AdminManagementController::class, 'block'])->where('user', '[0-9]+');
-                Route::post('/{user}/unblock', [AdminManagementController::class, 'unblock'])->where('user', '[0-9]+');
-                // Rute update POST (karena frontend kirim FormData)
-                Route::post('/{user}', [AdminManagementController::class, 'update'])->where('user', '[0-9]+');
-            });
-            Route::apiResource('admin-management', AdminManagementController::class)->parameters(['admin-management' => 'user']); // 'user' adalah nama parameter
 
-            // Manajemen User (Konselor)
-            Route::prefix('konselor-management')->group(function () {
-                Route::post('/{user}/block', [KonselorManagementController::class, 'block'])->where('user', '[0-9]+');
-                Route::post('/{user}/unblock', [KonselorManagementController::class, 'unblock'])->where('user', '[0-9]+');
-                // Rute update POST (karena frontend kirim FormData)
-                Route::post('/{user}', [KonselorManagementController::class, 'update'])->where('user', '[0-9]+');
-            });
-            Route::apiResource('konselor-management', KonselorManagementController::class)->parameters(['konselor-management' => 'user']); // 'user' adalah nama parameter
+            // Rute untuk manajemen admin
+            Route::post('admin-management/{user}/block', [AdminManagementController::class, 'block']);
+            Route::post('admin-management/{user}/unblock', [AdminManagementController::class, 'unblock']);
+            Route::apiResource('admin-management', AdminManagementController::class)->parameters(['admin-management' => 'user']);
 
-            // Manajemen User (Customer)
-            Route::prefix('customer-management')->group(function () {
-                Route::post('/{user}/block', [CustomerManagementController::class, 'block'])->where('user', '[0-9]+');
-                Route::post('/{user}/unblock', [CustomerManagementController::class, 'unblock'])->where('user', '[0-9]+');
-                // Tidak ada method update untuk customer oleh super-admin
-            });
+            // Rute untuk manajemen konselor
+            Route::post('konselor-management/{user}/block', [KonselorManagementController::class, 'block']);
+            Route::post('konselor-management/{user}/unblock', [KonselorManagementController::class, 'unblock']);
+            Route::apiResource('konselor-management', KonselorManagementController::class)->parameters(['konselor-management' => 'user']);
+            Route::post('konselor-management/{user}', [KonselorManagementController::class, 'update']);
+
+
+            // Rute untuk manajemen customer
+            Route::post('customer-management/{user}/block', [CustomerManagementController::class, 'block']);
+            Route::post('customer-management/{user}/unblock', [CustomerManagementController::class, 'unblock']);
             Route::apiResource('customer-management', CustomerManagementController::class)->parameters(['customer-management' => 'user'])->only(['index', 'show', 'destroy']);
+
             Route::apiResource('booking-management', BookingManagementController::class)->only(['index', 'show', 'destroy']);
         });
 
-        // =======================
         // --- RUTE UNTUK ADMIN ---
-        // =======================
         Route::middleware(RoleMiddleware::class . ':admin,super-admin')->prefix('admin')->group(function () {
-            // Jadwal Konsultasi (Verifikasi Booking)
-            Route::prefix('jadwal-konsultasi')->group(function () {
-                Route::get('/', [JadwalKonsultasiController::class, 'index']);
-                // Gunakan nama parameter {booking} agar konsisten dengan controller/model binding
-                Route::get('/{booking}', [JadwalKonsultasiController::class, 'show'])->where('booking', '[0-9]+');
-                Route::delete('/{booking}', [JadwalKonsultasiController::class, 'destroy'])->where('booking', '[0-9]+');
-                Route::patch('/{booking}/status', [JadwalKonsultasiController::class, 'updateStatus'])->where('booking', '[0-9]+');
-            });
+            Route::get('jadwal-konsultasi', [JadwalKonsultasiController::class, 'index']);
+            Route::get('jadwal-konsultasi/{booking:id}', [JadwalKonsultasiController::class, 'show']);
+            Route::delete('jadwal-konsultasi/{booking:id}', [JadwalKonsultasiController::class, 'destroy']);
+            Route::patch('jadwal-konsultasi/{booking:id}/status', [JadwalKonsultasiController::class, 'updateStatus']);
 
-            // Verifikasi Konselor
-            Route::prefix('verifikasi-konselor')->group(function () {
-                Route::get('/', [KonselorVerificationController::class, 'index']);
-                // Gunakan nama parameter {user}
-                Route::get('/{user}', [KonselorVerificationController::class, 'show'])->where('user', '[0-9]+');
-                Route::post('/{user}/approve', [KonselorVerificationController::class, 'approve'])->where('user', '[0-9]+');
-                Route::post('/{user}/reject', [KonselorVerificationController::class, 'reject'])->where('user', '[0-9]+');
-            });
+            // --- Rute Verifikasi Konselor ---
+            Route::get('verifikasi-konselor', [KonselorVerificationController::class, 'index']);
+            Route::get('verifikasi-konselor/{user:id}', [KonselorVerificationController::class, 'show']);
+            Route::post('verifikasi-konselor/{user:id}/approve', [KonselorVerificationController::class, 'approve']);
+            Route::post('verifikasi-konselor/{user:id}/reject', [KonselorVerificationController::class, 'reject']);
 
-            // Verifikasi Customer
-            Route::prefix('verifikasi-customer')->group(function () {
-                Route::get('/', [CustomerVerificationController::class, 'index']);
-                // Gunakan nama parameter {user}
-                Route::get('/{user}', [CustomerVerificationController::class, 'show'])->where('user', '[0-9]+');
-                Route::post('/{user}/approve', [CustomerVerificationController::class, 'approve'])->where('user', '[0-9]+');
-                Route::post('/{user}/reject', [CustomerVerificationController::class, 'reject'])->where('user', '[0-9]+');
-            });
+            // --- Rute Verifikasi Customer ---
+            Route::get('verifikasi-customer', [CustomerVerificationController::class, 'index']);
+            Route::get('verifikasi-customer/{user:id}', [CustomerVerificationController::class, 'show']);
+            Route::post('verifikasi-customer/{user:id}/approve', [CustomerVerificationController::class, 'approve']);
+            Route::post('verifikasi-customer/{user:id}/reject', [CustomerVerificationController::class, 'reject']);
         });
-    }); // End auth:sanctum group
-}); // End main group
+    });
+});
