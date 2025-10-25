@@ -21,7 +21,7 @@ import NotificationPage from "../pages/customer/NotificationPage";
 import BookingPage from "../pages/customer/booking/Index";
 import FindCounselorPage from "../pages/customer/booking/FindCounselorPage";
 import InPersonPage from "../pages/customer/booking/InPersonPage";
-import PaymentPage from "../pages/customer/booking/PaymentPage";
+// import PaymentPage from "../pages/customer/booking/PaymentPage";
 import LocationDetailPage from "../pages/customer/booking/LocationDetailPage";
 import PsychologistDetailPage from "../pages/customer/booking/PsychologistDetailPage"; // <-- Import Halaman Detail Psikolog
 
@@ -127,7 +127,7 @@ const AppRouter = () => {
             {/* ... (Rute GuestGuard) */}
             <Route element={<GuestGuard />}>
                 <Route element={<AuthLayout />}>
-                    {/* <Route path="/" element={<OnboardingPage />} /> */}
+                    <Route path="/" element={<OnboardingPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                 </Route>
@@ -188,11 +188,11 @@ const AppRouter = () => {
                         path="/booking/counselor/:id" // Gunakan ID konselor di URL
                         element={<PsychologistDetailPage />}
                     />
-                    {/* --- AKHIR RUTE BARU --- */}
-                    <Route
+
+                    {/* <Route
                         path="/booking/payment/:id"
-                        element={<PaymentPage />}
-                    />
+                        element={<PaymentPage />} 
+                    /> */}
                     {/* ... (Rute History Flow, Help Flow, Session Flow) */}
                     {/* History Flow */}
                     <Route
