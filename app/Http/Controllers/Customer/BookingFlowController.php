@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\TempatKonseling;
 use App\Models\User; // <-- Pastikan User di-import
+use App\Models\DurasiKonseling; // <-- Import DurasiKonseling
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon; // Untuk manipulasi tanggal
 
 class BookingFlowController extends Controller
 {
@@ -86,7 +88,6 @@ class BookingFlowController extends Controller
         }
     }
 
-    // --- METHOD BARU ---
     /**
      * Mengambil detail satu konselor.
      * GET /api/booking/counselors/{konselor}
@@ -100,7 +101,6 @@ class BookingFlowController extends Controller
             }
 
             // Pilih kolom yang ingin ditampilkan di detail (lebih banyak dari list)
-            // Anda bisa memuat relasi lain jika perlu di sini
             $konselorData = $konselor->only([
                 'id',
                 'name',
@@ -111,13 +111,12 @@ class BookingFlowController extends Controller
                 'spesialisasi',
                 'rating',
                 'surat_izin_praktik',
-                // Tambahkan kolom lain jika perlu (misal: deskripsi bio, pengalaman, dll)
+                // Tambahkan kolom lain jika perlu
             ]);
 
-            // TODO: Tambahkan logika untuk mengambil metode layanan yang tersedia (dari tabel lain?)
-            // Untuk sementara, kita hardcode
-            $konselorData['servesVia'] = ['Chat', 'Video Call', 'Voice Call', 'Tatap Muka'];
-            // TODO: Tambahkan logika untuk mengambil jumlah review (dari tabel lain?)
+            // TODO: Ambil metode layanan dari database (jika ada relasi)
+            $konselorData['servesVia'] = ['Chat', 'Video Call', 'Voice Call', 'Tatap Muka']; // Hardcoded
+            // TODO: Ambil jumlah review dari database (jika ada relasi)
             $konselorData['reviews'] = '(200+ ulasan)'; // Hardcoded
 
 
@@ -128,6 +127,58 @@ class BookingFlowController extends Controller
             Log::error('Error fetching counselor detail:', ['id' => $konselor->id ?? null, 'error' => $e->getMessage()]);
             return response()->json([
                 'message' => 'Gagal mengambil detail konselor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // --- METHOD BARU UNTUK JADWAL ---
+    /**
+     * Mengambil opsi durasi dan jadwal (dummy) untuk konselor tertentu.
+     * GET /api/booking/counselors/{konselor}/schedule-options
+     */
+    public function getScheduleOptions(User $konselor)
+    {
+        try {
+            // Validasi: Pastikan user adalah konselor dan terverifikasi
+            if ($konselor->role !== 'konselor' || $konselor->status !== 'Terverifikasi') {
+                return response()->json(['message' => 'Konselor tidak ditemukan atau tidak aktif.'], 404);
+            }
+
+            // 1. Ambil Durasi Konseling yang Aktif
+            $durations = DurasiKonseling::select('id', 'durasi_menit', 'harga')
+                // ->where('status', 'Aktif') // Jika ada kolom status di DurasiKonseling
+                ->orderBy('harga') // Urutkan berdasarkan harga atau durasi
+                ->get();
+
+            // 2. Buat Dummy Jadwal Ketersediaan (Contoh untuk 5 hari ke depan)
+            $availableDates = [];
+            $today = Carbon::today();
+            for ($i = 0; $i < 5; $i++) {
+                $date = $today->copy()->addDays($i);
+                $availableDates[] = [
+                    'date' => $date->toDateString(), // Format YYYY-MM-DD
+                    'dayName' => $date->translatedFormat('l'), // Nama hari (Senin, Selasa, ...)
+                    'dayOfMonth' => $date->day,
+                    'monthName' => $date->translatedFormat('M'), // Nama bulan singkat (Sep)
+                    // Contoh jam tersedia (bisa lebih kompleks berdasarkan hari)
+                    'availableTimes' => [
+                        'Pagi' => ['09:00', '10:00'], // Jam Pagi
+                        'Siang' => ['13:00', '14:00', '15:00'], // Jam Siang
+                        'Sore' => ['16:00'], // Jam Sore
+                        'Malam' => [], // Jam Malam (kosong)
+                    ]
+                ];
+            }
+
+            return response()->json([
+                'durations' => $durations,
+                'availableDates' => $availableDates,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching schedule options:', ['counselor_id' => $konselor->id, 'error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Gagal mengambil opsi jadwal.',
                 'error' => $e->getMessage()
             ], 500);
         }

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import apiClient from "../../../api/axios";
 
 // --- Komponen Ikon ---
+// ... (Kode Ikon tetap sama)
 const BackArrowIcon = () => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -88,23 +89,318 @@ const VideoCallIcon = () => (
         <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A.5.5 0 0014 7.5v5a.5.5 0 00.553.494l2-1A.5.5 0 0017 11.5v-3a.5.5 0 00-.447-.494l-2-1z" />
     </svg>
 );
-// --- Akhir Komponen Ikon ---
+const ClockIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5 text-cyan-600"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+    >
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+    </svg>
+);
+const CalendarIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5 text-cyan-600"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+    >
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+        />
+    </svg>
+);
+const ChevronDownIcon = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4 text-gray-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+    >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+);
+
+// --- Komponen Jadwal ---
+const ScheduleTabContent = ({ counselorId, method }) => {
+    const [scheduleOptions, setScheduleOptions] = useState({
+        durations: [],
+        availableDates: [],
+    });
+    const [loadingSchedule, setLoadingSchedule] = useState(true);
+    const [errorSchedule, setErrorSchedule] = useState(null);
+
+    // --- State untuk Pilihan User ---
+    const [selectedTimeOfDay, setSelectedTimeOfDay] = useState("Siang"); // Pagi, Siang, Sore, Malam
+    const [selectedDurationId, setSelectedDurationId] = useState("");
+    const [selectedDate, setSelectedDate] = useState(null); // Format YYYY-MM-DD
+    const [selectedTime, setSelectedTime] = useState(""); // Format HH:MM
+    const [selectedMedia, setSelectedMedia] = useState(""); // Voice Call, Video Call, Chat
+
+    // Fetch opsi jadwal saat komponen mount atau counselorId berubah
+    useEffect(() => {
+        const fetchSchedule = async () => {
+            if (!counselorId) return;
+            try {
+                setLoadingSchedule(true);
+                const response = await apiClient.get(
+                    `/api/booking/counselors/${counselorId}/schedule-options`
+                );
+                setScheduleOptions(response.data);
+                // Set durasi default jika ada
+                if (
+                    response.data.durations &&
+                    response.data.durations.length > 0
+                ) {
+                    setSelectedDurationId(response.data.durations[0].id);
+                }
+                // Set tanggal default jika ada
+                if (
+                    response.data.availableDates &&
+                    response.data.availableDates.length > 0
+                ) {
+                    setSelectedDate(response.data.availableDates[0].date);
+                }
+                setErrorSchedule(null);
+            } catch (err) {
+                console.error("Gagal mengambil opsi jadwal:", err);
+                setErrorSchedule("Gagal memuat jadwal.");
+            } finally {
+                setLoadingSchedule(false);
+            }
+        };
+        fetchSchedule();
+    }, [counselorId]);
+
+    // Mendapatkan jam tersedia berdasarkan tanggal dan waktu (Pagi/Siang/Sore/Malam)
+    const getAvailableTimesForSelectedDate = () => {
+        const dateData = scheduleOptions.availableDates.find(
+            (d) => d.date === selectedDate
+        );
+        return dateData?.availableTimes?.[selectedTimeOfDay] || [];
+    };
+
+    // Handler untuk memilih tanggal
+    const handleDateSelect = (date) => {
+        setSelectedDate(date);
+        setSelectedTime(""); // Reset pilihan jam saat tanggal berubah
+    };
+
+    // Handler untuk memilih jam
+    const handleTimeSelect = (time) => {
+        setSelectedTime(time);
+    };
+
+    // Handler untuk memilih media (hanya jika online)
+    const handleMediaSelect = (media) => {
+        if (method !== "Offline") {
+            // Hanya bisa dipilih jika bukan offline
+            setSelectedMedia(media);
+        }
+    };
+
+    if (loadingSchedule)
+        return <div className="text-center p-4">Memuat jadwal...</div>;
+    if (errorSchedule)
+        return (
+            <div className="text-center p-4 text-red-500">{errorSchedule}</div>
+        );
+
+    const availableTimes = getAvailableTimesForSelectedDate();
+
+    return (
+        <div className="space-y-5 bg-white p-4 rounded-xl shadow">
+            {/* Waktu & Durasi */}
+            <div className="grid grid-cols-2 gap-3">
+                {/* Waktu */}
+                <div className="relative">
+                    <label className="text-xs text-gray-500 mb-1 block">
+                        Waktu
+                    </label>
+                    <div className="flex items-center justify-between p-2.5 border border-gray-300 rounded-lg bg-gray-50">
+                        <div className="flex items-center gap-1.5">
+                            <ClockIcon />
+                            <select
+                                value={selectedTimeOfDay}
+                                onChange={(e) => {
+                                    setSelectedTimeOfDay(e.target.value);
+                                    setSelectedTime("");
+                                }} // Reset jam saat ganti waktu
+                                className="bg-transparent text-sm font-semibold text-gray-700 focus:outline-none appearance-none pr-4" // Tambah pr-4
+                            >
+                                <option value="Pagi">Pagi</option>
+                                <option value="Siang">Siang</option>
+                                <option value="Sore">Sore</option>
+                                <option value="Malam">Malam</option>
+                            </select>
+                        </div>
+                        <ChevronDownIcon />
+                    </div>
+                </div>
+                {/* Durasi */}
+                <div className="relative">
+                    <label className="text-xs text-gray-500 mb-1 block">
+                        Durasi
+                    </label>
+                    <div className="flex items-center justify-between p-2.5 border border-gray-300 rounded-lg bg-gray-50">
+                        <div className="flex items-center gap-1.5">
+                            <ClockIcon /> {/* Ganti ikon jika perlu */}
+                            <select
+                                value={selectedDurationId}
+                                onChange={(e) =>
+                                    setSelectedDurationId(e.target.value)
+                                }
+                                className="bg-transparent text-sm font-semibold text-gray-700 focus:outline-none appearance-none pr-4" // Tambah pr-4
+                            >
+                                {scheduleOptions.durations.map((dur) => (
+                                    <option key={dur.id} value={dur.id}>
+                                        {dur.durasi_menit}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <ChevronDownIcon />
+                    </div>
+                </div>
+            </div>
+
+            {/* Pilih Tanggal */}
+            <div>
+                <h4 className="font-semibold text-sm text-gray-700 mb-2">
+                    Pilih Tanggal dan waktu konseling
+                </h4>
+                <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+                    {scheduleOptions.availableDates.map((dateInfo) => (
+                        <button
+                            key={dateInfo.date}
+                            onClick={() => handleDateSelect(dateInfo.date)}
+                            className={`flex flex-col items-center justify-center p-2.5 rounded-lg border w-16 h-16 flex-shrink-0 transition-colors ${
+                                selectedDate === dateInfo.date
+                                    ? "bg-cyan-500 text-white border-cyan-600 shadow"
+                                    : "bg-white text-gray-600 border-gray-300 hover:bg-cyan-50"
+                            }`}
+                        >
+                            <span className="text-[10px] uppercase">
+                                {dateInfo.monthName}
+                            </span>
+                            <span className="text-lg font-bold">
+                                {dateInfo.dayOfMonth}
+                            </span>
+                            <span className="text-[10px]">
+                                {dateInfo.dayName.substring(0, 3)}
+                            </span>{" "}
+                            {/* Nama hari singkat */}
+                        </button>
+                    ))}
+                    {/* Tombol Kalender (opsional) */}
+                    <button className="flex flex-col items-center justify-center p-2.5 rounded-lg border w-16 h-16 flex-shrink-0 bg-white text-cyan-600 border-cyan-300 hover:bg-cyan-50">
+                        <CalendarIcon className="w-6 h-6 mb-1" />
+                        <span className="text-[10px] uppercase">Lain</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Jadwal Tersedia */}
+            <div>
+                <h4 className="font-semibold text-sm text-gray-700 mb-2">
+                    Jadwal {selectedTimeOfDay}
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                    {availableTimes.length > 0 ? (
+                        availableTimes.map((time, index) => (
+                            <button
+                                key={index}
+                                onClick={() => handleTimeSelect(time)}
+                                className={`px-4 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+                                    selectedTime === time
+                                        ? "bg-cyan-500 text-white border-cyan-600"
+                                        : "bg-white text-gray-700 border-gray-300 hover:bg-cyan-50"
+                                }`}
+                            >
+                                {time} WIB
+                            </button>
+                        ))
+                    ) : (
+                        <p className="text-xs text-gray-400">
+                            Tidak ada jadwal tersedia.
+                        </p>
+                    )}
+                </div>
+            </div>
+
+            {/* --- PERBAIKAN: Tampilkan Media Konseling secara kondisional --- */}
+            {method !== "Offline" && (
+                <div>
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">
+                        Pilihan Media Konseling
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                        {["Voice Call", "Video Call", "Chat"].map(
+                            (media, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => handleMediaSelect(media)}
+                                    className={`flex items-center px-4 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+                                        selectedMedia === media
+                                            ? "bg-cyan-500 text-white border-cyan-600"
+                                            : "bg-white text-gray-700 border-gray-300 hover:bg-cyan-50"
+                                    }`}
+                                >
+                                    {media === "Voice Call" && (
+                                        <VoiceCallIcon />
+                                    )}
+                                    {media === "Video Call" && (
+                                        <VideoCallIcon />
+                                    )}
+                                    {media === "Chat" && <ChatIcon />}
+                                    {media}
+                                </button>
+                            )
+                        )}
+                    </div>
+                </div>
+            )}
+            {/* --- AKHIR PERBAIKAN --- */}
+        </div>
+    );
+};
+// --- Akhir Komponen Jadwal ---
 
 export default function PsychologistDetailPage() {
+    // ... (State dan Hooks lainnya tetap sama)
     const navigate = useNavigate();
     const { id: counselorId } = useParams();
     const location = useLocation();
-    const { serviceId, serviceName, tempatId, tempatName, method } =
-        location.state || {};
+    // Ambil method dari state, default ke 'Online' jika tidak ada
+    const {
+        serviceId,
+        serviceName,
+        tempatId,
+        tempatName,
+        method = "Online",
+    } = location.state || {};
 
     const [activeTab, setActiveTab] = useState("Profile Psikolog");
     const [psychologistData, setPsychologistData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // ... (useEffect untuk fetchPsychologistDetail tetap sama)
     useEffect(() => {
         const fetchPsychologistDetail = async () => {
-            // ... (logika fetch data tetap sama)
             if (!counselorId) {
                 setError("ID Konselor tidak valid.");
                 setLoading(false);
@@ -127,26 +423,59 @@ export default function PsychologistDetailPage() {
         fetchPsychologistDetail();
     }, [counselorId]);
 
-    const handleBack = () => {
-        navigate(-1);
-    };
+    const handleBack = () => navigate(-1);
+
+    // --- PERBAIKAN: Update handleStartCounseling ---
+    // Perlu state dari ScheduleTabContent, jadi kita pindahkan state jadwal ke sini
+    const [selectedTimeOfDay, setSelectedTimeOfDay] = useState("Siang");
+    const [selectedDurationId, setSelectedDurationId] = useState("");
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedTime, setSelectedTime] = useState("");
+    const [selectedMedia, setSelectedMedia] = useState("");
 
     const handleStartCounseling = () => {
-        // ... (logika navigasi ke jadwal tetap sama)
-        navigate(`/booking/schedule`, {
-            // Asumsi halaman jadwal adalah /booking/schedule
-            state: {
-                serviceId,
-                serviceName,
-                tempatId,
-                tempatName,
-                counselorId,
-                counselorName: psychologistData?.name,
-                method: activeTab === "Jadwal" ? method : null, // Kirim method jika di tab Jadwal
-            },
+        // Validasi sederhana sebelum lanjut
+        if (activeTab === "Jadwal") {
+            if (!selectedDurationId || !selectedDate || !selectedTime) {
+                alert("Harap lengkapi pilihan jadwal (Durasi, Tanggal, Jam)."); // Ganti dengan modal
+                return;
+            }
+            // Validasi media hanya jika online
+            if (method !== "Offline" && !selectedMedia) {
+                alert("Harap pilih media konseling."); // Ganti dengan modal
+                return;
+            }
+        }
+
+        // Kumpulkan semua data booking
+        const bookingData = {
+            serviceId,
+            serviceName,
+            tempatId, // null jika online
+            tempatName, // null jika online
+            counselorId,
+            counselorName: psychologistData?.name,
+            method: method === "Offline" ? "Tatap Muka" : selectedMedia, // Ambil dari state jika online
+            durationId: selectedDurationId,
+            date: selectedDate,
+            time: selectedTime,
+            // Tambahkan data lain jika perlu (misal: harga durasi)
+        };
+
+        console.log(
+            "Navigating to next step (e.g., payment) with data:",
+            bookingData
+        );
+
+        // Arahkan ke halaman berikutnya (misal: konfirmasi atau pembayaran)
+        navigate(`/booking/confirmation`, {
+            // Ganti dengan path halaman konfirmasi/pembayaran
+            state: bookingData,
         });
     };
+    // --- AKHIR PERBAIKAN ---
 
+    // ... (Render loading, error, data tidak ditemukan tetap sama)
     if (loading)
         return <div className="p-4 text-center">Memuat detail psikolog...</div>;
     if (error)
@@ -162,33 +491,26 @@ export default function PsychologistDetailPage() {
         ? Number(psychologistData.rating)
         : null;
     const ratingDisplay = ratingValue !== null ? ratingValue.toFixed(1) : "N/A";
-    const firstName = psychologistData.name?.split(",")[0]; // Ambil nama depan
+    const firstName = psychologistData.name?.split(",")[0];
 
-    // Ambil maks 4 spesialisasi pertama
     const specializationTags = Array.isArray(psychologistData.spesialisasi)
         ? psychologistData.spesialisasi.slice(0, 4)
         : [];
-    // Tambah tag '+ lainnya' jika > 4
     if (
         Array.isArray(psychologistData.spesialisasi) &&
         psychologistData.spesialisasi.length > 4
     ) {
         specializationTags[3] = `${
             psychologistData.spesialisasi.length - 3
-        }+ lainnya`; // Ganti item ke-4
+        }+ lainnya`;
     }
 
     return (
         <div className="bg-gray-50 min-h-screen font-sans">
-            {/* --- Header Dinamis --- */}
+            {/* --- Header Dinamis (Tetap Sama) --- */}
             {activeTab === "Profile Psikolog" ? (
-                // --- Layout Header untuk Tab Profile ---
                 <div className="relative pb-16">
-                    {" "}
-                    {/* Beri ruang di bawah untuk avatar */}
-                    {/* Background Biru */}
                     <div className="bg-gradient-to-b from-cyan-400 to-cyan-200 h-36 rounded-b-3xl absolute top-0 left-0 right-0 z-0">
-                        {/* Tombol Back di dalam area biru */}
                         <button
                             onClick={handleBack}
                             className="absolute top-6 left-4 p-2 rounded-full text-white hover:bg-cyan-500/50 group transition-colors z-10"
@@ -197,10 +519,10 @@ export default function PsychologistDetailPage() {
                             <BackArrowIcon />
                         </button>
                         <h1 className="absolute top-6 left-1/2 -translate-x-1/2 text-lg font-bold text-white z-10">
-                            Psikolog {firstName}
+                            {" "}
+                            Psikolog {firstName}{" "}
                         </h1>
                     </div>
-                    {/* Avatar di tengah, overlay */}
                     <div className="relative flex justify-center pt-20 z-10">
                         <img
                             src={
@@ -219,24 +541,25 @@ export default function PsychologistDetailPage() {
                             }}
                         />
                     </div>
-                    {/* Nama dan Rating di bawah Avatar */}
                     <div className="text-center mt-2 px-4">
                         <h2 className="font-bold text-lg text-gray-800">
-                            {psychologistData.name}
+                            {" "}
+                            {psychologistData.name}{" "}
                         </h2>
                         <div className="flex items-center justify-center mt-1">
                             <StarIcon />
                             <span className="text-sm font-semibold text-yellow-500 ml-1">
-                                {ratingDisplay}
+                                {" "}
+                                {ratingDisplay}{" "}
                             </span>
                             <span className="text-xs text-gray-400 ml-1.5">
-                                {psychologistData.reviews || "(0 ulasan)"}
+                                {" "}
+                                {psychologistData.reviews || "(0 ulasan)"}{" "}
                             </span>
                         </div>
                     </div>
                 </div>
             ) : (
-                // --- Layout Header untuk Tab Jadwal ---
                 <header className="bg-gradient-to-b from-cyan-400 to-cyan-200 p-4 pt-6 flex items-start sticky top-0 z-20 text-white rounded-b-3xl shadow-lg">
                     <button
                         onClick={handleBack}
@@ -245,7 +568,6 @@ export default function PsychologistDetailPage() {
                     >
                         <BackArrowIcon />
                     </button>
-                    {/* Avatar Kecil di Kiri */}
                     <img
                         src={
                             psychologistData.avatar ||
@@ -262,10 +584,10 @@ export default function PsychologistDetailPage() {
                             )}&background=EBF4FF&color=3B82F6&bold=true&size=64`;
                         }}
                     />
-                    {/* Nama dan Keahlian di Kanan */}
                     <div className="flex-grow pt-1">
                         <h1 className="text-base font-bold leading-tight">
-                            {psychologistData.name}
+                            {" "}
+                            {psychologistData.name}{" "}
                         </h1>
                         <div className="flex flex-wrap gap-1.5 mt-1.5">
                             {specializationTags.map((tag, index) => (
@@ -273,8 +595,8 @@ export default function PsychologistDetailPage() {
                                     key={index}
                                     className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${
                                         tag.includes("+")
-                                            ? "bg-white/30 text-white border border-white/50" // Warna beda untuk 'lainnya'
-                                            : "bg-white text-cyan-600" // Warna tag biasa
+                                            ? "bg-white/30 text-white border border-white/50"
+                                            : "bg-white text-cyan-600"
                                     }`}
                                 >
                                     {tag}
@@ -284,13 +606,12 @@ export default function PsychologistDetailPage() {
                     </div>
                 </header>
             )}
-            {/* --- Akhir Header Dinamis --- */}
 
-            {/* Konten Utama (Tabs dan Isi Tab) */}
+            {/* Konten Utama */}
             <main className="relative p-4 pb-24">
                 {" "}
                 {/* Tambah padding bottom lebih banyak */}
-                {/* Pindahkan Tabs ke sini */}
+                {/* Tabs */}
                 <div className="flex justify-around bg-gray-100 rounded-lg p-1 mb-5">
                     <button
                         onClick={() => setActiveTab("Profile Psikolog")}
@@ -300,7 +621,8 @@ export default function PsychologistDetailPage() {
                                 : "text-gray-500 hover:bg-gray-200"
                         }`}
                     >
-                        Profile Psikolog
+                        {" "}
+                        Profile Psikolog{" "}
                     </button>
                     <button
                         onClick={() => setActiveTab("Jadwal")}
@@ -310,17 +632,18 @@ export default function PsychologistDetailPage() {
                                 : "text-gray-500 hover:bg-gray-200"
                         }`}
                     >
-                        Jadwal
+                        {" "}
+                        Jadwal{" "}
                     </button>
                 </div>
-                {/* Konten Tab */}
-                {activeTab === "Profile Psikolog" && (
+                {/* --- Konten Tab Dinamis --- */}
+                {activeTab === "Profile Psikolog" ? (
                     // Konten Profile (tetap sama)
                     <div className="space-y-5">
-                        {/* Keahlian */}
                         <div className="bg-white p-4 rounded-xl shadow">
                             <h3 className="font-bold text-gray-700 text-base mb-2">
-                                Keahlian
+                                {" "}
+                                Keahlian{" "}
                             </h3>
                             <div className="flex flex-wrap gap-2">
                                 {Array.isArray(psychologistData.spesialisasi) &&
@@ -331,7 +654,8 @@ export default function PsychologistDetailPage() {
                                                 key={index}
                                                 className="text-xs font-semibold px-3 py-1 rounded-full bg-cyan-100 text-cyan-700"
                                             >
-                                                {tag}
+                                                {" "}
+                                                {tag}{" "}
                                             </span>
                                         )
                                     )
@@ -342,38 +666,41 @@ export default function PsychologistDetailPage() {
                                 )}
                             </div>
                         </div>
-
-                        {/* Tentang Psikolog */}
                         <div className="bg-white p-4 rounded-xl shadow space-y-3">
                             <h3 className="font-bold text-gray-700 text-base">
-                                Tentang {firstName}
+                                {" "}
+                                Tentang {firstName}{" "}
                             </h3>
                             {psychologistData.universitas && (
                                 <div className="flex items-start gap-1.5">
-                                    <EducationIcon />
+                                    {" "}
+                                    <EducationIcon />{" "}
                                     <div>
+                                        {" "}
                                         <h4 className="font-semibold text-sm text-gray-600 mb-0.5">
                                             Pendidikan
-                                        </h4>
+                                        </h4>{" "}
                                         <p className="text-xs text-gray-500">
                                             {psychologistData.universitas}
-                                        </p>
-                                    </div>
+                                        </p>{" "}
+                                    </div>{" "}
                                 </div>
                             )}
                             {psychologistData.surat_izin_praktik && (
                                 <div className="flex items-start gap-1.5">
-                                    <LicenseIcon />
+                                    {" "}
+                                    <LicenseIcon />{" "}
                                     <div>
+                                        {" "}
                                         <h4 className="font-semibold text-sm text-gray-600 mb-0.5">
                                             Nomor Izin Praktek
-                                        </h4>
+                                        </h4>{" "}
                                         <p className="text-xs text-gray-500">
                                             {
                                                 psychologistData.surat_izin_praktik
                                             }
-                                        </p>
-                                    </div>
+                                        </p>{" "}
+                                    </div>{" "}
                                 </div>
                             )}
                             {!psychologistData.universitas &&
@@ -384,11 +711,10 @@ export default function PsychologistDetailPage() {
                                     </p>
                                 )}
                         </div>
-
-                        {/* Melayani Via */}
                         <div className="bg-white p-4 rounded-xl shadow">
                             <h3 className="font-bold text-gray-700 text-base mb-2">
-                                Melayani via:
+                                {" "}
+                                Melayani via:{" "}
                             </h3>
                             <div className="flex flex-wrap gap-2">
                                 {Array.isArray(psychologistData.servesVia) &&
@@ -399,18 +725,19 @@ export default function PsychologistDetailPage() {
                                                 key={index}
                                                 className="flex items-center text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-600"
                                             >
+                                                {" "}
                                                 {method === "Voice Call" && (
                                                     <VoiceCallIcon />
-                                                )}
+                                                )}{" "}
                                                 {method === "Chat" && (
                                                     <ChatIcon />
-                                                )}
+                                                )}{" "}
                                                 {(method === "Video Call" ||
                                                     method ===
                                                         "Vidio Call") && (
                                                     <VideoCallIcon />
-                                                )}
-                                                {method}
+                                                )}{" "}
+                                                {method}{" "}
                                             </span>
                                         )
                                     )
@@ -422,19 +749,24 @@ export default function PsychologistDetailPage() {
                             </div>
                         </div>
                     </div>
-                )}
-                {/* Konten Tab Jadwal (Sementara) */}
-                {activeTab === "Jadwal" && (
-                    <div className="bg-white p-4 rounded-xl shadow text-center text-gray-500">
-                        <p className="font-semibold mb-4">Fitur Jadwal</p>
-                        <p>
-                            Pilih Waktu, Durasi, Tanggal, Jam, dan Media
-                            Konseling.
-                        </p>
-                        <p className="mt-4 text-sm">
-                            (Komponen jadwal akan diimplementasikan di sini)
-                        </p>
-                    </div>
+                ) : (
+                    // --- PERBAIKAN: Render Komponen Jadwal ---
+                    <ScheduleTabContent
+                        counselorId={counselorId}
+                        method={method} // Kirim metode (Online/Offline)
+                        // Kirim state & setter agar ScheduleTab bisa update state di parent
+                        selectedTimeOfDay={selectedTimeOfDay}
+                        setSelectedTimeOfDay={setSelectedTimeOfDay}
+                        selectedDurationId={selectedDurationId}
+                        setSelectedDurationId={setSelectedDurationId}
+                        selectedDate={selectedDate}
+                        setSelectedDate={setSelectedDate}
+                        selectedTime={selectedTime}
+                        setSelectedTime={setSelectedTime}
+                        selectedMedia={selectedMedia}
+                        setSelectedMedia={setSelectedMedia}
+                    />
+                    // --- AKHIR PERBAIKAN ---
                 )}
             </main>
 
@@ -443,6 +775,8 @@ export default function PsychologistDetailPage() {
                 <button
                     onClick={handleStartCounseling}
                     className="w-full bg-cyan-500 text-white font-bold py-3 px-4 rounded-lg shadow hover:bg-cyan-600 transition-colors active:scale-95 disabled:bg-gray-400"
+                    // Logika disable bisa lebih kompleks nanti
+                    // disabled={activeTab === 'Jadwal' && (!selectedDurationId || !selectedDate || !selectedTime || (method !== 'Offline' && !selectedMedia))}
                 >
                     Mulai konseling dengan {firstName}
                 </button>
@@ -450,3 +784,6 @@ export default function PsychologistDetailPage() {
         </div>
     );
 }
+
+// Definisikan komponen ikon lain yang belum ada jika perlu
+// ...
