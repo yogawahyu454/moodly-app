@@ -35,7 +35,7 @@ import ReschedulePage from "../pages/customer/history/ReschedulePage";
 import ProfilePage from "../pages/customer/profile/Index";
 import EditProfilePage from "../pages/customer/profile/EditPage";
 import ChangePasswordPage from "../pages/customer/profile/ChangePasswordPage";
-// import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage";
+import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage";
 import HelpPage from "../pages/customer/help/Index";
 import FaqPage from "../pages/customer/help/FaqPage";
 import ChatAdminPage from "../pages/customer/help/ChatAdminPage";
@@ -165,7 +165,10 @@ const AppRouter = () => {
                         path="/profile/change-password"
                         element={<ChangePasswordPage />}
                     />
-                    {/* <Route path="/profile/change-email" element={<ChangeEmailPage />} /> */}
+                    <Route
+                        path="/profile/change-email"
+                        element={<ChangeEmailPage />}
+                    />
 
                     {/* Booking Flow */}
                     <Route
