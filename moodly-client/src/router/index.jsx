@@ -23,6 +23,7 @@ import FindCounselorPage from "../pages/customer/booking/FindCounselorPage";
 import InPersonPage from "../pages/customer/booking/InPersonPage";
 import PaymentPage from "../pages/customer/booking/PaymentPage";
 import LocationDetailPage from "../pages/customer/booking/LocationDetailPage";
+import PsychologistDetailPage from "../pages/customer/booking/PsychologistDetailPage"; // <-- Import Halaman Detail Psikolog
 
 import HistoryPage from "../pages/customer/history/Index";
 import HistoryDetailPage from "../pages/customer/history/DetailPage";
@@ -34,14 +35,14 @@ import ReschedulePage from "../pages/customer/history/ReschedulePage";
 import ProfilePage from "../pages/customer/profile/Index";
 import EditProfilePage from "../pages/customer/profile/EditPage";
 import ChangePasswordPage from "../pages/customer/profile/ChangePasswordPage";
-import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage";
-
+// import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage";
 import HelpPage from "../pages/customer/help/Index";
 import FaqPage from "../pages/customer/help/FaqPage";
 import ChatAdminPage from "../pages/customer/help/ChatAdminPage";
 import ChatPage from "../pages/customer/session/ChatPage";
 
 // --- Halaman Admin & Super Admin (Website) ---
+// (Import halaman Admin/Super Admin tetap sama)
 import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
 import DurasiKonselingPage from "../pages/super-admin/konseling/durasi/Index.jsx";
 import TempatKonselingPage from "../pages/super-admin/konseling/tempat/Index.jsx";
@@ -62,6 +63,7 @@ import VerifikasiCustomerPage from "../pages/admin/verifikasi-customer/Index.jsx
 import VerifikasiCustomerDetailPage from "../pages/admin/verifikasi-customer/Show.jsx";
 
 // --- Guards (Tetap Sama) ---
+// ... (Kode Guard)
 const GuestGuard = () => {
     const { user } = useAuth();
     if (user) {
@@ -106,12 +108,12 @@ const AdminProtectedGuard = () => {
         <Navigate to="/admin/login" />
     );
 };
-
 // --- PETA APLIKASI UTAMA ---
 const AppRouter = () => {
     const { loading } = useAuth();
 
     if (loading) {
+        // ... (loading state)
         return (
             <div className="flex items-center justify-center min-h-screen">
                 Loading...
@@ -122,9 +124,10 @@ const AppRouter = () => {
     return (
         <Routes>
             {/* === ZONA AUTH CUSTOMER (MOBILE) === */}
+            {/* ... (Rute GuestGuard) */}
             <Route element={<GuestGuard />}>
                 <Route element={<AuthLayout />}>
-                    <Route path="/" element={<OnboardingPage />} />
+                    {/* <Route path="/" element={<OnboardingPage />} /> */}
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                 </Route>
@@ -132,6 +135,8 @@ const AppRouter = () => {
 
             {/* === ZONA CUSTOMER TERPROTEKSI (MOBILE) === */}
             <Route element={<ProtectedGuard />}>
+                {/* 1. Rute MobileLayout */}
+                {/* ... (Rute /home, /booking, /history, /notifications, /profile) */}
                 <Route element={<MobileLayout />}>
                     <Route path="/home" element={<HomePage />} />
                     <Route path="/booking" element={<BookingPage />} />
@@ -145,19 +150,24 @@ const AppRouter = () => {
                         path="/beranda"
                         element={<Navigate to="/home" />}
                     />{" "}
+                    {/* Redirect */}
                 </Route>
 
+                {/* 2. Rute PageLayout */}
                 <Route element={<PageLayout />}>
+                    {/* ... (Rute Auth Flow, Profile Flow) */}
+                    {/* Auth Flow (lanjutan) */}
                     <Route path="/address" element={<AddressPage />} />
+
+                    {/* Profile Flow */}
                     <Route path="/profile/edit" element={<EditProfilePage />} />
                     <Route
                         path="/profile/change-password"
                         element={<ChangePasswordPage />}
                     />
-                    <Route
-                        path="/profile/change-email"
-                        element={<ChangeEmailPage />}
-                    />
+                    {/* <Route path="/profile/change-email" element={<ChangeEmailPage />} /> */}
+
+                    {/* Booking Flow */}
                     <Route
                         path="/booking/find-counselor"
                         element={<FindCounselorPage />}
@@ -170,10 +180,18 @@ const AppRouter = () => {
                         path="/booking/tempat/:id"
                         element={<LocationDetailPage />}
                     />
+                    {/* --- RUTE BARU: Detail Psikolog --- */}
+                    <Route
+                        path="/booking/counselor/:id" // Gunakan ID konselor di URL
+                        element={<PsychologistDetailPage />}
+                    />
+                    {/* --- AKHIR RUTE BARU --- */}
                     <Route
                         path="/booking/payment/:id"
                         element={<PaymentPage />}
                     />
+                    {/* ... (Rute History Flow, Help Flow, Session Flow) */}
+                    {/* History Flow */}
                     <Route
                         path="/history/:id"
                         element={<HistoryDetailPage />}
@@ -191,16 +209,21 @@ const AppRouter = () => {
                         element={<CancelDetailPage />}
                     />
                     <Route path="/history/rate/:id" element={<RatingPage />} />
+
+                    {/* Help Flow */}
                     <Route path="/help" element={<HelpPage />} />
                     <Route path="/help/faq" element={<FaqPage />} />
                     <Route
                         path="/help/chat-admin"
                         element={<ChatAdminPage />}
                     />
+
+                    {/* Session Flow */}
                     <Route path="/session/chat/:id" element={<ChatPage />} />
                 </Route>
             </Route>
 
+            {/* ... (Rute ZONA ADMIN) */}
             {/* === ZONA ADMIN (WEBSITE) === */}
             <Route element={<AdminGuestGuard />}>
                 <Route element={<AuthAdminLayout />}>
@@ -209,6 +232,7 @@ const AppRouter = () => {
             </Route>
             <Route element={<AdminProtectedGuard />}>
                 <Route element={<AdminLayout />}>
+                    {/* Rute Admin/SuperAdmin tetap sama */}
                     <Route
                         path="/admin"
                         element={<Navigate to="/admin/dashboard" />}
@@ -291,7 +315,7 @@ const AppRouter = () => {
                     />
                 </Route>
             </Route>
-
+            {/* ... (Rute FALLBACK) */}
             {/* === RUTE FALLBACK === */}
             <Route path="/" element={<Navigate to="/login" />} />
             <Route

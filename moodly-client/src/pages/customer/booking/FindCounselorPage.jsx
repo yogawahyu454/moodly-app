@@ -11,7 +11,7 @@ const BackArrowIcon = () => (
         viewBox="0 0 24 24"
         fill="none"
         // stroke="currentColor" // Warna stroke diambil dari className
-        strokeWidth="2"
+        strokeWidth="2.5" // Tebalkan sedikit
         strokeLinecap="round"
         strokeLinejoin="round"
         // className="text-gray-700" // Warna diatur di parent
@@ -35,31 +35,36 @@ const UniversityIcon = () => (
 
 // --- Komponen Kartu Psikolog (Diperbarui untuk handle klik) ---
 const PsikologCard = ({ counselor, onClick }) => {
-    // Ambil 2 spesialisasi pertama, atau default jika tidak ada
-    const specializationTags = counselor.spesialisasi?.slice(0, 2) || [
-        "Spesialisasi",
-    ];
+    // Ambil maks 2 spesialisasi pertama, atau default jika tidak ada
+    const specializationTags = Array.isArray(counselor.spesialisasi)
+        ? counselor.spesialisasi.slice(0, 2)
+        : ["Spesialisasi"]; // Fallback jika bukan array
+
     // Tambahkan tag 'lainnya' jika > 2
-    if (counselor.spesialisasi?.length > 2) {
+    if (
+        Array.isArray(counselor.spesialisasi) &&
+        counselor.spesialisasi.length > 2
+    ) {
         specializationTags.push(
             `${counselor.spesialisasi.length - 2}+ lainnya`
         );
     }
 
     return (
-        <div
+        // Gunakan button agar lebih aksesibel
+        <button
             onClick={onClick} // Tambahkan onClick handler
-            className="bg-white p-3 rounded-2xl border-2 border-cyan-100 shadow-sm flex items-center gap-4 transition-transform duration-300 hover:scale-[1.03] active:scale-95 cursor-pointer" // Sedikit perbesar hover
+            className="w-full text-left bg-white p-3 rounded-2xl border-2 border-cyan-100 shadow-sm flex items-center gap-4 transition-transform duration-300 hover:scale-[1.03] active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-300"
         >
             <img
                 src={counselor.avatar} // Dinamis dari accessor
                 alt={counselor.name}
-                className="w-20 h-20 rounded-lg object-cover"
+                className="w-20 h-20 rounded-lg object-cover flex-shrink-0" // Tambah flex-shrink-0
                 onError={(e) => {
                     // Fallback jika avatar gagal load
                     e.target.onerror = null;
                     e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        counselor.name
+                        counselor.name || "P" // Fallback jika nama null
                     )}&background=EBF4FF&color=3B82F6&bold=true`;
                 }}
             />
@@ -92,7 +97,7 @@ const PsikologCard = ({ counselor, onClick }) => {
                     ))}
                 </div>
             </div>
-        </div>
+        </button>
     );
 };
 
@@ -100,7 +105,9 @@ export default function FindCounselorPage() {
     // Rename komponen
     const location = useLocation();
     const navigate = useNavigate();
-    const { serviceId, serviceName, tempatId, method } = location.state || {}; // Ambil data dari state navigasi
+    // Ambil data dari state navigasi DENGAN fallback object kosong
+    const { serviceId, serviceName, tempatId, tempatName, method } =
+        location.state || {};
 
     const [counselors, setCounselors] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -118,7 +125,10 @@ export default function FindCounselorPage() {
                         // params: { serviceId } // Uncomment jika backend sudah bisa filter
                     }
                 );
-                setCounselors(response.data);
+                // Pastikan response.data adalah array
+                setCounselors(
+                    Array.isArray(response.data) ? response.data : []
+                );
                 setError(null);
             } catch (err) {
                 console.error("Gagal mengambil data konselor:", err);
@@ -127,42 +137,31 @@ export default function FindCounselorPage() {
                 setLoading(false);
             }
         };
-        // Pastikan serviceId ada sebelum fetch
-        // if (serviceId) {
+        // Hapus cek serviceId, selalu fetch konselor
         fetchCounselors();
-        // } else {
-        //     setError("Jenis layanan tidak valid.");
-        //     setLoading(false);
-        // }
-    }, [serviceId]); // Re-fetch jika serviceId berubah (meskipun seharusnya tidak)
+    }, []); // Hanya fetch sekali saat mount
 
-    // Handle saat kartu psikolog diklik
+    // --- PERUBAHAN: Handle saat kartu psikolog diklik ---
     const handleSelectCounselor = (counselorId, counselorName) => {
-        // Arahkan ke halaman berikutnya (misal: pilih jadwal), bawa semua data
-        console.log("Navigasi ke pilih jadwal dengan data:", {
-            serviceId,
-            serviceName,
-            tempatId, // Akan null jika online
-            method, // 'Online' atau 'Offline'
-            counselorId,
-            counselorName,
-        });
-        // Ganti '/booking/select-schedule' dengan path halaman berikutnya
-        navigate("/booking/select-schedule", {
-            // Ganti path jika perlu
+        // Arahkan ke halaman DETAIL psikolog, bawa state sebelumnya + counselorId
+        console.log("Navigating to counselor detail with ID:", counselorId);
+        navigate(`/booking/counselor/${counselorId}`, {
+            // <-- Rute baru ke detail
             state: {
                 serviceId,
                 serviceName,
-                tempatId,
-                method,
-                counselorId,
-                counselorName,
+                tempatId, // Akan null jika online
+                tempatName, // Nama tempat (jika ada)
+                method, // 'Online' atau 'Offline'
+                // counselorName tidak perlu dikirim lagi karena detail sudah punya nama
             },
         });
     };
+    // --- AKHIR PERUBAHAN ---
 
-    // Tentukan URL kembali berdasarkan method
-    const backUrl = method === "Offline" ? "/booking/in-person" : "/booking";
+    // Tentukan URL kembali berdasarkan method (dari state)
+    const backUrl =
+        method === "Offline" ? `/booking/tempat/${tempatId}` : "/booking"; // Kembali ke detail tempat jika offline
 
     return (
         // Gunakan bg-sky-50 (lebih terang dari cyan-50)
@@ -170,16 +169,14 @@ export default function FindCounselorPage() {
             {" "}
             {/* min-h-screen */}
             {/* Header Halaman */}
-            <header className="bg-cyan-400 p-4 flex items-center sticky top-0 z-10 text-white rounded-b-2xl shadow-lg">
+            <header className="bg-cyan-400 p-4 pt-6 flex items-center sticky top-0 z-10 text-white rounded-b-2xl shadow-lg">
+                {/* Tombol kembali sekarang menggunakan Link */}
                 <Link
                     to={backUrl}
-                    state={location.state}
+                    state={location.state} // Kirim state kembali jika user menekan back
                     className="p-2 -ml-2 text-white"
                 >
-                    {" "}
-                    {/* Warna ikon putih */}
                     <BackArrowIcon stroke="currentColor" />{" "}
-                    {/* Pakai stroke="currentColor" */}
                 </Link>
                 <h1 className="text-lg font-bold text-center flex-grow -ml-4">
                     Pilih Psikolog {serviceName ? `(${serviceName})` : ""}{" "}
@@ -208,12 +205,13 @@ export default function FindCounselorPage() {
                             <PsikologCard
                                 key={counselor.id}
                                 counselor={counselor}
+                                // Panggil handleSelectCounselor saat diklik
                                 onClick={() =>
                                     handleSelectCounselor(
                                         counselor.id,
                                         counselor.name
                                     )
-                                } // Tambahkan onClick
+                                }
                             />
                         ))
                     ) : (
