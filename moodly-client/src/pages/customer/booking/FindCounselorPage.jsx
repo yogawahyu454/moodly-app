@@ -1,65 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom"; // Tambahkan useLocation, useNavigate
-// import apiClient from "../../../api/axios"; // <-- Hapus import asli yang error
-
-// --- Mock API Client (Pengganti sementara agar bisa jalan di Canvas) ---
-// Di proyek asli Anda, gunakan import apiClient yang sesungguhnya
-const apiClient = {
-    get: (url) => {
-        return new Promise((resolve, reject) => {
-            // Simulasikan penundaan jaringan
-            setTimeout(() => {
-                if (url === "/api/booking/counselors") {
-                    // Berikan data dummy yang sesuai dengan struktur
-                    resolve({
-                        data: [
-                            {
-                                id: 1,
-                                name: "Raka Santoso, M.Psi., Psikolog",
-                                universitas: "Universitas Gadjah Mada",
-                                avatar: "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=600",
-                                spesialisasi: [
-                                    "Stress",
-                                    "Keluarga",
-                                    "Depresi",
-                                    "Karir",
-                                    "Cemas",
-                                    "Remaja",
-                                ],
-                            },
-                            {
-                                id: 2,
-                                name: "Vina Amalia, M.Psi., Psikolog",
-                                universitas: "Universitas Padjadjaran",
-                                avatar: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=600",
-                                spesialisasi: [
-                                    "Stress",
-                                    "Keluarga",
-                                    "8+ lainnya",
-                                ],
-                            },
-                            {
-                                id: 3,
-                                name: "Dimas Nugroho, M.Psi., Psikolog",
-                                universitas: "Universitas Gadjah Mada",
-                                avatar: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=600",
-                                spesialisasi: [
-                                    "Stress",
-                                    "Keluarga",
-                                    "Kecanduan",
-                                ],
-                            },
-                        ],
-                    });
-                } else {
-                    // Jika URL lain, kirim data kosong
-                    resolve({ data: [] });
-                }
-            }, 500); // 0.5 detik delay
-        });
-    },
-};
-// --- Akhir Mock API Client ---
+import apiClient from "../../../api/axios"; // Sesuaikan path
 
 // --- Komponen Ikon ---
 const BackArrowIcon = () => (
@@ -69,11 +10,11 @@ const BackArrowIcon = () => (
         height="24"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="currentColor" // Warna stroke diambil dari className (text-white)
+        // stroke="currentColor" // Warna stroke diambil dari className
         strokeWidth="2.5" // Tebalkan sedikit
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="w-6 h-6" // Pastikan ukuran ikon konsisten
+        // className="text-gray-700" // Warna diatur di parent
     >
         <line x1="19" y1="12" x2="5" y2="12"></line>
         <polyline points="12 19 5 12 12 5"></polyline>
@@ -230,17 +171,13 @@ export default function FindCounselorPage() {
             {/* Header Halaman */}
             <header className="bg-cyan-400 p-4 pt-6 flex items-center sticky top-0 z-10 text-white rounded-b-2xl shadow-lg">
                 {/* Tombol kembali sekarang menggunakan Link */}
-                {/* --- PERBAIKAN TOMBOL KEMBALI --- */}
                 <Link
                     to={backUrl}
                     state={location.state} // Kirim state kembali jika user menekan back
-                    className="p-2.5 -ml-2 text-white rounded-full hover:bg-white/20 active:bg-white/30 transition-colors" // Padding diperbesar
-                    aria-label="Kembali"
+                    className="p-2 -ml-2 text-white"
                 >
-                    <BackArrowIcon />{" "}
-                    {/* Icon sudah diatur warnanya dari className Link */}
+                    <BackArrowIcon stroke="currentColor" />{" "}
                 </Link>
-                {/* --- AKHIR PERBAIKAN --- */}
                 <h1 className="text-lg font-bold text-center flex-grow -ml-4">
                     Pilih Psikolog {serviceName ? `(${serviceName})` : ""}{" "}
                     {/* Tampilkan nama layanan */}
