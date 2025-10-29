@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext"; // Sesuaikan path jika perlu
 
 // --- Layouts ---
 import MobileLayout from "../layouts/MobileLayout";
@@ -21,9 +21,14 @@ import NotificationPage from "../pages/customer/NotificationPage";
 import BookingPage from "../pages/customer/booking/Index";
 import FindCounselorPage from "../pages/customer/booking/FindCounselorPage";
 import InPersonPage from "../pages/customer/booking/InPersonPage";
-// import PaymentPage from "../pages/customer/booking/PaymentPage";
+// import PaymentPage from "../pages/customer/booking/PaymentPage"; // <-- Sudah benar dikomentari
 import LocationDetailPage from "../pages/customer/booking/LocationDetailPage";
-import PsychologistDetailPage from "../pages/customer/booking/PsychologistDetailPage"; // <-- Import Halaman Detail Psikolog
+import PsychologistDetailPage from "../pages/customer/booking/PsychologistDetailPage";
+
+// --- IMPORT UNTUK PAYMENT ---
+import PaymentOnlinePage from "../pages/customer/booking/payment/PaymentOnlinePage";
+import QrisPaymentPage from "../pages/customer/booking/payment/QrisPaymentPage"; // <-- Tambahkan ini
+// --- AKHIR IMPORT PAYMENT ---
 
 import HistoryPage from "../pages/customer/history/Index";
 import HistoryDetailPage from "../pages/customer/history/DetailPage";
@@ -36,6 +41,8 @@ import ProfilePage from "../pages/customer/profile/Index";
 import EditProfilePage from "../pages/customer/profile/EditPage";
 import ChangePasswordPage from "../pages/customer/profile/ChangePasswordPage";
 import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage";
+import ChangePhoneNumberPage from "../pages/customer/profile/ChangePhoneNumberPage"; // <-- Import Halaman Ubah Nomor
+
 import HelpPage from "../pages/customer/help/Index";
 import FaqPage from "../pages/customer/help/FaqPage";
 import ChatAdminPage from "../pages/customer/help/ChatAdminPage";
@@ -63,7 +70,6 @@ import VerifikasiCustomerPage from "../pages/admin/verifikasi-customer/Index.jsx
 import VerifikasiCustomerDetailPage from "../pages/admin/verifikasi-customer/Show.jsx";
 
 // --- Guards (Tetap Sama) ---
-// ... (Kode Guard)
 const GuestGuard = () => {
     const { user } = useAuth();
     if (user) {
@@ -124,7 +130,6 @@ const AppRouter = () => {
     return (
         <Routes>
             {/* === ZONA AUTH CUSTOMER (MOBILE) === */}
-            {/* ... (Rute GuestGuard) */}
             <Route element={<GuestGuard />}>
                 <Route element={<AuthLayout />}>
                     <Route path="/" element={<OnboardingPage />} />
@@ -136,7 +141,6 @@ const AppRouter = () => {
             {/* === ZONA CUSTOMER TERPROTEKSI (MOBILE) === */}
             <Route element={<ProtectedGuard />}>
                 {/* 1. Rute MobileLayout */}
-                {/* ... (Rute /home, /booking, /history, /notifications, /profile) */}
                 <Route element={<MobileLayout />}>
                     <Route path="/home" element={<HomePage />} />
                     <Route path="/booking" element={<BookingPage />} />
@@ -155,7 +159,6 @@ const AppRouter = () => {
 
                 {/* 2. Rute PageLayout */}
                 <Route element={<PageLayout />}>
-                    {/* ... (Rute Auth Flow, Profile Flow) */}
                     {/* Auth Flow (lanjutan) */}
                     <Route path="/address" element={<AddressPage />} />
 
@@ -168,6 +171,10 @@ const AppRouter = () => {
                     <Route
                         path="/profile/change-email"
                         element={<ChangeEmailPage />}
+                    />
+                    <Route
+                        path="/profile/change-phone" // Path untuk halaman ubah nomor
+                        element={<ChangePhoneNumberPage />}
                     />
 
                     {/* Booking Flow */}
@@ -183,17 +190,21 @@ const AppRouter = () => {
                         path="/booking/tempat/:id"
                         element={<LocationDetailPage />}
                     />
-                    {/* --- RUTE BARU: Detail Psikolog --- */}
                     <Route
-                        path="/booking/counselor/:id" // Gunakan ID konselor di URL
+                        path="/booking/counselor/:id"
                         element={<PsychologistDetailPage />}
                     />
+                    <Route
+                        path="/booking/payment/online/:id"
+                        element={<PaymentOnlinePage />}
+                    />
+                    {/* --- RUTE BARU DITAMBAHKAN DI SINI --- */}
+                    <Route
+                        path="/booking/payment/qris/:id" // Path untuk halaman QRIS
+                        element={<QrisPaymentPage />}
+                    />
+                    {/* --- AKHIR RUTE BARU --- */}
 
-                    {/* <Route
-                        path="/booking/payment/:id"
-                        element={<PaymentPage />} 
-                    /> */}
-                    {/* ... (Rute History Flow, Help Flow, Session Flow) */}
                     {/* History Flow */}
                     <Route
                         path="/history/:id"
@@ -226,7 +237,6 @@ const AppRouter = () => {
                 </Route>
             </Route>
 
-            {/* ... (Rute ZONA ADMIN) */}
             {/* === ZONA ADMIN (WEBSITE) === */}
             <Route element={<AdminGuestGuard />}>
                 <Route element={<AuthAdminLayout />}>
@@ -318,7 +328,7 @@ const AppRouter = () => {
                     />
                 </Route>
             </Route>
-            {/* ... (Rute FALLBACK) */}
+            
             {/* === RUTE FALLBACK === */}
             <Route path="/" element={<Navigate to="/login" />} />
             <Route
