@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-// --- Komponen Ikon (diambil dari file sebelumnya) ---
+// --- Komponen Ikon ---
 function UserIcon() {
     return (
         <svg
@@ -73,6 +73,27 @@ function AddressIcon() {
         </svg>
     );
 }
+function GenderIcon() {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+    );
+}
+// --- Akhir Komponen Ikon ---
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -80,18 +101,21 @@ export default function RegisterPage() {
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
     const [address, setAddress] = useState(""); // Alamat singkat
+    const [gender, setGender] = useState("");
     const [error, setError] = useState("");
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!name || !phone || !email || !address) {
+
+        if (!name || !phone || !email || !address || !gender) {
             setError("Harap isi semua kolom.");
             return;
         }
 
-        // Kirim semua data awal ke halaman detail alamat
+        setError("");
+
         navigate("/address", {
-            state: { name, phone, email, address },
+            state: { name, phone, email, address, gender },
         });
     };
 
@@ -114,7 +138,7 @@ export default function RegisterPage() {
                 </div>
                 <div className="relative z-10 flex justify-center items-start h-full pt-6">
                     <img
-                        src="/images/3.png"
+                        src="/images/3.png" // Pastikan path gambar ini benar
                         alt="Ilustrasi"
                         className="w-32 h-auto object-contain"
                     />
@@ -130,7 +154,7 @@ export default function RegisterPage() {
                         onSubmit={handleSubmit}
                         noValidate
                     >
-                        {/* Nama, Telepon, Email, Alamat */}
+                        {/* Nama */}
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                                 <UserIcon />
@@ -144,6 +168,38 @@ export default function RegisterPage() {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
                             />
                         </div>
+
+                        {/* Input Jenis Kelamin (Dropdown) */}
+                        <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <GenderIcon />
+                            </span>
+                            <select
+                                value={gender}
+                                onChange={(e) => setGender(e.target.value)}
+                                required
+                                className={`w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none appearance-none bg-white ${
+                                    gender ? "text-gray-800" : "text-gray-400"
+                                }`}
+                                style={{
+                                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                                    backgroundPosition: "right 0.75rem center",
+                                    backgroundRepeat: "no-repeat",
+                                    backgroundSize: "1.25em 1.25em",
+                                }}
+                            >
+                                {/* ================== */}
+                                {/* --- INI YANG DIUBAH --- */}
+                                <option value="" disabled>
+                                    Jenis Kelamin
+                                </option>
+                                {/* ================== */}
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+
+                        {/* Telepon */}
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                                 <PhoneIcon />
@@ -157,6 +213,8 @@ export default function RegisterPage() {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
                             />
                         </div>
+
+                        {/* Email */}
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                                 <MailIcon />
@@ -170,6 +228,8 @@ export default function RegisterPage() {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
                             />
                         </div>
+
+                        {/* Alamat */}
                         <div className="relative">
                             <span className="absolute left-3 top-3 text-gray-400">
                                 <AddressIcon />
@@ -183,6 +243,8 @@ export default function RegisterPage() {
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none resize-none"
                             />
                         </div>
+
+                        {/* Tombol Submit */}
                         <button
                             type="submit"
                             className="w-full py-3 !mt-6 bg-black text-white rounded-full font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
@@ -190,11 +252,15 @@ export default function RegisterPage() {
                             Daftar
                         </button>
                     </form>
+
+                    {/* Pesan Error */}
                     {error && (
                         <div className="text-red-600 text-xs mt-2 text-center">
                             {error}
                         </div>
                     )}
+
+                    {/* Link ke Login */}
                     <div className="text-center text-sm text-gray-600 mt-4">
                         Sudah punya akun?{" "}
                         <Link
