@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // Sesuaikan path jika perlu
+import Commet from "../components/Commet";
 
 // --- Layouts ---
 import MobileLayout from "../layouts/MobileLayout";
@@ -119,10 +120,14 @@ const AppRouter = () => {
     const { loading } = useAuth();
 
     if (loading) {
-        // ... (loading state)
         return (
             <div className="flex items-center justify-center min-h-screen">
-                Loading...
+                <Commet
+                    color="#3139cc"
+                    size="medium"
+                    text="loading"
+                    textColor=""
+                />
             </div>
         );
     }
@@ -328,7 +333,7 @@ const AppRouter = () => {
                     />
                 </Route>
             </Route>
-            
+
             {/* === RUTE FALLBACK === */}
             <Route path="/" element={<Navigate to="/login" />} />
             <Route
