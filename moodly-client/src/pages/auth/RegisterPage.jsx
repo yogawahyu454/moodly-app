@@ -1,277 +1,360 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // Sesuaikan path jika perlu
+import Commet from "../components/Commet";
 
-// --- Komponen Ikon ---
-function UserIcon() {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-    );
-}
-function PhoneIcon() {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-        </svg>
-    );
-}
-function MailIcon() {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-            <polyline points="22,6 12,13 2,6"></polyline>
-        </svg>
-    );
-}
-function AddressIcon() {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-        </svg>
-    );
-}
-function GenderIcon() {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
-    );
-}
-// --- Akhir Komponen Ikon ---
+// --- Layouts ---
+import MobileLayout from "../layouts/MobileLayout";
+import AuthLayout from "../layouts/AuthLayout";
+import AdminLayout from "../layouts/AdminLayout";
+import AuthAdminLayout from "../layouts/AuthAdminLayout";
+import PageLayout from "../layouts/PageLayout";
 
-export default function RegisterPage() {
-    const navigate = useNavigate();
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [email, setEmail] = useState("");
-    const [address, setAddress] = useState(""); // Alamat singkat
-    const [gender, setGender] = useState("");
-    const [error, setError] = useState("");
+// --- Halaman Auth (Mobile) ---
+import LoginPage from "../pages/auth/LoginPage";
+import AddressPage from "../pages/auth/AddressPage";
+// Ini akan mengimpor file 'RegisterPage.jsx' Anda yang "pintar"
+import RegisterPage from "../pages/auth/RegisterPage"; 
+import OnboardingPage from "../pages/auth/OnboardingPage";
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+// --- Halaman Customer (Mobile) ---
+import HomePage from "../pages/customer/HomePage";
+import NotificationPage from "../pages/customer/NotificationPage";
+import BookingPage from "../pages/customer/booking/Index";
+import FindCounselorPage from "../pages/customer/booking/FindCounselorPage";
+import InPersonPage from "../pages/customer/booking/InPersonPage";
+// import PaymentPage from "../pages/customer/booking/PaymentPage"; // <-- Sudah benar dikomentari
+import LocationDetailPage from "../pages/customer/booking/LocationDetailPage";
+import PsychologistDetailPage from "../pages/customer/booking/PsychologistDetailPage";
 
-        if (!name || !phone || !email || !address || !gender) {
-            setError("Harap isi semua kolom.");
-            return;
+// --- IMPORT UNTUK PAYMENT ---
+import PaymentOnlinePage from "../pages/customer/booking/payment/PaymentOnlinePage";
+import QrisPaymentPage from "../pages/customer/booking/payment/QrisPaymentPage"; // <-- Tambahkan ini
+// --- AKHIR IMPORT PAYMENT ---
+
+import HistoryPage from "../pages/customer/history/Index";
+import HistoryDetailPage from "../pages/customer/history/DetailPage";
+import RatingPage from "../pages/customer/history/RatingPage";
+import CancelPage from "../pages/customer/history/CancelPage";
+import CancelDetailPage from "../pages/customer/history/CancelDetailPage";
+import ReschedulePage from "../pages/customer/history/ReschedulePage";
+
+import ProfilePage from "../pages/customer/profile/Index";
+import EditProfilePage from "../pages/customer/profile/EditPage";
+import ChangePasswordPage from "../pages/customer/profile/ChangePasswordPage";
+import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage";
+import ChangePhoneNumberPage from "../pages/customer/profile/ChangePhoneNumberPage"; // <-- Import Halaman Ubah Nomor
+
+import HelpPage from "../pages/customer/help/Index";
+import FaqPage from "../pages/customer/help/FaqPage";
+import ChatAdminPage from "../pages/customer/help/ChatAdminPage";
+import ChatPage from "../pages/customer/session/ChatPage";
+
+// --- Halaman Admin & Super Admin (Website) ---
+// (Import halaman Admin/Super Admin tetap sama)
+import JenisKonselingPage from "../pages/super-admin/konseling/jenis/Index.jsx";
+import DurasiKonselingPage from "../pages/super-admin/konseling/durasi/Index.jsx";
+import TempatKonselingPage from "../pages/super-admin/konseling/tempat/Index.jsx";
+import AdminManagementPage from "../pages/super-admin/admin/Index.jsx";
+import AdminDetailPage from "../pages/super-admin/admin/Show.jsx";
+import KonselorManagementPage from "../pages/super-admin/konselor/Index.jsx";
+import KonselorDetailPage from "../pages/super-admin/konselor/Show.jsx";
+import CustomerManagementPage from "../pages/super-admin/customer/Index.jsx";
+import CustomerDetailPage from "../pages/super-admin/customer/Show.jsx";
+import BookingManagementPage from "../pages/super-admin/pesanan/Index.jsx";
+import BookingDetailPage from "../pages/super-admin/pesanan/Show.jsx";
+
+import JadwalKonsultasiPage from "../pages/admin/jadwal-konsultasi/Index.jsx";
+import JadwalDetailPage from "../pages/admin/jadwal-konsultasi/Show.jsx";
+import VerifikasiKonselorPage from "../pages/admin/verifikasi-konselor/Index.jsx";
+import VerifikasiDetailPage from "../pages/admin/verifikasi-konselor/Show.jsx";
+import VerifikasiCustomerPage from "../pages/admin/verifikasi-customer/Index.jsx";
+import VerifikasiCustomerDetailPage from "../pages/admin/verifikasi-customer/Show.jsx";
+
+// --- Guards (Tetap Sama) ---
+const GuestGuard = () => {
+  const { user } = useAuth();
+  if (user) {
+    return user.role?.includes("admin") ||
+      user.role?.includes("super-admin") ? (
+      <Navigate to="/admin/dashboard" />
+    ) : (
+      <Navigate to="/home" />
+    );
+  }
+  return <Outlet />;
+};
+
+const ProtectedGuard = () => {
+  const { user } = useAuth();
+  if (
+    !user ||
+    user.role?.includes("admin") ||
+    user.role?.includes("super-admin")
+  ) {
+    return <Navigate to="/login" />;
+  }
+  return <Outlet />;
+};
+
+const AdminGuestGuard = () => {
+  const { user } = useAuth();
+  return user &&
+    (user.role?.includes("admin") || user.role?.includes("super-admin")) ? (
+    <Navigate to="/admin/dashboard" />
+  ) : (
+    <Outlet />
+  );
+};
+
+const AdminProtectedGuard = () => {
+  const { user } = useAuth();
+  return user &&
+    (user.role?.includes("admin") || user.role?.includes("super-admin")) ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/admin/login" />
+  );
+};
+
+// --- PETA APLIKASI UTAMA ---
+const AppRouter = () => {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Commet
+          color="#3139cc"
+          size="medium"
+          text="loading"
+          textColor=""
+        />
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      {/* === ZONA AUTH CUSTOMER & KONSELOR (MOBILE) === */}
+      {/* Ini adalah versi yang sudah benar */}
+      <Route element={<GuestGuard />}>
+        <Route element={<AuthLayout />}>
+          <Route path="/" element={<OnboardingPage />} />
+          
+          {/* Rute Login */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/konselor/login" element={<LoginPage />} />
+
+          {/* Rute Register */}
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/konselor/register" element={<RegisterPage />} />
+        </Route>
+      </Route>
+
+      {/* === ZONA CUSTOMER TERPROTEKSI (MOBILE) === */}
+      <Route element={<ProtectedGuard />}>
+        {/* 1. Rute MobileLayout */}
+        <Route element={<MobileLayout />}>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/booking" element={<BookingPage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route
+            path="/notifications"
+            element={<NotificationPage />}
+          />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route
+            path="/beranda"
+            element={<Navigate to="/home" />}
+          />{" "}
+          {/* Redirect */}
+        </Route>
+
+        {/* 2. Rute PageLayout */}
+        <Route element={<PageLayout />}>
+          {/* Auth Flow (lanjutan) */}
+          <Route path="/address" element={<AddressPage />} />
+
+          {/* Profile Flow */}
+          <Route path="/profile/edit" element={<EditProfilePage />} />
+          <Route
+            path="/profile/change-password"
+            element={<ChangePasswordPage />}
+          />
+          <Route
+            path="/profile/change-email"
+            element={<ChangeEmailPage />}
+          />
+          <Route
+            path="/profile/change-phone" // Path untuk halaman ubah nomor
+            element={<ChangePhoneNumberPage />}
+          />
+          {/* Booking Flow */}
+          <Route
+            path="/booking/find-counselor"
+            element={<FindCounselorPage />}
+          />
+          <Route
+            path="/booking/in-person"
+            element={<InPersonPage />}
+          />
+          <Route
+            path="/booking/tempat/:id"
+            element={<LocationDetailPage />}
+          />
+          <Route
+            path="/booking/counselor/:id"
+            element={<PsychologistDetailPage />}
+          />
+          <Route
+            path="/booking/payment/online/:id"
+            element={<PaymentOnlinePage />}
+          />
+          {/* --- RUTE BARU DITAMBAHKAN DI SINI --- */}
+          <Route
+            path="/booking/payment/qris/:id" // Path untuk halaman QRIS
+            element={<QrisPaymentPage />}
+          />
+          {/* --- AKHIR RUTE BARU --- */}
+
+          {/* History Flow */}
+          <Route
+            path="/history/:id"
+            element={<HistoryDetailPage />}
+          />
+          <Route
+            path="/history/reschedule/:id"
+            element={<ReschedulePage />}
+          />
+          <Route
+            path="/history/cancel/:id"
+            element={<CancelPage />}
+          />
+          <Route
+            path="/history/cancel-detail/:id"
+            element={<CancelDetailPage />}
+          />
+          <Route path="/history/rate/:id" element={<RatingPage />} />
+
+          {/* Help Flow */}
+          <Route path="/help" element={<HelpPage />} />
+          <Route path="/help/faq" element={<FaqPage />} />
+          <Route
+            path="/help/chat-admin"
+            element={<ChatAdminPage />}
+          />
+
+          {/* Session Flow */}
+          <Route path="/session/chat/:id" element={<ChatPage />} />
+        </Route>
+      </Route>
+
+      {/* === ZONA ADMIN (WEBSITE) === */}
+      <Route element={<AdminGuestGuard />}>
+        <Route element={<AuthAdminLayout />}>
+          <Route path="/admin/login" element={<LoginPage />} />
+        </Route>
+      </Route>
+      <Route element={<AdminProtectedGuard />}>
+        <Route element={<AdminLayout />}>
+          {/* Rute Admin/SuperAdmin tetap sama */}
+          <Route
+            path="/admin"
+            element={<Navigate to="/admin/dashboard" />}
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <div>
+                <h1>Selamat Datang di Dasbor!</h1>
+              </div>
+            }
+          />
+          <Route
+            path="/admin/jenis-konseling"
+            element={<JenisKonselingPage />}
+          />
+          <Route
+            path="/admin/durasi-konseling"
+            element={<DurasiKonselingPage />}
+          />
+          <Route
+            path="/admin/tempat-konseling"
+            element={<TempatKonselingPage />}
+          />
+          <Route
+            path="/admin/admin-management"
+            element={<AdminManagementPage />}
+          />
+          <Route
+            path="/admin/admin-management/:id"
+            element={<AdminDetailPage />}
+          />
+          <Route
+            path="/admin/konselor-management"
+            element={<KonselorManagementPage />}
+          />
+          <Route
+            path="/admin/konselor-management/:id"
+            element={<KonselorDetailPage />}
+          />
+          <Route
+            path="/admin/customer-management"
+            element={<CustomerManagementPage />}
+          />
+          <Route
+            path="/admin/customer-management/:id"
+            element={<CustomerDetailPage />}
+          />
+          <Route
+            path="/admin/booking-management"
+            element={<BookingManagementPage />}
+          />
+          <Route
+            path="/admin/booking-management/:id"
+            element={<BookingDetailPage />}
+          />
+          <Route
+            path="/admin/jadwal-konsultasi"
+            element={<JadwalKonsultasiPage />}
+          />
+          <Route
+            path="/admin/jadwal-konsultasi/:id"
+            element={<JadwalDetailPage />}
+          />
+          <Route
+            path="/admin/verifikasi-konselor"
+            element={<VerifikasiKonselorPage />}
+          />
+          <Route
+            path="/admin/verifikasi-konselor/:id"
+            element={<VerifikasiDetailPage />}
+          />
+          <Route
+            path="/admin/verifikasi-customer"
+            element={<VerifikasiCustomerPage />}
+          />
+          <Route
+            path="/admin/verifikasi-customer/:id"
+            element={<VerifikasiCustomerDetailPage />}
+          />
+        </Route>
+      </Route>
+
+      {/* === RUTE FALLBACK === */}
+      <Route path="/" element={<Navigate to="/login" />} />
+      <Route
+        path="*"
+        element={
+          <div>
+            <h1>404 - Halaman Tidak Ditemukan</h1>
+          </div>
         }
+      />
+    </Routes>
+  );
+};
 
-        setError("");
+export default AppRouter;
 
-        navigate("/address", {
-            state: { name, phone, email, address, gender },
-        });
-    };
-
-    return (
-        <>
-            <header className="relative h-64 flex-shrink-0">
-                <div className="absolute inset-x-0 top-0 w-full h-full">
-                    <svg
-                        viewBox="0 0 375 240"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-full h-full"
-                        preserveAspectRatio="none"
-                    >
-                        <path
-                            d="M0 0H375V150C375 150 281.25 240 187.5 240C93.75 240 0 150 0 150V0Z"
-                            fill="#00A9E0"
-                        />
-                    </svg>
-                </div>
-                <div className="relative z-10 flex justify-center items-start h-full pt-6">
-                    <img
-                        src="/images/3.png" // Pastikan path gambar ini benar
-                        alt="Ilustrasi"
-                        className="w-32 h-auto object-contain"
-                    />
-                </div>
-            </header>
-            <main className="flex-grow flex flex-col justify-center p-8">
-                <div className="w-full">
-                    <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">
-                        Daftar
-                    </h1>
-                    <form
-                        className="space-y-4"
-                        onSubmit={handleSubmit}
-                        noValidate
-                    >
-                        {/* Nama */}
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                <UserIcon />
-                            </span>
-                            <input
-                                type="text"
-                                placeholder="Nama lengkap"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
-                            />
-                        </div>
-
-                        {/* Input Jenis Kelamin (Dropdown) */}
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                <GenderIcon />
-                            </span>
-                            <select
-                                value={gender}
-                                onChange={(e) => setGender(e.target.value)}
-                                required
-                                className={`w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none appearance-none bg-white ${
-                                    gender ? "text-gray-800" : "text-gray-400"
-                                }`}
-                                style={{
-                                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                                    backgroundPosition: "right 0.75rem center",
-                                    backgroundRepeat: "no-repeat",
-                                    backgroundSize: "1.25em 1.25em",
-                                }}
-                            >
-                                {/* ================== */}
-                                {/* --- INI YANG DIUBAH --- */}
-                                <option value="" disabled>
-                                    Jenis Kelamin
-                                </option>
-                                {/* ================== */}
-                                <option value="Laki-laki">Laki-laki</option>
-                                <option value="Perempuan">Perempuan</option>
-                            </select>
-                        </div>
-
-                        {/* Telepon */}
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                <PhoneIcon />
-                            </span>
-                            <input
-                                type="tel"
-                                placeholder="No. Telepon"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                required
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
-                            />
-                        </div>
-
-                        {/* Email */}
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                <MailIcon />
-                            </span>
-                            <input
-                                type="email"
-                                placeholder="Email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none"
-                            />
-                        </div>
-
-                        {/* Alamat */}
-                        <div className="relative">
-                            <span className="absolute left-3 top-3 text-gray-400">
-                                <AddressIcon />
-                            </span>
-                            <textarea
-                                rows="3"
-                                placeholder="Alamat (Contoh: Jl. Mataram, Suryatmajan)"
-                                value={address}
-                                onChange={(e) => setAddress(e.target.value)}
-                                required
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none resize-none"
-                            />
-                        </div>
-
-                        {/* Tombol Submit */}
-                        <button
-                            type="submit"
-                            className="w-full py-3 !mt-6 bg-black text-white rounded-full font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
-                        >
-                            Daftar
-                        </button>
-                    </form>
-
-                    {/* Pesan Error */}
-                    {error && (
-                        <div className="text-red-600 text-xs mt-2 text-center">
-                            {error}
-                        </div>
-                    )}
-
-                    {/* Link ke Login */}
-                    <div className="text-center text-sm text-gray-600 mt-4">
-                        Sudah punya akun?{" "}
-                        <Link
-                            to="/login"
-                            className="text-sky-500 font-semibold hover:underline"
-                        >
-                            Masuk
-                        </Link>
-                    </div>
-                </div>
-            </main>
-        </>
-    );
-}
