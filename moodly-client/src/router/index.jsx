@@ -14,7 +14,7 @@ import PageLayout from "../layouts/PageLayout";
 import LoginPage from "../pages/auth/LoginPage";
 import AddressPage from "../pages/auth/AddressPage";
 // Ini akan mengimpor file 'RegisterPage.jsx' Anda yang "pintar"
-import RegisterPage from "../pages/auth/RegisterPage"; 
+import RegisterPage from "../pages/auth/RegisterPage";
 import OnboardingPage from "../pages/auth/OnboardingPage";
 
 // --- Halaman Customer (Mobile) ---
@@ -141,14 +141,14 @@ const AppRouter = () => {
       <Route element={<GuestGuard />}>
         <Route element={<AuthLayout />}>
           <Route path="/" element={<OnboardingPage />} />
-          
+
           {/* Rute Login */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/konselor/login" element={<LoginPage />} />
+          <Route path="/counselor/login" element={<LoginPage />} />
 
           {/* Rute Register */}
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/konselor/register" element={<RegisterPage />} />
+          <Route path="/counselor/register" element={<RegisterPage />} />
         </Route>
       </Route>
 

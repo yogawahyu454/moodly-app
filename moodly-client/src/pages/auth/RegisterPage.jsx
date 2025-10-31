@@ -150,7 +150,7 @@ export default function RegisterPage() {
 
   // State khusus Customer
   const [address, setAddress] = useState("");
-  const [gender, setGender] = useState("");
+  const [gender, setGender] = useState(""); // <-- State ini sekarang dipakai kedua role
 
   // State khusus Konselor
   const [izinPraktik, setIzinPraktik] = useState("");
@@ -165,9 +165,12 @@ export default function RegisterPage() {
 
   // Cek URL saat komponen dimuat
   useEffect(() => {
+    // =======================================================
+    // --- PERUBAHAN DI SINI ---
     // Logika ini akan memeriksa URL.
-    // Jika URL adalah /konselor/register, 'isCounselor' akan menjadi true
-    if (location.pathname.includes("/konselor")) {
+    // Jika URL adalah /counselor/register, 'isCounselor' akan menjadi true
+    if (location.pathname.includes("/counselor")) {
+    // =======================================================
       setIsCounselor(true);
     } else {
       setIsCounselor(false);
@@ -192,17 +195,22 @@ export default function RegisterPage() {
       const oneSpesialisSelected = Object.values(spesialis).some(
         (v) => v === true
       );
-      if (!name || !phone || !email || !izinPraktik || !oneSpesialisSelected) {
+      // Validasi (sudah termasuk gender)
+      if (!name || !phone || !email || !gender || !izinPraktik || !oneSpesialisSelected) {
         setError("Harap isi semua kolom untuk konselor.");
         return;
       }
       
-      // Logika submit untuk konselor (contoh: navigasi)
-      console.log("Data Konselor:", { name, phone, email, izinPraktik, spesialis });
-      // Ganti "/konselor/next-page" dengan tujuan Anda
-      navigate("/konselor/next-page", {
-        state: { name, phone, email, izinPraktik, spesialis },
+      // Logika submit untuk konselor (sudah termasuk gender)
+      console.log("Data Konselor:", { name, phone, email, gender, izinPraktik, spesialis });
+      
+      // =======================================================
+      // --- PERUBAHAN DI SINI ---
+      // Ganti "/counselor/next-page" dengan tujuan Anda
+      navigate("/counselor/next-page", {
+        state: { name, phone, email, gender, izinPraktik, spesialis },
       });
+      // =======================================================
 
     } else {
       // Validasi untuk Customer (dari kode Anda)
@@ -326,6 +334,34 @@ export default function RegisterPage() {
             {isCounselor ? (
               // --- FORM UNTUK KONSELOR ---
               <>
+                {/* --- TAMBAHAN UNTUK KONSELOR (JENIS KELAMIN) --- */}
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <GenderIcon />
+                  </span>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    required
+                    className={`w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:outline-none appearance-none bg-white ${
+                      gender ? "text-gray-800" : "text-gray-400"
+                    }`}
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                      backgroundPosition: "right 0.75rem center",
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize: "1.25em 1.25em",
+                    }}
+                  >
+                    <option value="" disabled>
+                      Jenis Kelamin
+                    </option>
+                    <option value="Laki-laki">Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                  </select>
+                </div>
+                {/* ================================================ */}
+
                 {/* Nomor Surat Izin Praktik */}
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -432,7 +468,10 @@ export default function RegisterPage() {
           <div className="text-center text-sm text-gray-600 mt-4">
             Sudah punya akun?{" "}
             <Link
-              to={isCounselor ? "/konselor/login" : "/login"}
+              // =======================================================
+              // --- PERUBAHAN DI SINI ---
+              to={isCounselor ? "/counselor/login" : "/login"}
+              // =======================================================
               className="text-sky-500 font-semibold hover:underline"
             >
               Masuk
