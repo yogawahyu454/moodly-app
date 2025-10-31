@@ -244,7 +244,6 @@ const AppRouter = () => {
             path="/help/chat-admin"
             element={<ChatAdminPage />}
           />
-
           {/* Session Flow */}
           <Route path="/session/chat/:id" element={<ChatPage />} />
         </Route>
