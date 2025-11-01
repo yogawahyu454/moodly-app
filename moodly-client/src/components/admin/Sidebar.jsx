@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react"; // <-- TAMBAHKAN useEffect DI SINI
 import { NavLink, useLocation } from "react-router-dom";
+// --- PERBAIKAN: Menggunakan path relatif yang benar ---
 import { useAuth } from "../../context/AuthContext";
+// --- AKHIR PERBAIKAN ---
 
 // --- Komponen Ikon ---
 // (Definisi semua ikon tetap sama, disembunyikan untuk keringkasan)
@@ -355,6 +357,9 @@ const SidebarMenu = ({ role }) => {
                 { label: "Jenis Konseling", path: "/admin/jenis-konseling" },
                 { label: "Durasi Konseling", path: "/admin/durasi-konseling" },
                 { label: "Tempat Konseling", path: "/admin/tempat-konseling" },
+                // --- TAMBAHKAN INI ---
+                { label: "Metode Pembayaran", path: "/admin/payment-methods" },
+                // --- AKHIR TAMBAHAN ---
             ],
         },
     ];

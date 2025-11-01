@@ -10,6 +10,9 @@ use App\Http\Controllers\SuperAdmin\AdminManagementController;
 use App\Http\Controllers\SuperAdmin\KonselorManagementController;
 use App\Http\Controllers\SuperAdmin\CustomerManagementController;
 use App\Http\Controllers\SuperAdmin\BookingManagementController;
+// --- TAMBAHKAN IMPORT BARU ---
+use App\Http\Controllers\SuperAdmin\PaymentMethodController;
+// --- AKHIR IMPORT BARU ---
 
 use App\Http\Controllers\Admin\JadwalKonsultasiController;
 use App\Http\Controllers\Admin\KonselorVerificationController;
@@ -65,10 +68,12 @@ Route::group(['middleware' => [
         Route::get('/booking/counselors', [BookingFlowController::class, 'getCounselors']);
         Route::get('/booking/counselors/{konselor}', [BookingFlowController::class, 'showCounselor'])
             ->where('konselor', '[0-9]+');
-
-        // --- INI RUTE YANG HILANG (SUDAH DITAMBAHKAN) ---
         Route::get('/booking/counselors/{konselor}/schedule-options', [BookingFlowController::class, 'getScheduleOptions'])
             ->where('konselor', '[0-9]+');
+
+        // --- INI RUTE YANG PERLU DITAMBAHKAN ---
+        Route::post('/booking/create', [BookingFlowController::class, 'storeBooking']);
+        // --- AKHIR RUTE BARU ---
 
         // Booking Chat
         Route::prefix('booking/{booking}/chat')->group(function () {
@@ -84,6 +89,12 @@ Route::group(['middleware' => [
             Route::apiResource('durasi-konseling', DurasiKonselingController::class);
             Route::apiResource('tempat-konseling', TempatKonselingController::class);
             Route::post('tempat-konseling/{tempatKonseling}', [TempatKonselingController::class, 'update']);
+
+            // --- TAMBAHKAN RUTE MANAJEMEN PEMBAYARAN DI SINI ---
+            Route::apiResource('payment-methods', PaymentMethodController::class);
+            // Route POST terpisah untuk update yang mengandung file (gambar)
+            Route::post('payment-methods/{paymentMethod}', [PaymentMethodController::class, 'update']);
+            // --- AKHIR RUTE BARU ---
 
             // Manajemen Admin
             Route::post('admin-management/{user}/block', [AdminManagementController::class, 'block']);
