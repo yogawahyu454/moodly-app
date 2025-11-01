@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from "react"; // Tambah useEffect
+import React, { useState, useEffect } from "react"; // <-- PERBAIKAN: Tambahkan useEffect
 import { Link, useNavigate, useLocation } from "react-router-dom";
-// --- PERBAIKAN: Koreksi path relatif ---
-import apiClient from "../../../../api/axios"; // Sesuaikan path jika perlu
-// --- AKHIR PERBAIKAN ---
+import apiClient from "../../../../api/axios.js"; // <-- PERBAIKAN: Path lengkap dengan ekstensi
 
 // --- Komponen Ikon ---
-// ... (Ikon tetap sama)
 const BackArrowIcon = () => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -81,140 +78,26 @@ const InformationCircleIcon = () => (
 );
 // --- Akhir Komponen Ikon ---
 
-// --- PERBAIKAN: Ubah nama komponen jadi PaymentOfflinePage ---
 export default function PaymentOfflinePage() {
+    // Ganti nama komponen
     const navigate = useNavigate();
     const location = useLocation();
-    // --- PERBAIKAN: Ambil bookingData dari state navigasi ---
+
+    // --- PERBAIKAN: Ambil data dari location.state ---
     const { bookingData } = location.state || {};
-    const displayData = bookingData?.displayData || {}; // Ambil displayData
-    const apiPayload = bookingData?.apiPayload || {}; // Ambil apiPayload
-    // --- AKHIR PERBAIKAN ---
+    const { apiPayload, displayData } = bookingData || {};
 
-    const [agreed, setAgreed] = useState(false); // State untuk checkbox persetujuan
-    // --- PERBAIKAN: State untuk loading dan error ---
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-    // --- AKHIR PERBAIKAN ---
+    const [agreed, setAgreed] = useState(false);
+    const [loading, setLoading] = useState(false); // State loading baru
+    const [error, setError] = useState(null); // State error baru
 
-    // --- PERBAIKAN: Efek untuk mengambil detail tempat jika offline ---
-    const [tempatDetail, setTempatDetail] = useState(null);
+    // Jika tidak ada data, redirect
     useEffect(() => {
-        const fetchTempatDetail = async () => {
-            // Hanya fetch jika ini offline dan ada tempatId
-            if (displayData.method === "Tatap Muka" && apiPayload.tempatId) {
-                try {
-                    const response = await apiClient.get(
-                        `/api/booking/tempat-konseling/${apiPayload.tempatId}`
-                    );
-                    setTempatDetail(response.data); // Simpan detail tempat
-                } catch (err) {
-                    console.error("Gagal mengambil detail tempat:", err);
-                    // Mungkin tampilkan error kecil di bagian alamat?
-                }
-            }
-        };
-
-        if (bookingData) {
-            // Pastikan bookingData ada sebelum fetch
-            fetchTempatDetail();
+        if (!bookingData) {
+            console.error("Tidak ada data booking, kembali ke beranda.");
+            navigate("/"); // Arahkan ke home jika tidak ada state
         }
-    }, [bookingData, displayData.method, apiPayload.tempatId]); // Tambahkan dependensi
-    // --- AKHIR PERBAIKAN ---
-
-    // --- PERBAIKAN: Gunakan data dinamis dari displayData ---
-    const bookingDetails = {
-        bookingCode: "...", // Akan didapat setelah booking berhasil dibuat
-        bookingDate: new Date()
-            .toLocaleDateString("id-ID", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-            })
-            .split("/")
-            .join(" - "), // Tanggal hari ini
-        psychologistName: displayData.counselorName || "Nama Psikolog",
-        psychologistImage:
-            displayData.counselorImage ||
-            "https://placehold.co/48x48/EBF8FF/7F9CF5?text=P",
-        specialty: `Spesialisasi : ${displayData.counselorSpecialty || "-"}`,
-        university: displayData.counselorUniversity || "-",
-        scheduleType: displayData.method || "Metode",
-        scheduleDate: displayData.scheduleDateDisplay || "Tanggal Jadwal",
-        scheduleTime: displayData.scheduleTime
-            ? `${displayData.scheduleTime} WIB`
-            : "Jam Jadwal",
-        locationName:
-            displayData.tempatName ||
-            (displayData.method !== "Tatap Muka"
-                ? "Online"
-                : "Memuat Lokasi..."),
-        locationAddress:
-            tempatDetail?.alamat ||
-            (displayData.method !== "Tatap Muka" ? "-" : "Memuat Alamat..."), // Ambil dari tempatDetail
-        consultationFee: displayData.consultationFee || 0,
-        serviceFee: displayData.serviceFee || 0,
-    };
-    // --- AKHIR PERBAIKAN ---
-
-    const totalPayment =
-        bookingDetails.consultationFee + bookingDetails.serviceFee;
-
-    const handleBack = () => {
-        navigate(-1); // Kembali ke halaman sebelumnya
-    };
-
-    // --- PERBAIKAN: Fungsi untuk mengirim data booking ke API ---
-    const handleContinue = async () => {
-        if (!agreed) {
-            setError("Anda harus menyetujui syarat dan ketentuan.");
-            return;
-        }
-        if (!bookingData || !apiPayload) {
-            setError("Data booking tidak lengkap, silakan kembali dan ulangi.");
-            return;
-        }
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            console.log("Mengirim data booking:", apiPayload);
-            const response = await apiClient.post(
-                "/api/booking/create",
-                apiPayload
-            );
-            const createdBooking = response.data; // Data booking yang baru dibuat (termasuk ID)
-            console.log("Booking berhasil dibuat:", createdBooking);
-
-            // Navigasi ke halaman instruksi pembayaran offline atau halaman sukses
-            // Kirim ID booking baru agar halaman selanjutnya tahu booking mana yang dimaksud
-            navigate("/booking/payment-instructions-offline", {
-                replace: true, // Ganti history agar tidak bisa kembali ke halaman ini
-                state: {
-                    bookingId: createdBooking.id,
-                    totalPayment: totalPayment,
-                }, // Kirim ID dan total
-            });
-        } catch (err) {
-            console.error("Gagal membuat booking:", err);
-            const errorMessage =
-                err.response?.data?.message ||
-                "Gagal membuat pesanan. Silakan coba lagi.";
-            // Cek jika error validasi
-            if (err.response?.status === 422 && err.response?.data?.errors) {
-                // Bisa proses error validasi lebih detail jika perlu
-                setError(
-                    "Data yang dimasukkan tidak valid. Mohon periksa kembali."
-                );
-            } else {
-                setError(errorMessage);
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    // --- AKHIR PERBAIKAN ---
+    }, [bookingData, navigate]);
 
     // Format Rupiah
     const formatCurrency = (amount) => {
@@ -226,23 +109,97 @@ export default function PaymentOfflinePage() {
         }).format(amount);
     };
 
-    // --- PERBAIKAN: Handle jika bookingData tidak ada ---
+    // Data dinamis dari displayData (jika bookingData ada)
+    const bookingDetails = displayData
+        ? {
+              bookingCode: "MOODLY-XXXXX", // Bisa digenerate backend nanti
+              bookingDate: new Date().toLocaleDateString("id-ID", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+              }),
+              psychologistName: displayData.counselorName,
+              psychologistImage: displayData.counselorImage,
+              university: displayData.counselorUniversity,
+              specialty: `Spesialisasi : ${displayData.counselorSpecialty}`,
+              scheduleType: displayData.method, // "Tatap Muka"
+              scheduleDate: displayData.scheduleDateDisplay,
+              scheduleTime: `${displayData.scheduleTime} WIB`,
+              locationName: displayData.tempatName || "Lokasi tidak ditentukan",
+              locationAddress:
+                  displayData.tempatAddress ||
+                  "Alamat akan diinformasikan setelah pembayaran.", // TODO: Ambil alamat tempat
+              consultationFee: displayData.consultationFee,
+              serviceFee: displayData.serviceFee,
+          }
+        : {}; // Default object kosong jika data tidak ada
+
+    const totalPayment =
+        (displayData?.consultationFee || 0) + (displayData?.serviceFee || 0);
+    // --- AKHIR PERBAIKAN DATA ---
+
+    const handleBack = () => {
+        navigate(-1); // Kembali ke halaman sebelumnya
+    };
+
+    // --- PERBAIKAN: Handler untuk submit ke API ---
+    const handleContinue = async () => {
+        if (!agreed) {
+            setError("Anda harus menyetujui syarat dan ketentuan.");
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            // Panggil API storeBooking yang sudah kita buat
+            const response = await apiClient.post(
+                "/api/booking/create",
+                apiPayload
+            );
+
+            // Sukses! Arahkan ke halaman instruksi pembayaran
+            // Kirim data booking yang baru dibuat (termasuk ID)
+            const createdBooking = response.data.booking;
+
+            // Tentukan halaman instruksi (offline/online)
+            // Di sini kita asumsikan offline
+            navigate(`/booking/payment-instructions-offline`, {
+                // TODO: Buat halaman ini
+                replace: true, // Ganti riwayat agar tidak bisa back ke konfirmasi
+                state: { booking: createdBooking },
+            });
+        } catch (err) {
+            console.error("Gagal membuat booking:", err);
+            let errorMessage = "Gagal membuat pesanan. Silakan coba lagi.";
+            if (err.response && err.response.status === 422) {
+                // Ambil error validasi pertama
+                const firstError = Object.values(
+                    err.response.data.errors
+                )[0][0];
+                errorMessage = firstError || errorMessage;
+            } else if (
+                err.response &&
+                err.response.data &&
+                err.response.data.message
+            ) {
+                errorMessage = err.response.data.message;
+            }
+            setError(errorMessage);
+            setLoading(false);
+        }
+    };
+    // --- AKHIR PERBAIKAN HANDLER ---
+
+    // Tampilkan loading jika data state belum siap
     if (!bookingData) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-                <p className="text-red-500 mb-4">
-                    Data booking tidak ditemukan.
-                </p>
-                <button
-                    onClick={() => navigate("/booking")} // Arahkan kembali ke awal alur booking
-                    className="bg-cyan-500 text-white px-4 py-2 rounded-lg"
-                >
-                    Kembali ke Pemilihan Layanan
-                </button>
+            <div className="bg-gray-50 min-h-full font-sans flex items-center justify-center">
+                Memuat data...
             </div>
         );
     }
-    // --- AKHIR PERBAIKAN ---
 
     return (
         <div className="bg-gray-50 min-h-full font-sans">
@@ -255,60 +212,60 @@ export default function PaymentOfflinePage() {
                 >
                     <BackArrowIcon />
                 </button>
-                {/* --- PERBAIKAN: Judul dinamis --- */}
                 <h1 className="text-lg font-bold text-center flex-grow -translate-x-4">
                     Konfirmasi Pesanan {/* Ganti judul */}
                 </h1>
-                {/* --- AKHIR PERBAIKAN --- */}
                 <div className="w-8"></div> {/* Spacer */}
             </header>
 
             {/* Konten Utama */}
-            <main className="relative p-4 pb-28">
-                {/* Timer Pembayaran (Mungkin tidak relevan untuk offline?) */}
-                {/* <div className="bg-white p-3 rounded-lg shadow mb-4 flex justify-between items-center">
+            <main className="relative p-4 pb-40">
+                {" "}
+                {/* Perbanyak padding bottom */}
+                {/* Timer Pembayaran (Mungkin tidak relevan untuk offline? Atau tetap ada?) */}
+                <div className="bg-white p-3 rounded-lg shadow mb-4 flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">
                         Selesaikan Pembayaran dalam
                     </span>
+                    {/* TODO: Implementasi Timer */}
                     <span className="text-sm font-bold text-red-500 bg-red-100 px-2 py-0.5 rounded">
-                        59 : 54
+                        23 : 59 : 54 {/* Timer 24 jam? */}
                     </span>
-                </div> */}
-
-                {/* --- PERBAIKAN: Tampilkan pesan error jika ada --- */}
+                </div>
+                {/* --- Tampilkan Error API jika ada --- */}
                 {error && (
-                    <div
-                        className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-                        role="alert"
-                    >
-                        <strong className="font-bold">Oops!</strong>
-                        <span className="block sm:inline"> {error}</span>
+                    <div className="bg-red-100 border border-red-300 text-red-700 p-3 rounded-lg shadow mb-4 text-sm">
+                        <strong>Oops!</strong> {error}
                     </div>
                 )}
-                {/* --- AKHIR PERBAIKAN --- */}
-
                 {/* Detail Booking */}
                 <div className="bg-white p-4 rounded-lg shadow space-y-4">
-                    {/* Info Kode Booking (Tampilkan setelah berhasil) */}
-                    {/* <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                    {/* Info Kode Booking */}
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-100">
                         <span className="text-sm font-semibold text-gray-800">
                             {bookingDetails.bookingCode}
                         </span>
                         <span className="text-xs text-gray-400">
                             {bookingDetails.bookingDate}
                         </span>
-                    </div> */}
+                    </div>
 
                     {/* Info Psikolog */}
                     <div className="flex items-center gap-3">
                         <img
-                            src={bookingDetails.psychologistImage}
+                            src={
+                                bookingDetails.psychologistImage ||
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                    bookingDetails.psychologistName || "P"
+                                )}&background=EBF4FF&color=3B82F6&bold=true&size=64`
+                            }
                             alt={bookingDetails.psychologistName}
                             className="w-12 h-12 rounded-full object-cover"
                             onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src =
-                                    "https://placehold.co/48x48/EBF8FF/7F9CF5?text=P";
+                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                    bookingDetails.psychologistName || "P"
+                                )}&background=EBF4FF&color=3B82F6&bold=true&size=64`;
                             }}
                         />
                         <div>
@@ -316,10 +273,10 @@ export default function PaymentOfflinePage() {
                                 {bookingDetails.psychologistName}
                             </h3>
                             <p className="text-xs text-gray-500">
-                                {bookingDetails.university}
+                                {bookingDetails.university || "-"}
                             </p>
                             <p className="text-xs text-gray-500">
-                                {bookingDetails.specialty}
+                                {bookingDetails.specialty || "-"}
                             </p>
                         </div>
                     </div>
@@ -348,8 +305,8 @@ export default function PaymentOfflinePage() {
                         </div>
                     </div>
 
-                    {/* Info Lokasi (Hanya jika Tatap Muka) */}
-                    {displayData.method === "Tatap Muka" && (
+                    {/* Info Lokasi (Hanya untuk Offline) */}
+                    {bookingDetails.scheduleType === "Tatap Muka" && (
                         <div className="space-y-1 pt-3 border-t border-gray-100">
                             <h4 className="text-xs font-semibold text-gray-400 uppercase mb-1">
                                 Lokasi
@@ -372,9 +329,7 @@ export default function PaymentOfflinePage() {
                     <div className="space-y-1 pt-3 border-t border-gray-100">
                         <div className="flex justify-between items-center">
                             <p className="text-sm text-gray-500">
-                                Biaya Konsultasi (
-                                {displayData.durationText || ""}){" "}
-                                {/* Tampilkan durasi */}
+                                Biaya Konsultasi
                             </p>
                             <p className="text-sm text-gray-700">
                                 {formatCurrency(bookingDetails.consultationFee)}
@@ -404,10 +359,7 @@ export default function PaymentOfflinePage() {
                             type="checkbox"
                             id="agreement"
                             checked={agreed}
-                            onChange={(e) => {
-                                setAgreed(e.target.checked);
-                                if (e.target.checked) setError(null); // Hapus error jika dicentang
-                            }}
+                            onChange={(e) => setAgreed(e.target.checked)}
                             className="mt-1 h-4 w-4 text-cyan-600 border-gray-300 rounded focus:ring-cyan-500"
                         />
                         <label
@@ -416,9 +368,8 @@ export default function PaymentOfflinePage() {
                         >
                             Dengan ini kamu menyetujui syarat dan ketentuan{" "}
                             <Link
-                                to="/peraturan-konseling" // Ganti ke path yang benar jika perlu
+                                to="/peraturan-konseling" // TODO: Pastikan rute ini ada
                                 className="text-cyan-600 hover:underline font-medium"
-                                target="_blank" // Buka di tab baru
                             >
                                 Peraturan Konseling
                             </Link>
@@ -428,7 +379,7 @@ export default function PaymentOfflinePage() {
                     {/* Bantuan */}
                     <div className="flex justify-center pt-2">
                         <Link
-                            to="/help" // Ganti ke path bantuan
+                            to="/help" // TODO: Pastikan rute ini ada
                             className="flex items-center gap-1 text-xs text-blue-500 hover:underline"
                         >
                             <InformationCircleIcon /> Butuh Bantuan ?
@@ -447,40 +398,15 @@ export default function PaymentOfflinePage() {
                 </div>
                 <button
                     onClick={handleContinue}
-                    disabled={!agreed || isLoading} // Nonaktifkan jika belum setuju atau sedang loading
-                    className={`px-6 py-3 rounded-lg font-semibold text-white shadow transition-colors duration-200 flex items-center justify-center min-w-[120px] ${
-                        // Tambah min-w
-                        agreed && !isLoading
-                            ? "bg-cyan-500 hover:bg-cyan-600 active:scale-95"
-                            : "bg-gray-300 cursor-not-allowed"
+                    disabled={!agreed || loading} // Nonaktifkan jika belum setuju atau sedang loading
+                    className={`px-6 py-3 rounded-lg font-semibold text-white shadow transition-colors duration-200 ${
+                        !agreed || loading
+                            ? "bg-gray-300 cursor-not-allowed"
+                            : "bg-cyan-500 hover:bg-cyan-600 active:scale-95"
                     }`}
                 >
-                    {/* --- PERBAIKAN: Tampilkan Loading --- */}
-                    {isLoading ? (
-                        <svg
-                            className="animate-spin h-5 w-5 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                            ></circle>
-                            <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                    ) : (
-                        "Lanjutkan"
-                    )}
-                    {/* --- AKHIR PERBAIKAN --- */}
+                    {/* --- Teks Tombol Dinamis --- */}
+                    {loading ? "Memproses..." : "Lanjutkan"}
                 </button>
             </div>
         </div>
