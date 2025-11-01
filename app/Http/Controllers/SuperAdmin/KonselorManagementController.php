@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\CounselorAvailability; // <-- Import Model Jadwal
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage; // <-- Import Storage
@@ -130,6 +131,10 @@ class KonselorManagementController extends Controller
             $updateData['spesialisasi'] = $validated['spesialisasi'];
         }
 
+        // Tambahkan path avatar ke updateData jika ada file baru atau path lama (jika tidak ada file baru)
+        // Ini memastikan kolom avatar di database selalu terisi path yang benar
+        $updateData['avatar'] = $avatarPath;
+
 
         $user->update($updateData);
 
@@ -179,4 +184,72 @@ class KonselorManagementController extends Controller
         $user->update(['status' => 'Terverifikasi']);
         return response()->json($user);
     }
+
+    // --- METHOD BARU UNTUK MANAJEMEN JADWAL ---
+
+    /**
+     * Menampilkan daftar jadwal ketersediaan untuk konselor tertentu.
+     * GET /api/super-admin/konselor-management/{user}/availabilities
+     */
+    public function getAvailabilities(User $user)
+    {
+        // Pastikan user adalah konselor
+        if ($user->role !== 'konselor') {
+            return response()->json(['message' => 'User bukan konselor.'], 404);
+        }
+
+        $availabilities = CounselorAvailability::where('counselor_id', $user->id)
+            ->orderBy('day_of_week')
+            ->orderBy('start_time')
+            ->get();
+
+        return response()->json($availabilities);
+    }
+
+    /**
+     * Menyimpan jadwal ketersediaan baru untuk konselor.
+     * POST /api/super-admin/konselor-management/{user}/availabilities
+     */
+    public function storeAvailability(Request $request, User $user)
+    {
+        if ($user->role !== 'konselor') {
+            return response()->json(['message' => 'User bukan konselor.'], 404);
+        }
+
+        $validated = $request->validate([
+            'day_of_week' => 'required|integer|between:0,6', // 0=Minggu, 6=Sabtu
+            'start_time' => 'required|date_format:H:i', // Format jam:menit (e.g., 09:00)
+            'end_time' => 'required|date_format:H:i|after:start_time',
+        ]);
+
+        // Cek overlapping schedule (opsional tapi bagus)
+        // TODO: Tambahkan logika untuk mencegah jadwal tumpang tindih
+
+        $availability = CounselorAvailability::create([
+            'counselor_id' => $user->id,
+            'day_of_week' => $validated['day_of_week'],
+            'start_time' => $validated['start_time'] . ':00', // Tambahkan detik
+            'end_time' => $validated['end_time'] . ':00', // Tambahkan detik
+        ]);
+
+        return response()->json($availability, 201);
+    }
+
+    /**
+     * Menghapus jadwal ketersediaan.
+     * DELETE /api/super-admin/konselor-management/{user}/availabilities/{availability}
+     */
+    public function destroyAvailability(User $user, CounselorAvailability $availability)
+    {
+        // Pastikan availability milik user yang benar
+        if ($availability->counselor_id !== $user->id) {
+            return response()->json(['message' => 'Jadwal tidak ditemukan untuk konselor ini.'], 404);
+        }
+
+        $availability->delete();
+
+        return response()->json(['message' => 'Jadwal berhasil dihapus.'], 200);
+    }
+
+    // --- AKHIR METHOD BARU ---
 }

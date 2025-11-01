@@ -1,6 +1,8 @@
 import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+// --- PERBAIKAN: Mengembalikan path ke relatif (../) ---
+import { useAuth } from "../context/AuthContext"; // Sesuaikan path jika perlu
+import Commet from "../components/Commet";
 
 // --- Layouts ---
 import MobileLayout from "../layouts/MobileLayout";
@@ -12,6 +14,7 @@ import PageLayout from "../layouts/PageLayout";
 // --- Halaman Auth (Mobile) ---
 import LoginPage from "../pages/auth/LoginPage";
 import AddressPage from "../pages/auth/AddressPage";
+// Ini akan mengimpor file 'RegisterPage.jsx' Anda yang "pintar"
 import RegisterPage from "../pages/auth/RegisterPage";
 import OnboardingPage from "../pages/auth/OnboardingPage";
 
@@ -21,11 +24,19 @@ import NotificationPage from "../pages/customer/NotificationPage";
 import BookingPage from "../pages/customer/booking/Index";
 import FindCounselorPage from "../pages/customer/booking/FindCounselorPage";
 import InPersonPage from "../pages/customer/booking/InPersonPage";
-import PaymentPage from "../pages/customer/booking/PaymentPage";
+// import PaymentPage from "../pages/customer/booking/PaymentPage"; // <-- Sudah benar dikomentari
 import LocationDetailPage from "../pages/customer/booking/LocationDetailPage";
-import PsychologistDetailPage from "../pages/customer/booking/PsychologistDetailPage"; // <-- Import Halaman Detail Psikolog
+import PsychologistDetailPage from "../pages/customer/booking/PsychologistDetailPage";
+
+// --- IMPORT UNTUK PAYMENT ---
+import PaymentOnlinePage from "../pages/customer/booking/payment/PaymentOnlinePage";
+// --- TAMBAHKAN IMPORT INI ---
+import PaymentOfflinePage from "../pages/customer/booking/payment/PaymentOfflinePage";
+// --- AKHIR TAMBAHAN ---
+import QrisPaymentPage from "../pages/customer/booking/payment/QrisPaymentPage"; // <-- Tambahkan ini
 
 import HistoryPage from "../pages/customer/history/Index";
+// --- PERBAIKAN: Typo 'pagesa' di bawah ini ---
 import HistoryDetailPage from "../pages/customer/history/DetailPage";
 import RatingPage from "../pages/customer/history/RatingPage";
 import CancelPage from "../pages/customer/history/CancelPage";
@@ -36,6 +47,8 @@ import ProfilePage from "../pages/customer/profile/Index";
 import EditProfilePage from "../pages/customer/profile/EditPage";
 import ChangePasswordPage from "../pages/customer/profile/ChangePasswordPage";
 import ChangeEmailPage from "../pages/customer/profile/ChangeEmailPage";
+import ChangePhoneNumberPage from "../pages/customer/profile/ChangePhoneNumberPage"; // <-- Import Halaman Ubah Nomor
+
 import HelpPage from "../pages/customer/help/Index";
 import FaqPage from "../pages/customer/help/FaqPage";
 import ChatAdminPage from "../pages/customer/help/ChatAdminPage";
@@ -62,17 +75,30 @@ import VerifikasiDetailPage from "../pages/admin/verifikasi-konselor/Show.jsx";
 import VerifikasiCustomerPage from "../pages/admin/verifikasi-customer/Index.jsx";
 import VerifikasiCustomerDetailPage from "../pages/admin/verifikasi-customer/Show.jsx";
 
-// --- Guards (Tetap Sama) ---
-// ... (Kode Guard)
+// --- TAMBAHAN: Import Halaman Counselor ---
+// (Path sudah diganti ke Bahasa Inggris & Relatif)
+import CounselorDashboard from "../pages/counselor/HomePage";
+import CounselorSchedulePage from "../pages/counselor/schedule"; // <-- PERUBAHAN
+import CounselorHistoryPage from "../pages/counselor/history/HistoryPage"; // <-- PERUBAHAN
+// --- AKHIR TAMBAHAN ---
+
+// --- Guards (Dimodifikasi untuk Counselor) ---
 const GuestGuard = () => {
     const { user } = useAuth();
     if (user) {
-        return user.role?.includes("admin") ||
-            user.role?.includes("super-admin") ? (
-            <Navigate to="/admin/dashboard" />
-        ) : (
-            <Navigate to="/home" />
-        );
+        // 1. Cek Admin
+        if (
+            user.role?.includes("admin") ||
+            user.role?.includes("super-admin")
+        ) {
+            return <Navigate to="/admin/dashboard" />;
+        }
+        // 2. Cek Counselor
+        if (user.role?.includes("counselor")) {
+            return <Navigate to="/counselor/home" />;
+        }
+        // 3. Sisanya (Customer)
+        return <Navigate to="/home" />;
     }
     return <Outlet />;
 };
@@ -82,7 +108,9 @@ const ProtectedGuard = () => {
     if (
         !user ||
         user.role?.includes("admin") ||
-        user.role?.includes("super-admin")
+        user.role?.includes("super-admin") ||
+        // TAMBAHAN: Counselor dilarang masuk rute customer
+        user.role?.includes("counselor")
     ) {
         return <Navigate to="/login" />;
     }
@@ -108,35 +136,73 @@ const AdminProtectedGuard = () => {
         <Navigate to="/admin/login" />
     );
 };
+
+// --- TAMBAHAN: Guard untuk Counselor ---
+const CounselorProtectedGuard = () => {
+    const { user } = useAuth();
+    // Jika tidak login, redirect ke login
+    if (!user) {
+        return <Navigate to="/login" />;
+    }
+
+    // Jika login TAPI BUKAN counselor, redirect
+    if (!user.role?.includes("counselor")) {
+        // Jika dia admin, lempar ke admin dashboard
+        if (
+            user.role?.includes("admin") ||
+            user.role?.includes("super-admin")
+        ) {
+            return <Navigate to="/admin/dashboard" />;
+        }
+        // Jika dia customer, lempar ke home customer
+        return <Navigate to="/home" />;
+    }
+
+    // Jika login DAN role-nya counselor, izinkan akses
+    return <Outlet />;
+};
+// --- AKHIR TAMBAHAN ---
+
 // --- PETA APLIKASI UTAMA ---
 const AppRouter = () => {
     const { loading } = useAuth();
 
     if (loading) {
-        // ... (loading state)
         return (
             <div className="flex items-center justify-center min-h-screen">
-                Loading...
+                <Commet
+                    color="#3139cc"
+                    size="medium"
+                    text="loading"
+                    textColor=""
+                />
             </div>
         );
     }
 
     return (
         <Routes>
-            {/* === ZONA AUTH CUSTOMER (MOBILE) === */}
-            {/* ... (Rute GuestGuard) */}
+            {/* === ZONA AUTH CUSTOMER & KONSELOR (MOBILE) === */}
             <Route element={<GuestGuard />}>
                 <Route element={<AuthLayout />}>
-                    {/* <Route path="/" element={<OnboardingPage />} /> */}
+                    <Route path="/" element={<OnboardingPage />} />
+
+                    {/* Rute Login */}
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/counselor/login" element={<LoginPage />} />
+
+                    {/* Rute Register */}
                     <Route path="/register" element={<RegisterPage />} />
+                    <Route
+                        path="/counselor/register"
+                        element={<RegisterPage />}
+                    />
                 </Route>
             </Route>
 
             {/* === ZONA CUSTOMER TERPROTEKSI (MOBILE) === */}
             <Route element={<ProtectedGuard />}>
                 {/* 1. Rute MobileLayout */}
-                {/* ... (Rute /home, /booking, /history, /notifications, /profile) */}
                 <Route element={<MobileLayout />}>
                     <Route path="/home" element={<HomePage />} />
                     <Route path="/booking" element={<BookingPage />} />
@@ -155,7 +221,6 @@ const AppRouter = () => {
 
                 {/* 2. Rute PageLayout */}
                 <Route element={<PageLayout />}>
-                    {/* ... (Rute Auth Flow, Profile Flow) */}
                     {/* Auth Flow (lanjutan) */}
                     <Route path="/address" element={<AddressPage />} />
 
@@ -169,7 +234,10 @@ const AppRouter = () => {
                         path="/profile/change-email"
                         element={<ChangeEmailPage />}
                     />
-
+                    <Route
+                        path="/profile/change-phone" // Path untuk halaman ubah nomor
+                        element={<ChangePhoneNumberPage />}
+                    />
                     {/* Booking Flow */}
                     <Route
                         path="/booking/find-counselor"
@@ -183,17 +251,33 @@ const AppRouter = () => {
                         path="/booking/tempat/:id"
                         element={<LocationDetailPage />}
                     />
-                    {/* --- RUTE BARU: Detail Psikolog --- */}
                     <Route
-                        path="/booking/counselor/:id" // Gunakan ID konselor di URL
+                        path="/booking/counselor/:id"
                         element={<PsychologistDetailPage />}
                     />
-                    {/* --- AKHIR RUTE BARU --- */}
+
+                    {/* --- RUTE KONFIRMASI (SESUAI NAVIGASI) --- */}
                     <Route
-                        path="/booking/payment/:id"
-                        element={<PaymentPage />}
+                        path="/booking/payment-offline"
+                        element={<PaymentOfflinePage />}
                     />
-                    {/* ... (Rute History Flow, Help Flow, Session Flow) */}
+                    <Route
+                        path="/booking/payment-online"
+                        element={<PaymentOnlinePage />}
+                    />
+                    {/* --- AKHIR RUTE KONFIRMASI --- */}
+
+                    <Route
+                        path="/booking/payment/online/:id"
+                        element={<PaymentOnlinePage />}
+                    />
+                    {/* --- RUTE BARU DITAMBAHKAN DI SINI --- */}
+                    <Route
+                        path="/booking/payment/qris/:id" // Path untuk halaman QRIS
+                        element={<QrisPaymentPage />}
+                    />
+                    {/* --- AKHIR RUTE BARU --- */}
+
                     {/* History Flow */}
                     <Route
                         path="/history/:id"
@@ -220,13 +304,36 @@ const AppRouter = () => {
                         path="/help/chat-admin"
                         element={<ChatAdminPage />}
                     />
-
                     {/* Session Flow */}
                     <Route path="/session/chat/:id" element={<ChatPage />} />
                 </Route>
             </Route>
 
-            {/* ... (Rute ZONA ADMIN) */}
+            {/* --- TAMBAHAN: ZONA COUNSELOR TERPROTEKSI (MOBILE) --- */}
+            <Route element={<CounselorProtectedGuard />}>
+                <Route element={<MobileLayout />}>
+                    <Route
+                        path="/counselor/home"
+                        element={<CounselorDashboard />}
+                    />
+                    <Route
+                        path="/counselor/schedule"
+                        element={<CounselorSchedulePage />}
+                    />
+                    <Route
+                        path="/counselor/history"
+                        element={<CounselorHistoryPage />}
+                    />{" "}
+                    {/* <-- RUTE RIWAYAT */}
+                    {/* Redirect jika counselor akses /counselor */}
+                    <Route
+                        path="/counselor"
+                        element={<Navigate to="/counselor/home" />}
+                    />
+                </Route>
+            </Route>
+            {/* --- AKHIR TAMBAHAN --- */}
+
             {/* === ZONA ADMIN (WEBSITE) === */}
             <Route element={<AdminGuestGuard />}>
                 <Route element={<AuthAdminLayout />}>
@@ -318,7 +425,7 @@ const AppRouter = () => {
                     />
                 </Route>
             </Route>
-            {/* ... (Rute FALLBACK) */}
+
             {/* === RUTE FALLBACK === */}
             <Route path="/" element={<Navigate to="/login" />} />
             <Route

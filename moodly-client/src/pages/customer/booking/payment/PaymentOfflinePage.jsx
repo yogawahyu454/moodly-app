@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom"; // useLocation untuk ambil data
+import React, { useState, useEffect } from "react"; // <-- PERBAIKAN: Tambahkan useEffect
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import apiClient from "../../../../api/axios.js"; // <-- PERBAIKAN: Path lengkap dengan ekstensi
 
 // --- Komponen Ikon ---
 const BackArrowIcon = () => (
@@ -77,72 +78,128 @@ const InformationCircleIcon = () => (
 );
 // --- Akhir Komponen Ikon ---
 
-export default function PaymentConfirmationPage() {
+export default function PaymentOfflinePage() {
+    // Ganti nama komponen
     const navigate = useNavigate();
     const location = useLocation();
-    const { schedule, psychologist } = location.state || {}; // Ambil data dari state navigasi
 
-    const [agreed, setAgreed] = useState(false); // State untuk checkbox persetujuan
+    // --- PERBAIKAN: Ambil data dari location.state ---
+    const { bookingData } = location.state || {};
+    const { apiPayload, displayData } = bookingData || {};
 
-    // Dummy data - idealnya gunakan data dari 'schedule' dan 'psychologist'
-    // Tambahkan tanggal yang diformat dari data schedule jika ada
-    const formattedDate =
-        schedule?.day && schedule?.timeSlot
-            ? `Jum'at, 5 Januari 2023`
-            : "Tanggal belum dipilih"; // Placeholder, perlu logika format tanggal asli
+    const [agreed, setAgreed] = useState(false);
+    const [loading, setLoading] = useState(false); // State loading baru
+    const [error, setError] = useState(null); // State error baru
 
-    const bookingDetails = {
-        bookingCode: "GHJ-294-393",
-        bookingDate: "03 - 01 - 2025", // Format tanggal
-        psychologistName:
-            psychologist?.name || "Laras Sekarwati, M.Psi., Psikolog",
-        psychologistImage:
-            psychologist?.image ||
-            "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=600",
-        specialty: psychologist?.specialties?.[0]
-            ? `Spesialisasi : ${psychologist.specialties[0]}`
-            : "Spesialisasi : Konseling pernikahan", // Ambil dari data psikolog jika ada
-        university: psychologist?.education?.[1] || "Universitas Gadjah Mada", // Ambil dari data psikolog jika ada
-        scheduleType: "Tatap Muka", // Ambil dari data jadwal jika ada
-        scheduleDay: schedule?.day || "Jum'at",
-        scheduleDate: formattedDate, // Gunakan tanggal yang diformat
-        scheduleTime: schedule?.timeSlot || "Belum Dipilih",
-        locationName: "Rumah Konseling Moodly", // Ambil dari data lokasi jika ada
-        locationAddress:
-            "Jl. Bunga Mawar No. 15, RT 03 / RW 06 Kel. Mentari, Kec. Harmoni, Jakarta Selatan 12580 (Lantai 2, Ruang Konseling 3)",
-        consultationFee: 300000,
-        serviceFee: 5000,
-    };
-
-    const totalPayment =
-        bookingDetails.consultationFee + bookingDetails.serviceFee;
-
-    const handleBack = () => {
-        navigate(-1); // Kembali ke halaman sebelumnya
-    };
-
-    const handleContinue = () => {
-        if (agreed) {
-            console.log("Melanjutkan ke pembayaran...");
-            // Navigasi ke halaman instruksi pembayaran atau proses selanjutnya
-            // Ganti '/instruksi-pembayaran' dengan path yang benar di AppRouter Anda
-            navigate("/payment-instructions", {
-                state: { bookingDetails, totalPayment },
-            });
-        } else {
-            // Tampilkan pesan error jika belum setuju
-            alert("Anda harus menyetujui syarat dan ketentuan.");
+    // Jika tidak ada data, redirect
+    useEffect(() => {
+        if (!bookingData) {
+            console.error("Tidak ada data booking, kembali ke beranda.");
+            navigate("/"); // Arahkan ke home jika tidak ada state
         }
-    };
+    }, [bookingData, navigate]);
 
     // Format Rupiah
     const formatCurrency = (amount) => {
+        if (typeof amount !== "number") return "Rp 0";
         return new Intl.NumberFormat("id-ID", {
             style: "currency",
             currency: "IDR",
             minimumFractionDigits: 0,
         }).format(amount);
     };
+
+    // Data dinamis dari displayData (jika bookingData ada)
+    const bookingDetails = displayData
+        ? {
+              bookingCode: "MOODLY-XXXXX", // Bisa digenerate backend nanti
+              bookingDate: new Date().toLocaleDateString("id-ID", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+              }),
+              psychologistName: displayData.counselorName,
+              psychologistImage: displayData.counselorImage,
+              university: displayData.counselorUniversity,
+              specialty: `Spesialisasi : ${displayData.counselorSpecialty}`,
+              scheduleType: displayData.method, // "Tatap Muka"
+              scheduleDate: displayData.scheduleDateDisplay,
+              scheduleTime: `${displayData.scheduleTime} WIB`,
+              locationName: displayData.tempatName || "Lokasi tidak ditentukan",
+              locationAddress:
+                  displayData.tempatAddress ||
+                  "Alamat akan diinformasikan setelah pembayaran.", // TODO: Ambil alamat tempat
+              consultationFee: displayData.consultationFee,
+              serviceFee: displayData.serviceFee,
+          }
+        : {}; // Default object kosong jika data tidak ada
+
+    const totalPayment =
+        (displayData?.consultationFee || 0) + (displayData?.serviceFee || 0);
+    // --- AKHIR PERBAIKAN DATA ---
+
+    const handleBack = () => {
+        navigate(-1); // Kembali ke halaman sebelumnya
+    };
+
+    // --- PERBAIKAN: Handler untuk submit ke API ---
+    const handleContinue = async () => {
+        if (!agreed) {
+            setError("Anda harus menyetujui syarat dan ketentuan.");
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            // Panggil API storeBooking yang sudah kita buat
+            const response = await apiClient.post(
+                "/api/booking/create",
+                apiPayload
+            );
+
+            // Sukses! Arahkan ke halaman instruksi pembayaran
+            // Kirim data booking yang baru dibuat (termasuk ID)
+            const createdBooking = response.data.booking;
+
+            // Tentukan halaman instruksi (offline/online)
+            // Di sini kita asumsikan offline
+            navigate(`/booking/payment-instructions-offline`, {
+                // TODO: Buat halaman ini
+                replace: true, // Ganti riwayat agar tidak bisa back ke konfirmasi
+                state: { booking: createdBooking },
+            });
+        } catch (err) {
+            console.error("Gagal membuat booking:", err);
+            let errorMessage = "Gagal membuat pesanan. Silakan coba lagi.";
+            if (err.response && err.response.status === 422) {
+                // Ambil error validasi pertama
+                const firstError = Object.values(
+                    err.response.data.errors
+                )[0][0];
+                errorMessage = firstError || errorMessage;
+            } else if (
+                err.response &&
+                err.response.data &&
+                err.response.data.message
+            ) {
+                errorMessage = err.response.data.message;
+            }
+            setError(errorMessage);
+            setLoading(false);
+        }
+    };
+    // --- AKHIR PERBAIKAN HANDLER ---
+
+    // Tampilkan loading jika data state belum siap
+    if (!bookingData) {
+        return (
+            <div className="bg-gray-50 min-h-full font-sans flex items-center justify-center">
+                Memuat data...
+            </div>
+        );
+    }
 
     return (
         <div className="bg-gray-50 min-h-full font-sans">
@@ -156,25 +213,31 @@ export default function PaymentConfirmationPage() {
                     <BackArrowIcon />
                 </button>
                 <h1 className="text-lg font-bold text-center flex-grow -translate-x-4">
-                    Jenis konseling {/* Ganti judul jika perlu */}
+                    Konfirmasi Pesanan {/* Ganti judul */}
                 </h1>
                 <div className="w-8"></div> {/* Spacer */}
             </header>
 
             {/* Konten Utama */}
-            {/* PERBAIKAN: Tambahkan pb-28 agar footer tidak menutupi */}
-            <main className="relative p-4 pb-28">
-                {/* Timer Pembayaran */}
+            <main className="relative p-4 pb-40">
+                {" "}
+                {/* Perbanyak padding bottom */}
+                {/* Timer Pembayaran (Mungkin tidak relevan untuk offline? Atau tetap ada?) */}
                 <div className="bg-white p-3 rounded-lg shadow mb-4 flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">
                         Selesaikan Pembayaran dalam
                     </span>
-                    {/* Placeholder Timer */}
+                    {/* TODO: Implementasi Timer */}
                     <span className="text-sm font-bold text-red-500 bg-red-100 px-2 py-0.5 rounded">
-                        59 : 54
+                        23 : 59 : 54 {/* Timer 24 jam? */}
                     </span>
                 </div>
-
+                {/* --- Tampilkan Error API jika ada --- */}
+                {error && (
+                    <div className="bg-red-100 border border-red-300 text-red-700 p-3 rounded-lg shadow mb-4 text-sm">
+                        <strong>Oops!</strong> {error}
+                    </div>
+                )}
                 {/* Detail Booking */}
                 <div className="bg-white p-4 rounded-lg shadow space-y-4">
                     {/* Info Kode Booking */}
@@ -190,19 +253,30 @@ export default function PaymentConfirmationPage() {
                     {/* Info Psikolog */}
                     <div className="flex items-center gap-3">
                         <img
-                            src={bookingDetails.psychologistImage}
+                            src={
+                                bookingDetails.psychologistImage ||
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                    bookingDetails.psychologistName || "P"
+                                )}&background=EBF4FF&color=3B82F6&bold=true&size=64`
+                            }
                             alt={bookingDetails.psychologistName}
                             className="w-12 h-12 rounded-full object-cover"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                    bookingDetails.psychologistName || "P"
+                                )}&background=EBF4FF&color=3B82F6&bold=true&size=64`;
+                            }}
                         />
                         <div>
                             <h3 className="font-semibold text-sm text-gray-800">
                                 {bookingDetails.psychologistName}
                             </h3>
                             <p className="text-xs text-gray-500">
-                                {bookingDetails.university}
+                                {bookingDetails.university || "-"}
                             </p>
                             <p className="text-xs text-gray-500">
-                                {bookingDetails.specialty}
+                                {bookingDetails.specialty || "-"}
                             </p>
                         </div>
                     </div>
@@ -222,7 +296,6 @@ export default function PaymentConfirmationPage() {
                             <p className="text-sm text-gray-700">
                                 {bookingDetails.scheduleDate}
                             </p>{" "}
-                            {/* Tanggal yang sudah diformat */}
                         </div>
                         <div className="flex items-center gap-2">
                             <ClockIcon />
@@ -232,25 +305,25 @@ export default function PaymentConfirmationPage() {
                         </div>
                     </div>
 
-                    {/* Info Lokasi */}
-                    <div className="space-y-1 pt-3 border-t border-gray-100">
-                        <h4 className="text-xs font-semibold text-gray-400 uppercase mb-1">
-                            Lokasi
-                        </h4>
-                        <div className="flex items-start gap-2">
-                            {" "}
-                            {/* Align start for multi-line address */}
-                            <LocationMarkerIcon className="mt-0.5 flex-shrink-0" />
-                            <div>
-                                <p className="text-sm font-semibold text-gray-700">
-                                    {bookingDetails.locationName}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                    {bookingDetails.locationAddress}
-                                </p>
+                    {/* Info Lokasi (Hanya untuk Offline) */}
+                    {bookingDetails.scheduleType === "Tatap Muka" && (
+                        <div className="space-y-1 pt-3 border-t border-gray-100">
+                            <h4 className="text-xs font-semibold text-gray-400 uppercase mb-1">
+                                Lokasi
+                            </h4>
+                            <div className="flex items-start gap-2">
+                                <LocationMarkerIcon className="mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-700">
+                                        {bookingDetails.locationName}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        {bookingDetails.locationAddress}
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Rincian Biaya */}
                     <div className="space-y-1 pt-3 border-t border-gray-100">
@@ -295,7 +368,7 @@ export default function PaymentConfirmationPage() {
                         >
                             Dengan ini kamu menyetujui syarat dan ketentuan{" "}
                             <Link
-                                to="/peraturan-konseling"
+                                to="/peraturan-konseling" // TODO: Pastikan rute ini ada
                                 className="text-cyan-600 hover:underline font-medium"
                             >
                                 Peraturan Konseling
@@ -306,7 +379,7 @@ export default function PaymentConfirmationPage() {
                     {/* Bantuan */}
                     <div className="flex justify-center pt-2">
                         <Link
-                            to="/bantuan"
+                            to="/help" // TODO: Pastikan rute ini ada
                             className="flex items-center gap-1 text-xs text-blue-500 hover:underline"
                         >
                             <InformationCircleIcon /> Butuh Bantuan ?
@@ -316,7 +389,6 @@ export default function PaymentConfirmationPage() {
             </main>
 
             {/* Footer Total & Tombol Lanjutkan */}
-            {/* PERBAIKAN: max-w-md mx-auto agar lebar footer sesuai */}
             <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white border-t border-gray-200 shadow-[0_-2px_5px_rgba(0,0,0,0.05)] z-20 flex justify-between items-center">
                 <div>
                     <p className="text-xs text-gray-500">Total Pembayaran</p>
@@ -326,14 +398,15 @@ export default function PaymentConfirmationPage() {
                 </div>
                 <button
                     onClick={handleContinue}
-                    disabled={!agreed} // Nonaktifkan jika belum setuju
+                    disabled={!agreed || loading} // Nonaktifkan jika belum setuju atau sedang loading
                     className={`px-6 py-3 rounded-lg font-semibold text-white shadow transition-colors duration-200 ${
-                        agreed
-                            ? "bg-cyan-500 hover:bg-cyan-600 active:scale-95"
-                            : "bg-gray-300 cursor-not-allowed"
+                        !agreed || loading
+                            ? "bg-gray-300 cursor-not-allowed"
+                            : "bg-cyan-500 hover:bg-cyan-600 active:scale-95"
                     }`}
                 >
-                    Lanjutkan
+                    {/* --- Teks Tombol Dinamis --- */}
+                    {loading ? "Memproses..." : "Lanjutkan"}
                 </button>
             </div>
         </div>
