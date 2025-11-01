@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage; // <-- Import Storage
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Casts\Attribute; // <-- TAMBAHKAN INI
 
 class TempatKonseling extends Model
 {
@@ -13,39 +14,52 @@ class TempatKonseling extends Model
     protected $fillable = [
         'nama_tempat',
         'alamat',
-        'image',        // <-- TAMBAHKAN
-        'rating',       // <-- TAMBAHKAN
-        'review_count', // <-- TAMBAHKAN
+        'image',        // Path gambar di storage
+        'rating',
+        'review_count',
         'status',
     ];
 
+    // --- TAMBAHAN BARU: Memberitahu Eloquent untuk SELALU menyertakan 'image_url' ---
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['image_url'];
+    // --- AKHIR TAMBAHAN ---
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'image', // Sembunyikan path 'image' asli
+    ];
+
     protected $casts = [
-        'rating' => 'float', // Coba ganti ke float
+        'rating' => 'float',
     ];
 
     /**
-     * Accessor untuk mendapatkan URL gambar lengkap.
+     * Accessor untuk mendapatkan URL gambar lengkap (Gaya Baru).
      *
-     * @param string|null $value
-     * @return string|null
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    public function getImageAttribute($value)
+    protected function imageUrl(): Attribute
     {
-        // Jika ada path gambar, buat URL lengkapnya
-        // Jika tidak, kembalikan null atau URL placeholder
-        if ($value) {
-            // Pastikan APP_URL di .env sudah benar (http://localhost:8000)
-            return Storage::url($value);
-        }
-        // Ganti dengan URL placeholder jika Anda mau
-        return null;
-        // Contoh Placeholder:
-        // return 'https://placehold.co/400x300/E0F2FE/0EA5E9?text=Tempat';
+        return Attribute::make(
+            // --- PERBAIKAN: Menggunakan function() {} ---
+            get: function () {
+                if ($this->image) {
+                    /** @phpstan-ignore-next-line */
+                    return Storage::disk('public')->url($this->image);
+                }
+                // Placeholder default jika tidak ada gambar
+                return 'https://placehold.co/400x300/E0F2FE/0EA5E9?text=' . urlencode($this->nama_tempat);
+            }
+            // --- AKHIR PERBAIKAN ---
+        );
     }
-
-    // TODO: Definisikan relasi ke Konselor jika perlu
-    // Misal, jika satu tempat hanya punya konselor tertentu
-    // public function konselors() {
-    //     return $this->belongsToMany(User::class, 'konselor_tempat'); // Contoh pivot table
-    // }
 }
