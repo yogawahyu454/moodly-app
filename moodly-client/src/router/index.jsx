@@ -30,8 +30,10 @@ import PsychologistDetailPage from "../pages/customer/booking/PsychologistDetail
 
 // --- IMPORT UNTUK PAYMENT ---
 import PaymentOnlinePage from "../pages/customer/booking/payment/PaymentOnlinePage";
+// --- TAMBAHKAN IMPORT INI ---
+import PaymentOfflinePage from "../pages/customer/booking/payment/PaymentOfflinePage";
+// --- AKHIR TAMBAHAN ---
 import QrisPaymentPage from "../pages/customer/booking/payment/QrisPaymentPage"; // <-- Tambahkan ini
-// --- AKHIR IMPORT PAYMENT ---
 
 import HistoryPage from "../pages/customer/history/Index";
 // --- PERBAIKAN: Typo 'pagesa' di bawah ini ---
@@ -253,6 +255,18 @@ const AppRouter = () => {
                         path="/booking/counselor/:id"
                         element={<PsychologistDetailPage />}
                     />
+
+                    {/* --- RUTE KONFIRMASI (SESUAI NAVIGASI) --- */}
+                    <Route
+                        path="/booking/payment-offline"
+                        element={<PaymentOfflinePage />}
+                    />
+                    <Route
+                        path="/booking/payment-online"
+                        element={<PaymentOnlinePage />}
+                    />
+                    {/* --- AKHIR RUTE KONFIRMASI --- */}
+
                     <Route
                         path="/booking/payment/online/:id"
                         element={<PaymentOnlinePage />}
