@@ -4,11 +4,12 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany; // <-- TAMBAHKAN
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Storage; // <-- TAMBAHKAN
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Casts\Attribute; // <-- TAMBAHKAN INI
 
 class User extends Authenticatable
 {
@@ -21,7 +22,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'avatar',
+        'avatar', // Path avatar di storage
         'email',
         'role',
         'status',
@@ -39,6 +40,16 @@ class User extends Authenticatable
         'universitas',
     ];
 
+    // --- TAMBAHAN BARU: Memberitahu Eloquent untuk SELALU menyertakan 'avatar_url' ---
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['avatar_url'];
+    // --- AKHIR TAMBAHAN ---
+
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -47,6 +58,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'avatar', // Sembunyikan path 'avatar' asli, tampilkan 'avatar_url' saja
     ];
 
     /**
@@ -70,25 +82,29 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class, 'customer_id');
     }
 
-    // --- ACCESSOR BARU UNTUK AVATAR ---
+    // --- ACCESSOR BARU UNTUK AVATAR (Gaya Baru) ---
 
     /**
-     * Mengambil atribut avatar.
-     * Mengubah path (e.g., "avatars/abc.png") menjadi URL lengkap
-     * atau memberikan fallback jika tidak ada.
+     * Mendapatkan URL lengkap untuk avatar.
      *
-     * @param  string|null  $value
-     * @return string|null
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    public function getAvatarAttribute($value)
+    protected function avatarUrl(): Attribute
     {
-        // Jika value ada (path ke file), kembalikan URL lengkap.
-        if ($value) {
-            return Storage::url($value);
-        }
+        return Attribute::make(
+            // --- PERBAIKAN: Menggunakan function() {}
+            get: function () {
+                if ($this->avatar) {
+                    // Gunakan disk 'public'
+                    /** @phpstan-ignore-next-line */
+                    return Storage::disk('public')->url($this->avatar);
+                }
 
-        // Fallback ke UI Avatars jika tidak ada avatar
-        $name = urlencode($this->name);
-        return "https://ui-avatars.com/api/?name={$name}&background=EBF4FF&color=3B82F6&bold=true";
+                // Fallback ke UI Avatars
+                $name = urlencode($this->name);
+                return "https://ui-avatars.com/api/?name={$name}&background=EBF4FF&color=3B82F6&bold=true";
+            }
+            // --- AKHIR PERBAIKAN ---
+        );
     }
 }
