@@ -1,9 +1,17 @@
 import React from "react";
-import { Link, useLocation, Outlet } from "react-router-dom";
-// Menggunakan useAuth yang asli dari Context
+// PERBAIKAN: Gunakan NavLink untuk status aktif, bukan Link
+import { NavLink, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-// --- Komponen Ikon Baru (Disesuaikan dengan Desain Referensi) ---
+// [BARU] Import ikon-ikon untuk Navbar Konselor
+import {
+    Home as CounselorHomeIcon,
+    ClipboardList as CounselorHistoryIcon,
+    User as CounselorProfileIcon,
+    MessageSquare as CounselorScheduleIcon,
+} from "lucide-react";
+
+// --- Ikon-ikon (dari kode Anda untuk Customer) ---
 
 const BellIcon = () => (
     <svg
@@ -40,7 +48,7 @@ const ChevronDownIcon = () => (
     </svg>
 );
 
-const HomeIcon = ({ active }) => (
+const CustomerHomeIcon = ({ active }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -56,9 +64,7 @@ const HomeIcon = ({ active }) => (
         <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
         <path d="M5 12l-2 0l9 -9l9 9l-2 0"></path>
         <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"></path>
-        {/* Hanya outline path bawah */}
         {!active && <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"></path>}
-        {/* Path bawah di-fill saat aktif */}
         {active && (
             <path
                 d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"
@@ -68,7 +74,7 @@ const HomeIcon = ({ active }) => (
     </svg>
 );
 
-const CounselingIcon = ({ active }) => (
+const CustomerCounselingIcon = ({ active }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -88,7 +94,7 @@ const CounselingIcon = ({ active }) => (
     </svg>
 );
 
-const HistoryIcon = ({ active }) => (
+const CustomerHistoryIcon = ({ active }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -96,7 +102,7 @@ const HistoryIcon = ({ active }) => (
         viewBox="0 0 24 24"
         strokeWidth="2"
         stroke="currentColor"
-        fill="none" // Clipboard icon biasanya tidak di-fill solid
+        fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
         className={active ? "text-sky-500" : "text-gray-400"}
@@ -111,7 +117,7 @@ const HistoryIcon = ({ active }) => (
     </svg>
 );
 
-const ProfileIcon = ({ active }) => (
+const CustomerProfileIcon = ({ active }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -119,7 +125,7 @@ const ProfileIcon = ({ active }) => (
         viewBox="0 0 24 24"
         strokeWidth="2"
         stroke="currentColor"
-        fill="none" // User icon biasanya tidak di-fill solid
+        fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
         className={active ? "text-sky-500" : "text-gray-400"}
@@ -130,11 +136,64 @@ const ProfileIcon = ({ active }) => (
     </svg>
 );
 
-// --- Komponen Navigasi Bawah ---
-const BottomNavItem = ({ to, icon, label, active }) => (
-    <Link
+// --- [BARU] Komponen Navbar Konselor ---
+const CounselorNavBar = () => (
+    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white shadow-lg border-t border-gray-200 z-50">
+        <div className="flex justify-around items-center h-16">
+            <NavLink
+                to="/counselor/home"
+                className={({ isActive }) =>
+                    `flex flex-col items-center gap-1 py-1 flex-1 ${
+                        isActive ? "text-sky-500" : "text-gray-500"
+                    } hover:text-sky-500`
+                }
+            >
+                <CounselorHomeIcon size={24} />
+                <span className="text-xs">Beranda</span>
+            </NavLink>
+            <NavLink
+                to="/counselor/schedule"
+                className={({ isActive }) =>
+                    `flex flex-col items-center gap-1 py-1 flex-1 ${
+                        isActive ? "text-sky-500" : "text-gray-500"
+                    } hover:text-sky-500`
+                }
+            >
+                <CounselorScheduleIcon size={24} />
+                <span className="text-xs">Jadwal</span>
+            </NavLink>
+            <NavLink
+                to="/counselor/history"
+                className={({ isActive }) =>
+                    `flex flex-col items-center gap-1 py-1 flex-1 ${
+                        isActive ? "text-sky-500" : "text-gray-500"
+                    } hover:text-sky-500`
+                }
+            >
+                <CounselorHistoryIcon size={24} />
+                <span className="text-xs">Riwayat</span>
+            </NavLink>
+            <NavLink
+                to="/counselor/profile"
+                className={({ isActive }) =>
+                    `flex flex-col items-center gap-1 py-1 flex-1 ${
+                        isActive ? "text-sky-500" : "text-gray-500"
+                    } hover:text-sky-500`
+                }
+            >
+                <CounselorProfileIcon size={24} />
+                <span className="text-xs">Profile</span>
+            </NavLink>
+        </div>
+    </nav>
+);
+
+// --- Komponen Navigasi Bawah (Customer) ---
+const CustomerBottomNavItem = ({ to, icon, label, active }) => (
+    // PERBAIKAN: Gunakan NavLink di sini
+    <NavLink
         to={to}
-        className="flex flex-col items-center justify-center gap-1 flex-1 py-1" // Tambahkan padding vertikal jika perlu
+        className="flex flex-col items-center justify-center gap-1 flex-1 py-1"
     >
         {icon}
         <span
@@ -144,113 +203,119 @@ const BottomNavItem = ({ to, icon, label, active }) => (
         >
             {label}
         </span>
-    </Link>
+    </NavLink>
 );
 
-// --- Komponen Layout Utama ---
+// --- Komponen Navbar Customer (dari kode Anda) ---
+const CustomerNavBar = ({ currentPath }) => (
+    <footer className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 shadow-[0_-1px_4px_rgba(0,0,0,0.05)] z-10">
+        <div className="flex justify-around items-center h-16">
+            <CustomerBottomNavItem
+                to="/home"
+                icon={<CustomerHomeIcon active={currentPath === "/home"} />}
+                label="Home"
+                active={currentPath === "/home"}
+            />
+            <CustomerBottomNavItem
+                to="/booking"
+                icon={
+                    <CustomerCounselingIcon
+                        active={currentPath.startsWith("/booking")}
+                    />
+                }
+                label="Booking"
+                active={currentPath.startsWith("/booking")}
+            />
+            <CustomerBottomNavItem
+                to="/history"
+                icon={
+                    <CustomerHistoryIcon active={currentPath.startsWith("/history")} />
+                }
+                label="History"
+                active={currentPath.startsWith("/history")}
+            />
+            <CustomerBottomNavItem
+                to="/profile"
+                icon={
+                    <CustomerProfileIcon active={currentPath.startsWith("/profile")} />
+                }
+                label="Profile"
+                active={currentPath.startsWith("/profile")}
+            />
+        </div>
+    </footer>
+);
+
+// --- Komponen Header Customer (dari kode Anda) ---
+const CustomerHeader = ({ user }) => (
+    <header className="p-4 flex items-center justify-between sticky top-0 z-20 bg-white shadow-sm">
+        <div className="flex items-center gap-3">
+            <img
+                src={
+                    user?.avatar ||
+                    `https://ui-avatars.com/api/?name=${
+                        user?.name || "User"
+                    }&background=EBF4FF&color=3B82F6&bold=true`
+                }
+                alt="User Avatar"
+                className="w-11 h-11 rounded-full"
+            />
+            <div>
+                <p className="text-base text-gray-800 font-bold">
+                    Hi, {user?.name || "Pengguna"}
+                </p>
+                <div className="flex items-center cursor-pointer">
+                    <p className="text-xs text-gray-500">
+                        {user?.city || "Yogyakarta"},{" "}
+                        {user?.province
+                            ? user.province.split(" ").pop()
+                            : "Indonesia"}
+                    </p>
+                    <ChevronDownIcon />
+                </div>
+            </div>
+        </div>
+        {/* PERBAIKAN: Gunakan NavLink/Link agar tidak me-refresh halaman */}
+        <NavLink to="/notifications">
+            <BellIcon />
+        </NavLink>
+    </header>
+);
+
+// --- Komponen Layout Utama (YANG DIPERBAIKI) ---
 export default function MobileLayout() {
-    // Menggunakan useAuth asli
     const { user } = useAuth();
     const location = useLocation();
     const currentPath = location.pathname;
 
-    // Tentukan apakah header harus ditampilkan
-    // PERUBAHAN: Diperbarui ke "/home"
-    const showHeader = currentPath === "/home"; // Hanya tampil di beranda
+    // [PERBAIKAN] Cek role user
+    // --- PERUBAHAN DI SINI ---
+    const isCounselor = user && user.role?.includes("konselor"); // <-- Diubah dari "counselor"
+
+    // [PERBAIKAN] Tentukan apakah header customer harus ditampilkan
+    // (Hanya jika BUKAN konselor DAN ada di /home)
+    const showCustomerHeader = !isCounselor && currentPath === "/home";
 
     return (
         <div className="bg-gray-100 min-h-screen font-sans">
             <div className="max-w-md mx-auto bg-white min-h-screen flex flex-col">
-                {/* Header (Tampil Kondisional) */}
-                {showHeader && (
-                    <header className="p-4 flex items-center justify-between sticky top-0 z-20 bg-white shadow-sm">
-                        {" "}
-                        {/* Naikkan z-index */}
-                        <div className="flex items-center gap-3">
-                            <img
-                                src={
-                                    user?.avatar ||
-                                    `https://ui-avatars.com/api/?name=${
-                                        user?.name || "User"
-                                    }&background=EBF4FF&color=3B82F6&bold=true`
-                                }
-                                alt="User Avatar"
-                                className="w-11 h-11 rounded-full"
-                            />
-                            <div>
-                                <p className="text-base text-gray-800 font-bold">
-                                    Hi, {user?.name || "Pengguna"}
-                                </p>
-                                <div className="flex items-center cursor-pointer">
-                                    <p className="text-xs text-gray-500">
-                                        {user?.city || "Yogyakarta"},{" "}
-                                        {user?.province
-                                            ? user.province.split(" ").pop()
-                                            : "Indonesia"}
-                                    </p>
-                                    <ChevronDownIcon />
-                                </div>
-                            </div>
-                        </div>
-                        {/* PERUBAHAN: BellIcon menjadi Link ke /notifications */}
-                        <Link to="/notifications">
-                            <BellIcon />
-                        </Link>
-                    </header>
-                )}
+                
+                {/* Header Customer (Tampil Kondisional) */}
+                {/* Header Konselor sudah ada di halamannya sendiri (HomePage.jsx) */}
+                {showCustomerHeader && <CustomerHeader user={user} />}
 
                 {/* Konten Halaman */}
-                {/* PERBAIKAN: Tambahkan padding-bottom (pb-20) untuk memberi ruang bagi footer */}
                 <main className="flex-grow pb-20">
-                    {" "}
-                    {/* Sesuaikan nilai padding jika perlu */}
                     <Outlet />
                 </main>
             </div>
 
-            {/* Navigasi Bawah */}
-            <footer className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 shadow-[0_-1px_4px_rgba(0,0,0,0.05)] z-10">
-                {" "}
-                {/* Pastikan z-index lebih rendah dari header jika header sticky */}
-                <div className="flex justify-around items-center h-16">
-                    {/* PERUBAHAN: Item Beranda */}
-                    <BottomNavItem
-                        to="/home"
-                        icon={<HomeIcon active={currentPath === "/home"} />}
-                        label="Home"
-                        active={currentPath === "/home"}
-                    />
-                    {/* PERUBAHAN: Item Konseling */}
-                    <BottomNavItem
-                        to="/booking"
-                        icon={
-                            <CounselingIcon
-                                active={currentPath === "/booking"}
-                            />
-                        }
-                        label="Booking"
-                        active={currentPath === "/booking"}
-                    />
-                    {/* PERUBAHAN: Item Riwayat */}
-                    <BottomNavItem
-                        to="/history"
-                        icon={
-                            <HistoryIcon active={currentPath === "/history"} />
-                        }
-                        label="History"
-                        active={currentPath === "/history"}
-                    />
-                    {/* TETAP: Item Profile */}
-                    <BottomNavItem
-                        to="/profile"
-                        icon={
-                            <ProfileIcon active={currentPath === "/profile"} />
-                        }
-                        label="Profile"
-                        active={currentPath === "/profile"}
-                    />
-                </div>
-            </footer>
+            {/* [PERBAIKAN] Navigasi Bawah Tampil Kondisional */}
+            {isCounselor ? (
+                <CounselorNavBar />
+            ) : (
+                <CustomerNavBar currentPath={currentPath} />
+            )}
         </div>
     );
 }
