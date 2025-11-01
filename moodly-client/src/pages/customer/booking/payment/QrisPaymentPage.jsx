@@ -1,5 +1,7 @@
-import React, { useRef, useState, useEffect } from "react"; // Import useState dan useEffect
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import React, { useRef, useState, useEffect } from "react";
+// --- PERBAIKAN: Tambahkan 'Link' dan 'useParams' ---
+import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
+// --- AKHIR PERBAIKAN ---
 // --- PERBAIKAN: Path relatif 4x mundur, tanpa ekstensi ---
 import apiClient from "../../../../api/axios";
 // --- AKHIR PERBAIKAN ---
@@ -21,6 +23,7 @@ const BackArrowIcon = () => (
         />
     </svg>
 );
+// --- Akhir Komponen Ikon ---
 
 // --- Komponen Loading Spinner Sederhana ---
 const Spinner = () => (
@@ -186,7 +189,7 @@ function QrisPaymentPage() {
 
                 {/* Container QR Code */}
                 <div className="relative inline-block p-1 border-2 border-dashed border-cyan-400 rounded-lg mb-8">
-                    {/* ... (garis sudut tetap sama) ... */}
+                    {/* Garis sudut */}
                     <span className="absolute -top-1 -left-1 w-4 h-4 border-t-4 border-l-4 border-cyan-500"></span>
                     <span className="absolute -top-1 -right-1 w-4 h-4 border-t-4 border-r-4 border-cyan-500"></span>
                     <span className="absolute -bottom-1 -left-1 w-4 h-4 border-b-4 border-l-4 border-cyan-500"></span>

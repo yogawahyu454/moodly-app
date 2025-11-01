@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react"; // <-- PERBAIKAN: Tambahkan useEffect
+import React, { useState, useEffect } from "react"; // <-- Pastikan useEffect ada
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import apiClient from "../../../../api/axios.js"; // <-- PERBAIKAN: Path lengkap dengan ekstensi
+import apiClient from "../../../../api/axios.js"; // <-- Path import dikoreksi
 
 // --- Komponen Ikon ---
 const BackArrowIcon = () => (
@@ -83,19 +83,19 @@ export default function PaymentOfflinePage() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // --- PERBAIKAN: Ambil data dari location.state ---
+    // --- Ambil data dari location.state ---
     const { bookingData } = location.state || {};
     const { apiPayload, displayData } = bookingData || {};
 
     const [agreed, setAgreed] = useState(false);
-    const [loading, setLoading] = useState(false); // State loading baru
-    const [error, setError] = useState(null); // State error baru
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     // Jika tidak ada data, redirect
     useEffect(() => {
         if (!bookingData) {
             console.error("Tidak ada data booking, kembali ke beranda.");
-            navigate("/"); // Arahkan ke home jika tidak ada state
+            navigate("/");
         }
     }, [bookingData, navigate]);
 
@@ -112,7 +112,7 @@ export default function PaymentOfflinePage() {
     // Data dinamis dari displayData (jika bookingData ada)
     const bookingDetails = displayData
         ? {
-              bookingCode: "MOODLY-XXXXX", // Bisa digenerate backend nanti
+              bookingCode: "MOODLY-XXXXX", // Ini akan diganti setelah kita implementasi kode pesanan
               bookingDate: new Date().toLocaleDateString("id-ID", {
                   day: "2-digit",
                   month: "2-digit",
@@ -122,24 +122,23 @@ export default function PaymentOfflinePage() {
               psychologistImage: displayData.counselorImage,
               university: displayData.counselorUniversity,
               specialty: `Spesialisasi : ${displayData.counselorSpecialty}`,
-              scheduleType: displayData.method, // "Tatap Muka"
+              scheduleType: displayData.method,
               scheduleDate: displayData.scheduleDateDisplay,
               scheduleTime: `${displayData.scheduleTime} WIB`,
               locationName: displayData.tempatName || "Lokasi tidak ditentukan",
               locationAddress:
                   displayData.tempatAddress ||
-                  "Alamat akan diinformasikan setelah pembayaran.", // TODO: Ambil alamat tempat
+                  "Alamat akan diinformasikan setelah pembayaran.",
               consultationFee: displayData.consultationFee,
               serviceFee: displayData.serviceFee,
           }
-        : {}; // Default object kosong jika data tidak ada
+        : {};
 
     const totalPayment =
         (displayData?.consultationFee || 0) + (displayData?.serviceFee || 0);
-    // --- AKHIR PERBAIKAN DATA ---
 
     const handleBack = () => {
-        navigate(-1); // Kembali ke halaman sebelumnya
+        navigate(-1);
     };
 
     // --- PERBAIKAN: Handler untuk submit ke API ---
@@ -153,28 +152,27 @@ export default function PaymentOfflinePage() {
         setError(null);
 
         try {
-            // Panggil API storeBooking yang sudah kita buat
+            // Panggil API storeBooking
             const response = await apiClient.post(
                 "/api/booking/create",
                 apiPayload
             );
-
-            // Sukses! Arahkan ke halaman instruksi pembayaran
-            // Kirim data booking yang baru dibuat (termasuk ID)
             const createdBooking = response.data.booking;
 
-            // Tentukan halaman instruksi (offline/online)
-            // Di sini kita asumsikan offline
-            navigate(`/booking/payment-instructions-offline`, {
-                // TODO: Buat halaman ini
-                replace: true, // Ganti riwayat agar tidak bisa back ke konfirmasi
-                state: { booking: createdBooking },
+            // --- PERBAIKAN NAVIGASI: Langsung ke QRIS ---
+            console.log(
+                "Booking sukses dibuat, navigasi ke QRIS...",
+                createdBooking
+            );
+            navigate(`/booking/payment/qris/${createdBooking.id}`, {
+                replace: true,
+                state: { booking: createdBooking }, // Kirim data booking (termasuk total_harga)
             });
+            // --- AKHIR PERBAIKAN NAVIGASI ---
         } catch (err) {
             console.error("Gagal membuat booking:", err);
             let errorMessage = "Gagal membuat pesanan. Silakan coba lagi.";
             if (err.response && err.response.status === 422) {
-                // Ambil error validasi pertama
                 const firstError = Object.values(
                     err.response.data.errors
                 )[0][0];
@@ -192,7 +190,6 @@ export default function PaymentOfflinePage() {
     };
     // --- AKHIR PERBAIKAN HANDLER ---
 
-    // Tampilkan loading jika data state belum siap
     if (!bookingData) {
         return (
             <div className="bg-gray-50 min-h-full font-sans flex items-center justify-center">
@@ -213,31 +210,30 @@ export default function PaymentOfflinePage() {
                     <BackArrowIcon />
                 </button>
                 <h1 className="text-lg font-bold text-center flex-grow -translate-x-4">
-                    Konfirmasi Pesanan {/* Ganti judul */}
+                    Konfirmasi Pesanan
                 </h1>
                 <div className="w-8"></div> {/* Spacer */}
             </header>
 
             {/* Konten Utama */}
             <main className="relative p-4 pb-40">
-                {" "}
-                {/* Perbanyak padding bottom */}
-                {/* Timer Pembayaran (Mungkin tidak relevan untuk offline? Atau tetap ada?) */}
+                {/* Timer Pembayaran */}
                 <div className="bg-white p-3 rounded-lg shadow mb-4 flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">
                         Selesaikan Pembayaran dalam
                     </span>
-                    {/* TODO: Implementasi Timer */}
                     <span className="text-sm font-bold text-red-500 bg-red-100 px-2 py-0.5 rounded">
-                        23 : 59 : 54 {/* Timer 24 jam? */}
+                        23 : 59 : 54 {/* TODO: Implementasi Timer */}
                     </span>
                 </div>
-                {/* --- Tampilkan Error API jika ada --- */}
+
+                {/* Tampilkan Error API jika ada */}
                 {error && (
                     <div className="bg-red-100 border border-red-300 text-red-700 p-3 rounded-lg shadow mb-4 text-sm">
                         <strong>Oops!</strong> {error}
                     </div>
                 )}
+
                 {/* Detail Booking */}
                 <div className="bg-white p-4 rounded-lg shadow space-y-4">
                     {/* Info Kode Booking */}
@@ -306,24 +302,22 @@ export default function PaymentOfflinePage() {
                     </div>
 
                     {/* Info Lokasi (Hanya untuk Offline) */}
-                    {bookingDetails.scheduleType === "Tatap Muka" && (
-                        <div className="space-y-1 pt-3 border-t border-gray-100">
-                            <h4 className="text-xs font-semibold text-gray-400 uppercase mb-1">
-                                Lokasi
-                            </h4>
-                            <div className="flex items-start gap-2">
-                                <LocationMarkerIcon className="mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <p className="text-sm font-semibold text-gray-700">
-                                        {bookingDetails.locationName}
-                                    </p>
-                                    <p className="text-xs text-gray-500">
-                                        {bookingDetails.locationAddress}
-                                    </p>
-                                </div>
+                    <div className="space-y-1 pt-3 border-t border-gray-100">
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase mb-1">
+                            Lokasi
+                        </h4>
+                        <div className="flex items-start gap-2">
+                            <LocationMarkerIcon className="mt-0.5 flex-shrink-0" />
+                            <div>
+                                <p className="text-sm font-semibold text-gray-700">
+                                    {bookingDetails.locationName}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    {bookingDetails.locationAddress}
+                                </p>
                             </div>
                         </div>
-                    )}
+                    </div>
 
                     {/* Rincian Biaya */}
                     <div className="space-y-1 pt-3 border-t border-gray-100">
@@ -398,14 +392,13 @@ export default function PaymentOfflinePage() {
                 </div>
                 <button
                     onClick={handleContinue}
-                    disabled={!agreed || loading} // Nonaktifkan jika belum setuju atau sedang loading
+                    disabled={!agreed || loading}
                     className={`px-6 py-3 rounded-lg font-semibold text-white shadow transition-colors duration-200 ${
                         !agreed || loading
                             ? "bg-gray-300 cursor-not-allowed"
                             : "bg-cyan-500 hover:bg-cyan-600 active:scale-95"
                     }`}
                 >
-                    {/* --- Teks Tombol Dinamis --- */}
                     {loading ? "Memproses..." : "Lanjutkan"}
                 </button>
             </div>

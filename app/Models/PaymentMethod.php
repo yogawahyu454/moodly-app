@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\Storage; // Pastikan Storage di-import
+use Illuminate\Database\Eloquent\Casts\Attribute; // Pastikan Attribute di-import
 
 class PaymentMethod extends Model
 {
@@ -15,23 +15,38 @@ class PaymentMethod extends Model
         'name',
         'account_details',
         'image',
-        'status',
+        'status', // 'Aktif', 'Tidak Aktif'
     ];
 
     /**
-     * Accessor untuk mendapatkan URL lengkap gambar QRIS.
+     * protected $casts = [
+     * 'account_details' => 'json', // Jika Anda menyimpannya sebagai JSON
+     * ];
+     */
+
+    // --- TAMBAHAN BARU: Memberitahu Eloquent untuk SELALU menyertakan 'image_url' ---
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
      */
     protected $appends = ['image_url'];
+    // --- AKHIR TAMBAHAN ---
 
-    public function getImageUrlAttribute(): ?string
+
+    /**
+     * Accessor untuk mendapatkan URL lengkap gambar QRIS.
+     * Nama method: imageUrl() -> akan diakses sebagai $model->image_url
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    protected function imageUrl(): Attribute
     {
-        if ($this->image) {
-
-            /** @var FilesystemAdapter $disk */
-            $disk = Storage::disk('public');
-            return $disk->url($this->image);
-        }
-        // Fallback jika tidak ada gambar
-        return 'https://placehold.co/300x300/EBF8FF/3B82F6?text=QRIS';
+        return Attribute::make(
+            get: fn() => $this->image
+                /** @phpstan-ignore-next-line */
+                ? Storage::disk('public')->url($this->image)
+                : null,
+        );
     }
 }
