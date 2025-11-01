@@ -1,16 +1,12 @@
 import React from "react";
-// Import ikon-ikon yang kita butuhkan dari Lucide React
+// Import ikon-ikon yang kita butuhkan HANYA UNTUK KONTEN HALAMAN INI
 import {
     Calendar,
     Clock,
-    Home,
-    MessageSquare, // Ikon untuk "Jadwal"
-    ClipboardList, // Ikon untuk "Riwayat"
-    User,
+    // Ikon-ikon Navbar (Home, MessageSquare, dll) TELAH DIHAPUS
 } from "lucide-react";
 
 // --- DATA DUMMY ---
-// Nanti ini bisa diganti dengan data dari API
 const patientScheduleData = [
     {
         id: 1,
@@ -18,7 +14,7 @@ const patientScheduleData = [
         date: "12 - 09 - 2025",
         time: "16.00 - 17.00",
         type: "Voice Call",
-        img: "https://randomuser.me/api/portraits/women/68.jpg", // Ganti dengan URL gambar
+        img: "https://randomuser.me/api/portraits/women/68.jpg",
     },
     {
         id: 2,
@@ -26,23 +22,23 @@ const patientScheduleData = [
         date: "12 - 09 - 2025",
         time: "16.00 - 17.00",
         type: "Vidio Call",
-        img: "https://randomuser.me/api/portraits/women/67.jpg", // Ganti dengan URL gambar
+        img: "https://randomuser.me/api/portraits/women/67.jpg",
     },
     {
         id: 3,
         name: "Erika Putri Renayma",
         date: "12 - 09 - 2025",
         time: "16.00 - 17.00",
-        type: "Janji Temu", // Perubahan jenis sesuai gambar
-        img: "https://randomuser.me/api/portraits/women/66.jpg", // Ganti dengan URL gambar
+        type: "Janji Temu",
+        img: "https://randomuser.me/api/portraits/women/66.jpg",
     },
     {
         id: 4,
         name: "Diana Rahas Nadhifa",
         date: "12 - 09 - 2025",
         time: "16.00 - 17.00",
-        type: "Chat", // Perubahan jenis sesuai gambar
-        img: "https://randomuser.me/api/portraits/women/65.jpg", // Ganti dengan URL gambar
+        type: "Chat",
+        img: "https://randomuser.me/api/portraits/women/65.jpg",
     },
 ];
 
@@ -86,58 +82,26 @@ const PatientScheduleCard = ({ item }) => (
     </div>
 );
 
-// --- Komponen Bottom Navigation Bar ---
-const BottomNavBar = () => (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-50">
-        <div className="flex justify-around items-center h-16">
-            <a
-                href="#"
-                className="flex flex-col items-center text-gray-500 hover:text-sky-500"
-            >
-                <Home size={24} />
-                <span className="text-xs mt-1">Beranda</span>
-            </a>
-            {/* Icon Jadwal aktif */}
-            <a href="#" className="flex flex-col items-center text-sky-500">
-                <MessageSquare size={24} />
-                <span className="text-xs mt-1">Jadwal</span>
-            </a>
-            <a
-                href="#"
-                className="flex flex-col items-center text-gray-500 hover:text-sky-500"
-            >
-                <ClipboardList size={24} />
-                <span className="text-xs mt-1">Riwayat</span>
-            </a>
-            <a
-                href="#"
-                className="flex flex-col items-center text-gray-500 hover:text-sky-500"
-            >
-                <User size={24} />
-                <span className="text-xs mt-1">Profile</span>
-            </a>
-        </div>
-    </nav>
-);
+// --- Komponen Bottom Navigation Bar TELAH DIHAPUS DARI SINI ---
+
 
 // --- Komponen Utama CounselorSchedulePage ---
 export default function CounselorSchedulePage() {
     return (
-        // Kontainer utama untuk seluruh halaman, memastikan tinggi penuh dan latar belakang abu-abu
+        // Kontainer utama untuk seluruh halaman
         <div className="min-h-screen bg-gray-50 flex flex-col">
             {/* Header Halaman Jadwal Pasien */}
             <ScheduleHeader />
 
             {/* Konten utama yang bisa discroll */}
+            {/* pb-24 memberi ruang untuk BottomNav DARI LAYOUT */}
             <main className="flex-grow p-4 pt-6 space-y-4 pb-24">
-                {/* pt-6 agar konten tidak terlalu dekat dengan header */}
                 {patientScheduleData.map((item) => (
                     <PatientScheduleCard key={item.id} item={item} />
                 ))}
             </main>
 
-            {/* Bottom Navigation Bar */}
-            <BottomNavBar />
+            {/* Pemanggilan <BottomNavBar /> TELAH DIHAPUS DARI SINI */}
         </div>
     );
 }

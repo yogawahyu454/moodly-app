@@ -1,15 +1,13 @@
 import React from "react";
-// Import ikon-ikon yang kita butuhkan dari Lucide React
+// Import ikon-ikon yang kita butuhkan HANYA untuk halaman ini
 import {
     Wallet,
     Download,
     Calendar,
     Clock,
     Bell, // Untuk ikon notifikasi
-    Home, // Untuk ikon Beranda
-    ClipboardList, // Untuk ikon Riwayat (opsional, bisa diganti dengan FileText atau sejenisnya)
-    User, // Untuk ikon Profile
-    MessageSquare, // Untuk ikon Jadwal (opsional, bisa diganti dengan Calendar atau lainnya)
+    // Ikon untuk NavBar (Home, ClipboardList, User, MessageSquare) TELAH DIHAPUS
+    // karena sudah dipindahkan ke MobileLayout.jsx
 } from "lucide-react";
 
 // --- DATA DUMMY ---
@@ -40,10 +38,11 @@ const scheduleData = [
     },
 ];
 
-// --- Komponen-Komponen Kecil (direfactor sedikit untuk kejelasan) ---
+// --- Komponen-Komponen Kecil ---
 
 const CounselorHeader = () => (
-    <header className="flex items-center justify-between p-4 bg-white shadow-sm">
+    // Dibuat sticky agar header tetap di atas saat scroll
+    <header className="flex items-center justify-between p-4 bg-white shadow-sm sticky top-0 z-10">
         <div className="flex items-center gap-3">
             <img
                 src="https://randomuser.me/api/portraits/women/4.jpg" // Ganti dengan URL gambar profil konselor
@@ -138,52 +137,21 @@ const ScheduleCard = ({ item }) => (
     </div>
 );
 
-const BottomNavBar = () => (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-50">
-        <div className="flex justify-around items-center h-16">
-            <a href="#" className="flex flex-col items-center text-sky-500">
-                <Home size={24} />
-                <span className="text-xs mt-1">Beranda</span>
-            </a>
-            <a
-                href="#"
-                className="flex flex-col items-center text-gray-500 hover:text-sky-500"
-            >
-                <MessageSquare size={24} />{" "}
-                {/* Menggunakan MessageSquare untuk ikon jadwal, bisa diganti Calendar */}
-                <span className="text-xs mt-1">Jadwal</span>
-            </a>
-            <a
-                href="#"
-                className="flex flex-col items-center text-gray-500 hover:text-sky-500"
-            >
-                <ClipboardList size={24} />{" "}
-                {/* Menggunakan ClipboardList untuk riwayat, bisa diganti lain */}
-                <span className="text-xs mt-1">Riwayat</span>
-            </a>
-            <a
-                href="#"
-                className="flex flex-col items-center text-gray-500 hover:text-sky-500"
-            >
-                <User size={24} />
-                <span className="text-xs mt-1">Profile</span>
-            </a>
-        </div>
-    </nav>
-);
+// --- Komponen BottomNavBar TELAH DIHAPUS DARI SINI ---
+// (Karena sudah di-handle oleh MobileLayout.jsx)
 
-// --- Komponen Utama CounselorDashboard ---
-export default function CounselorDashboard() {
+
+// --- Komponen Utama (Nama diubah agar sesuai nama file) ---
+export default function HomePage() {
     return (
-        // Kontainer utama untuk seluruh halaman, memastikan tinggi penuh dan latar belakang abu-abu
+        // Kontainer utama untuk seluruh halaman
         <div className="min-h-screen bg-gray-50 flex flex-col">
             {/* Header */}
             <CounselorHeader />
 
             {/* Konten utama yang bisa discroll */}
-            <main className="flex-grow p-4 space-y-6 pb-24">
-                {" "}
-                {/* pb-24 untuk memberi ruang bottom nav */}
+            {/* pb-24 untuk memberi ruang bottom nav DARI LAYOUT */}
+            <main className="flex-grow p-4 space-y-6 pb-24"> 
                 <WelcomeBanner />
                 <BalanceCard />
                 {/* Bagian Jadwal Terbaru */}
@@ -193,7 +161,7 @@ export default function CounselorDashboard() {
                             Jadwal Terbaru
                         </h2>
                         <a
-                            href="#"
+                            href="#" // Ganti dengan <Link to="/counselor/schedule"> jika perlu
                             className="text-sm font-medium text-cyan-500 hover:text-cyan-600"
                         >
                             Lihat Semua
@@ -209,8 +177,7 @@ export default function CounselorDashboard() {
                 </div>
             </main>
 
-            {/* Bottom Navigation Bar */}
-            <BottomNavBar />
+            {/* Pemanggilan <BottomNavBar /> TELAH DIHAPUS DARI SINI */}
         </div>
     );
 }

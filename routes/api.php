@@ -10,6 +10,9 @@ use App\Http\Controllers\SuperAdmin\AdminManagementController;
 use App\Http\Controllers\SuperAdmin\KonselorManagementController;
 use App\Http\Controllers\SuperAdmin\CustomerManagementController;
 use App\Http\Controllers\SuperAdmin\BookingManagementController;
+// --- TAMBAHKAN IMPORT INI ---
+use App\Http\Controllers\SuperAdmin\PaymentMethodController;
+// --- AKHIR TAMBAHAN ---
 
 use App\Http\Controllers\Admin\JadwalKonsultasiController;
 use App\Http\Controllers\Admin\KonselorVerificationController;
@@ -41,6 +44,12 @@ Route::group(['middleware' => [
     // 1. Rute Autentikasi
     require __DIR__ . '/auth.php';
 
+    // --- RUTE PUBLIK (TIDAK PERLU LOGIN) ---
+    // --- TAMBAHKAN RUTE INI UNTUK CUSTOMER MENGAMBIL DATA QRIS ---
+    Route::get('/payment-methods', [BookingFlowController::class, 'getPaymentMethods']);
+    // --- AKHIR RUTE BARU ---
+
+
     // 2. Grup untuk SEMUA rute yang terproteksi
     Route::middleware('auth:sanctum')->group(function () {
 
@@ -65,10 +74,9 @@ Route::group(['middleware' => [
         Route::get('/booking/counselors', [BookingFlowController::class, 'getCounselors']);
         Route::get('/booking/counselors/{konselor}', [BookingFlowController::class, 'showCounselor'])
             ->where('konselor', '[0-9]+');
-
-        // --- INI RUTE YANG HILANG (SUDAH DITAMBAHKAN) ---
         Route::get('/booking/counselors/{konselor}/schedule-options', [BookingFlowController::class, 'getScheduleOptions'])
             ->where('konselor', '[0-9]+');
+        Route::post('/booking/create', [BookingFlowController::class, 'storeBooking']);
 
         // Booking Chat
         Route::prefix('booking/{booking}/chat')->group(function () {
@@ -101,6 +109,11 @@ Route::group(['middleware' => [
             Route::post('konselor-management/{user}/availabilities', [KonselorManagementController::class, 'storeAvailability']);
             Route::put('konselor-management/{user}/availabilities/{availability}', [KonselorManagementController::class, 'updateAvailability']);
             Route::delete('konselor-management/{user}/availabilities/{availability}', [KonselorManagementController::class, 'destroyAvailability']);
+
+            // --- TAMBAHKAN RUTE INI UNTUK SUPER ADMIN MENGELOLA QRIS ---
+            Route::apiResource('payment-methods', PaymentMethodController::class);
+            Route::post('payment-methods/{paymentMethod}', [PaymentMethodController::class, 'update']); // Untuk handle FormData/Update gambar
+            // --- AKHIR RUTE BARU ---
 
             // Manajemen Customer
             Route::post('customer-management/{user}/block', [CustomerManagementController::class, 'block']);
